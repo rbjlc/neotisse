@@ -1,0 +1,86 @@
+---
+import Admin from '../../layouts/Admin.astro';
+---
+<Admin titre="Aide" actif="aide">
+	<div class="adm-titre"><div><h1>Aide</h1><p>Les réponses aux questions les plus courantes. Rien ne peut « casser » le site : au pire, un texte s’affiche mal et il suffit de le corriger.</p></div></div>
+	<div class="aide-page" style="display:flex;flex-direction:column;gap:12px">
+		<h2>Les bases</h2>
+		<details open>
+			<summary>Je modifie quelque chose : quand est-ce visible sur le site ?</summary>
+			<p>Tout de suite après avoir cliqué sur <strong>Enregistrer</strong>. Ouvrez la page avec « Voir la page ↗ » pour vérifier (rechargez-la si elle était déjà ouverte).</p>
+		</details>
+		<details>
+			<summary>Changer un texte d’une page (accueil, qui sommes-nous…)</summary>
+			<ol><li>Menu <strong>Textes des pages</strong>, puis la page.</li><li>Ouvrez le bloc concerné (ils sont dans l’ordre de la page, de haut en bas).</li><li>Modifiez, puis <strong>Enregistrer</strong> en bas.</li></ol>
+		</details>
+		<details>
+			<summary>Mettre un mot en gras ou ajouter un lien</summary>
+			<p>Dans les zones avec une barre d’outils : sélectionnez les mots, puis cliquez sur <strong>G</strong> (gras) ou <strong>🔗 Lien</strong>. Pour un lien vers une page du site, écrivez simplement son adresse, par exemple <code>/contact/</code>.</p>
+		</details>
+		<details>
+			<summary>Un bouton ne doit plus s’afficher</summary>
+			<p>Videz le champ « Texte du bouton » et enregistrez.</p>
+		</details>
+
+		<h2>Photos</h2>
+		<details>
+			<summary>Changer une photo</summary>
+			<ol><li>Sur la page concernée, cliquez sur <strong>Changer la photo</strong>.</li><li>Choisissez une photo de la bibliothèque, ou <strong>Envoyer une nouvelle photo</strong> depuis l’ordinateur ou le téléphone.</li><li>Vérifiez la <strong>description</strong>, puis enregistrez.</li></ol>
+		</details>
+		<details>
+			<summary>À quoi sert la « description » d’une photo ?</summary>
+			<p>Elle est lue aux personnes malvoyantes et aide Google à comprendre la photo. Décrivez simplement ce qu’on voit : « Enfant tissant sur un carton », « Écheveaux de laine teints à la garance ». Le tableau de bord signale les photos qui n’en ont pas.</p>
+		</details>
+		<details>
+			<summary>Mes photos sont très lourdes</summary>
+			<p>Aucun souci : elles sont réduites automatiquement à l’envoi. Préférez les photos horizontales pour la grande photo de l’accueil.</p>
+		</details>
+
+		<h2>Calendrier, actualités, ateliers</h2>
+		<details>
+			<summary>Ajouter une date au calendrier</summary>
+			<ol><li>Menu <strong>Calendrier</strong> → <strong>Nouvelle date</strong>.</li><li>Titre, type, date et lieu. Si vous avez le site internet du lieu, collez-le : le nom du lieu deviendra cliquable.</li><li><strong>Ajouter</strong>. Les dates passées disparaissent toutes seules du site.</li></ol>
+			<p>Astuce : pour un événement qui revient (ex. café week-end), utilisez <strong>Dupliquer</strong> puis changez la date.</p>
+		</details>
+		<details>
+			<summary>Publier une actualité</summary>
+			<p>Menu <strong>Actualités</strong> → <strong>Nouvelle actualité</strong>. Cochez <strong>À la une</strong> pour qu’elle apparaisse en grand sur l’accueil (une seule à la fois). Le badge « Nouveau » s’affiche pendant 30 jours.</p>
+		</details>
+		<details>
+			<summary>Préparer un contenu sans le montrer tout de suite</summary>
+			<p>Décochez <strong>Visible sur le site</strong> : il reste enregistré ici, caché des visiteurs. Recochez la case le jour venu.</p>
+		</details>
+
+		<h2>Messages et témoignages</h2>
+		<details>
+			<summary>Où arrivent les demandes de devis ?</summary>
+			<p>Dans <strong>Messages reçus</strong> (une pastille rouge indique les messages non lus). Cliquez sur <strong>Répondre par e-mail</strong> pour répondre depuis votre messagerie.</p>
+		</details>
+		<details>
+			<summary>Comment fonctionne l’objectif du tableau de bord ?</summary>
+			<p>Il compte les messages reçus pendant la période choisie (mois, trimestre…) dans les catégories choisies. Changez le nombre, la période et les catégories dans <strong>Réglages → Objectif</strong>. Une demande reçue par téléphone ? Ajoutez-la avec <strong>Ajouter une demande reçue autrement</strong> pour qu’elle compte.</p>
+		</details>
+		<details>
+			<summary>Un message est une simple question, pas une demande de devis</summary>
+			<p>Ouvrez le message et changez sa catégorie en « Demande d’information ». Il ne comptera plus dans l’objectif « devis ».</p>
+		</details>
+		<details>
+			<summary>Valider un témoignage</summary>
+			<p>Menu <strong>Témoignages</strong> : <strong>Publier</strong> pour l’afficher sur le site, <strong>Refuser</strong> sinon. Vous pouvez corriger une faute de frappe avant de publier.</p>
+		</details>
+
+		<h2>Compte et sécurité</h2>
+		<details>
+			<summary>J’ai oublié mon mot de passe</summary>
+			<p>Sur la page de connexion, cliquez sur <strong>Mot de passe oublié ?</strong> : un lien arrive par e-mail.</p>
+		</details>
+		<details>
+			<summary>Les données personnelles (RGPD)</summary>
+			<p>Les messages et les témoignages sont supprimés automatiquement après 3 ans. Si quelqu’un demande la suppression de ses données plus tôt, supprimez son message ou son témoignage ici.</p>
+		</details>
+		<details>
+			<summary>Besoin d’aide ?</summary>
+			<p>Contactez l’agence BELLADONNA, qui a réalisé le site.</p>
+		</details>
+	</div>
+</Admin>

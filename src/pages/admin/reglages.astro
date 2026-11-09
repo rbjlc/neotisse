@@ -1,0 +1,51 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import Champ from '../../components/admin/Champ.astro';
+import { REGLAGES } from '../../lib/schemas.js';
+import { reglages } from '../../lib/site.js';
+import { lire, ecrire } from '../../lib/donnees.js';
+import { formulaireEnObjet, convertir, sourcesAdmin, valeurDe } from '../../lib/admin.js';
+
+let erreur = '';
+if (Astro.request.method === 'POST') {
+	const brut = formulaireEnObjet(await Astro.request.formData());
+	const avant = (await lire('reglages', 'site')) || {};
+	const data = { ...avant };
+	for (const s of REGLAGES) {
+		const v = convertir(s.champs, brut);
+		for (const [k, val] of Object.entries(v)) data[k] = typeof val === 'object' && !Array.isArray(val) && val && !('src' in val) ? { ...(avant[k] || {}), ...val } : val;
+	}
+	if (!data.categories_messages?.length) erreur = 'Gardez au moins une catégorie de messages.';
+	else if (!data.categories?.length) erreur = 'Gardez au moins un type d’événement.';
+	else if (data.ga_id && !/^G-[A-Z0-9]+$/i.test(data.ga_id)) erreur = 'L’identifiant Google Analytics doit commencer par G- (ex. : G-AB12CD34EF).';
+	else {
+		await ecrire('reglages', 'site', data);
+		return Astro.redirect('/admin/reglages/?ok=' + encodeURIComponent('Réglages enregistrés.'), 303);
+	}
+}
+const [r, sources] = await Promise.all([reglages(), sourcesAdmin()]);
+const ancres = ['coordonnees', 'reseaux', 'objectif', 'messages', 'types', 'reperes', 'formulaire', 'statistiques', 'partage'];
+---
+<Admin titre="Réglages" actif="reglages">
+	<div class="adm-titre"><div><h1>Réglages</h1><p>Les informations communes à tout le site.</p></div></div>
+	{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+	<form method="post" class="edition">
+		{REGLAGES.map((s, i) => (
+			<details class="section" id={ancres[i]} open={i === 0}>
+				<summary>{s.titre}</summary>
+				<div class="section-corps">
+					{s.aide && <p class="section-aide">{s.aide}</p>}
+					{s.champs.map((c) => <Champ c={c} nom={c.cle} valeur={valeurDe(r, c.cle)} sources={sources} />)}
+				</div>
+			</details>
+		))}
+		<div class="barre-enregistrer">
+			<button class="b b-principal" type="submit">Enregistrer</button>
+			<span class="modifie" data-etat-modif></span>
+		</div>
+	</form>
+	<script is:inline>
+		// Ouvre la section demandée dans l'adresse (#objectif…)
+		if (location.hash) { var d = document.querySelector(location.hash + '.section'); if (d) d.open = true; }
+	</script>
+</Admin>
