@@ -1,0 +1,31 @@
+---
+import Connexion from '../../components/admin/Connexion.astro';
+import { connecter, utilisateur, DEMO } from '../../lib/auth.js';
+import { modeSupabase } from '../../lib/donnees.js';
+
+const retourBrut = Astro.url.searchParams.get('retour') || '/admin/';
+const retour = retourBrut.startsWith('/admin') ? retourBrut : '/admin/';
+let erreur = '';
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	const r = await connecter(Astro.cookies, f.get('email'), f.get('mdp'));
+	if (r.ok) return Astro.redirect(retour, 303);
+	erreur = r.erreur;
+} else if (await utilisateur(Astro.cookies)) {
+	return Astro.redirect(retour);
+}
+const demo = !modeSupabase();
+---
+<Connexion titre="Espace Neotisse">
+	<p>Connectez-vous pour modifier le site.</p>
+	{Astro.url.searchParams.get('ok') && <p class="adm-ok" role="status">{Astro.url.searchParams.get('ok')}</p>}
+	{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+	{demo && <p class="adm-info">Mode démo : e-mail <strong>{DEMO.email()}</strong>, mot de passe <strong>{DEMO.mdp() === 'neotisse-demo' ? 'neotisse-demo' : '(celui du fichier .env)'}</strong>.</p>}
+	<form method="post" class="edition" style="gap:16px">
+		<div class="champ"><label for="email">Adresse e-mail</label><input id="email" name="email" type="email" autocomplete="username" required autofocus /></div>
+		<div class="champ"><label for="mdp">Mot de passe</label><input id="mdp" name="mdp" type="password" autocomplete="current-password" required /></div>
+		<button class="b b-principal" type="submit">Se connecter</button>
+	</form>
+	{!demo && <a href="/admin/mot-de-passe-oublie/">Mot de passe oublié ?</a>}
+	<a href="/">← Retour au site</a>
+</Connexion>

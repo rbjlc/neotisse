@@ -1,0 +1,27 @@
+---
+// Page ouverte depuis l'e-mail d'invitation ou de mot de passe oublié.
+import Connexion from '../../components/admin/Connexion.astro';
+import { changerMotDePasse } from '../../lib/auth.js';
+
+let erreur = '';
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	if (f.get('mdp') !== f.get('mdp2')) erreur = 'Les deux mots de passe ne sont pas identiques.';
+	else {
+		const r = await changerMotDePasse(Astro.cookies, f.get('jeton'), f.get('mdp'));
+		if (r.ok) return Astro.redirect('/admin/?ok=' + encodeURIComponent('Mot de passe enregistré. Bienvenue !'), 303);
+		erreur = r.erreur;
+	}
+}
+---
+<Connexion titre="Choisir un mot de passe">
+	{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+	<p class="adm-erreur" id="sans-jeton" hidden>Ce lien n’est pas complet ou a expiré. Redemandez un e-mail depuis <a href="/admin/mot-de-passe-oublie/">Mot de passe oublié</a>.</p>
+	<form method="post" class="edition" style="gap:16px">
+		<input type="hidden" name="jeton" id="jeton" />
+		<p>Au moins 10 caractères. Une petite phrase facile à retenir fonctionne très bien (ex. : « laine teinte en rouge garance »).</p>
+		<div class="champ"><label for="mdp">Nouveau mot de passe</label><input id="mdp" name="mdp" type="password" autocomplete="new-password" minlength="10" required /></div>
+		<div class="champ"><label for="mdp2">Le même, encore une fois</label><input id="mdp2" name="mdp2" type="password" autocomplete="new-password" minlength="10" required /></div>
+		<button class="b b-principal" type="submit">Enregistrer et me connecter</button>
+	</form>
+</Connexion>

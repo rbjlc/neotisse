@@ -1,0 +1,24 @@
+---
+import Connexion from '../../components/admin/Connexion.astro';
+import { envoyerLienMotDePasse } from '../../lib/auth.js';
+import { urlSite } from '../../lib/site.js';
+
+let envoye = false;
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	await envoyerLienMotDePasse(f.get('email'), urlSite() + '/admin/nouveau-mot-de-passe/').catch(() => {});
+	envoye = true; // même message dans tous les cas (on ne révèle pas quels e-mails existent)
+}
+---
+<Connexion titre="Mot de passe oublié">
+	{envoye ? (
+		<p class="adm-ok" role="status">Si cette adresse a un compte, un e-mail vient d’être envoyé. Ouvrez le lien qu’il contient pour choisir un nouveau mot de passe (pensez à regarder dans les spams).</p>
+	) : (
+		<form method="post" class="edition" style="gap:16px">
+			<p>Indiquez votre adresse e-mail : vous recevrez un lien pour choisir un nouveau mot de passe.</p>
+			<div class="champ"><label for="email">Adresse e-mail</label><input id="email" name="email" type="email" required autofocus /></div>
+			<button class="b b-principal" type="submit">Recevoir le lien</button>
+		</form>
+	)}
+	<a href="/admin/connexion/">← Retour à la connexion</a>
+</Connexion>
