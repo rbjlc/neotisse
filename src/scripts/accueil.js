@@ -9,24 +9,38 @@ var g = gsap, ST = ScrollTrigger;
 var calme = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var chargement = document.getElementById('chargement');
 
-  /* Carrousel à glisser */
+/* Carrousel des ateliers : il avance tout seul avec le défilement de la page,
+   et on peut aussi le faire glisser (souris, doigt) ou utiliser les flèches du clavier. */
 var car = document.getElementById('carrousel'), barre = document.getElementById('progression');
+var placerCarrousel = null, carrouselDefil = 0;
 if (car && barre) {
-var x = 0, departX = 0, baseX = 0, prise = false;
+var main = 0, x = 0, departX = 0, baseMain = 0, prise = false;
 function limites() { return Math.min(0, window.innerWidth - car.scrollWidth); }
-function placer(v, anime) {
-x = Math.max(limites(), Math.min(0, v));
-if (g && anime && !calme) g.to(car, { x: x, duration: 0.8, ease: 'power3.out' }); else car.style.transform = 'translateX(' + x + 'px)';
-var p = limites() ? x / limites() : 0;
-barre.style.transform = 'scaleX(' + (0.25 + 0.75 * p) + ')';
+function placer(anime) {
+var lim = limites();
+main = Math.max(lim - carrouselDefil, Math.min(-carrouselDefil, main));
+x = carrouselDefil + main;
+if (anime && !calme) g.to(car, { x: x, duration: 0.8, ease: 'power3.out', overwrite: true });
+else g.set(car, { x: x, overwrite: true });
+barre.style.transform = 'scaleX(' + (0.15 + 0.85 * (lim ? x / lim : 0)) + ')';
 }
+placerCarrousel = placer;
 var glisse = 0;
-car.addEventListener('pointerdown', function (e) { if (e.pointerType === 'mouse' && e.button !== 0) return; prise = true; glisse = 0; departX = e.clientX; baseX = x; car.classList.add('prise'); });
+car.addEventListener('pointerdown', function (e) { if (e.pointerType === 'mouse' && e.button !== 0) return; prise = true; glisse = 0; departX = e.clientX; baseMain = main; car.classList.add('prise'); });
 car.addEventListener('click', function (e) { if (glisse > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
-car.addEventListener('pointermove', function (e) { if (!prise) return; glisse = Math.max(glisse, Math.abs(e.clientX - departX)); if (glisse > 6) placer(baseX + (e.clientX - departX) * 1.2, false); });
+car.addEventListener('pointermove', function (e) { if (!prise) return; glisse = Math.max(glisse, Math.abs(e.clientX - departX)); if (glisse > 6) { main = baseMain + (e.clientX - departX) * 1.2; placer(false); } });
 ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { car.addEventListener(t, function () { prise = false; car.classList.remove('prise'); }); });
-car.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight') placer(x - 300, true); if (e.key === 'ArrowLeft') placer(x + 300, true); });
-window.addEventListener('resize', function () { placer(x, false); });
+car.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight') { main -= 300; placer(true); } if (e.key === 'ArrowLeft') { main += 300; placer(true); } });
+window.addEventListener('resize', function () { placer(false); });
+placer(false);
+}
+
+/* Titres qui montent mot à mot, chaque mot sortant d'un cache */
+function decouperTitre(h) {
+if (h.dataset.decoupe) return;
+h.dataset.decoupe = '1';
+h.setAttribute('aria-label', h.textContent.replace(/\s+/g, ' ').trim());
+h.innerHTML = h.innerHTML.replace(/(<em>.*?<\/em>)|([^ \t\n\r<]+)/g, function (t) { return '<span class="cache-mot" aria-hidden="true"><span>' + t + '</span></span>'; });
 }
 
 /* Fil aux quatre couleurs, de haut en bas de la page */
@@ -200,6 +214,8 @@ placerAiguille();
 function animations() {
 if (calme) { if (chargement) chargement.remove(); dessinerFil(); return; }
 document.documentElement.classList.add('js-anim');
+// le fil est tracé d'après la mise en page, avant que les animations ne déplacent les éléments
+dessinerFil();
 var tl = g.timeline();
 if (chargement && document.documentElement.classList.contains('premiere-visite')) {
   // Première visite : « NEOTISSE » s'écrit pendant qu'un fil se dessine, puis quatre fils se lèvent
@@ -218,19 +234,39 @@ tl.from('.hero h1 .ligne > span', { yPercent: 110, duration: 1.2, ease: 'power4.
   .from('.hero .apparait', { y: 24, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.15 }, '-=0.9')
   .from('#hero-img', { scale: 1.15, duration: 2.4, ease: 'power2.out' }, '-=1.6');
 // Hero en parallaxe
-g.to('#hero-img', { yPercent: 14, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+g.to('#hero-img', { yPercent: 18, scale: 1.12, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+g.to('.hero .contenu', { yPercent: -35, opacity: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: '20% top', end: 'bottom top', scrub: true } });
+g.to('.hero .defiler', { opacity: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '15% top', scrub: true } });
+// Grands titres des sections : les mots montent, liés au défilement
+document.querySelectorAll('.ateliers h2, .equipe h2, .agenda h2, .final h2').forEach(function (h) {
+  decouperTitre(h);
+  g.from(h.querySelectorAll('.cache-mot > span'), { yPercent: 110, rotate: 4, ease: 'none', stagger: 0.08, scrollTrigger: { trigger: h, start: 'top 92%', end: 'top 55%', scrub: 0.8 } });
+});
+// Petits titres : un trait qui se dessine
+g.utils.toArray('main .libelle').forEach(function (l) {
+  g.from(l, { opacity: 0, x: -30, ease: 'none', scrollTrigger: { trigger: l, start: 'top 95%', end: 'top 75%', scrub: 0.6 } });
+});
 // Manifeste mot à mot
 var m = document.getElementById('manifeste');
 if (m) m.innerHTML = m.innerHTML.replace(/(<em>.*?<\/em>)|([^\s<]+)/g, function (t) { return '<span class="mot">' + t + '</span>'; });
 if (m) g.to('#manifeste .mot', { opacity: 1, stagger: 0.06, ease: 'none', scrollTrigger: { trigger: m, start: 'top 82%', end: 'bottom 45%', scrub: true } });
 // Principes : chiffres qui défilent
-g.from('.principe', { y: 50, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.12, scrollTrigger: { trigger: '.principes', start: 'top 82%' } });
+// Principes : chaque colonne monte à sa propre vitesse
+g.utils.toArray('.principe').forEach(function (c, i) {
+  g.fromTo(c, { y: 60 + i * 50, opacity: 0 }, { y: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger: '.principes', start: 'top 95%', end: 'top 40%', scrub: 0.8 } });
+});
 // Mots qui glissent au rythme du défilement (une ligne vers la gauche, l'autre vers la droite)
 if (document.getElementById('rang-1')) g.fromTo('#rang-1', { x: function () { return window.innerWidth * 0.05; } }, { x: function () { return -(document.getElementById('rang-1').scrollWidth - window.innerWidth * 0.95); }, ease: 'none', scrollTrigger: { trigger: '.mots', start: 'top bottom', end: 'bottom top', scrub: 0.6, invalidateOnRefresh: true } });
 if (document.getElementById('rang-2')) g.fromTo('#rang-2', { x: function () { return -(document.getElementById('rang-2').scrollWidth - window.innerWidth * 0.95); } }, { x: function () { return window.innerWidth * 0.05; }, ease: 'none', scrollTrigger: { trigger: '.mots', start: 'top bottom', end: 'bottom top', scrub: 0.6, invalidateOnRefresh: true } });
 // Ateliers
-g.from('.carte', { x: 120, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: '.ateliers', start: 'top 70%' } });
-g.from('.ateliers h2', { y: 50, opacity: 0, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: '.ateliers', start: 'top 78%' } });
+g.from('.carte', { x: 160, opacity: 0, ease: 'none', stagger: 0.15, scrollTrigger: { trigger: '.ateliers', start: 'top 85%', end: 'top 30%', scrub: 0.8 } });
+// le carrousel avance à mesure qu'on descend dans la page
+if (placerCarrousel) ST.create({ trigger: '.ateliers', start: 'top 60%', end: 'bottom 20%', scrub: true, invalidateOnRefresh: true,
+  onUpdate: function (st) { carrouselDefil = st.progress * Math.min(0, window.innerWidth - car.scrollWidth); placerCarrousel(false); } });
+// les photos des cartes glissent dans leur cadre
+g.utils.toArray('.carte img').forEach(function (im) {
+  g.fromTo(im, { xPercent: -6, scale: 1.15 }, { xPercent: 6, scale: 1.15, ease: 'none', scrollTrigger: { trigger: '.ateliers', start: 'top bottom', end: 'bottom top', scrub: true } });
+});
 // Grande photo
 g.fromTo('.respiration', { clipPath: 'inset(8% 6% 8% 6%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none', scrollTrigger: { trigger: '.respiration', start: 'top bottom', end: 'top 25%', scrub: true } });
 g.to('#respiration-img', { yPercent: 10, ease: 'none', scrollTrigger: { trigger: '.respiration', start: 'top bottom', end: 'bottom top', scrub: true } });
@@ -242,7 +278,10 @@ document.querySelectorAll('[data-vitesse]').forEach(function (im) {
 g.fromTo('.equipe .photos .a', { clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)', duration: 1.3, ease: 'power4.inOut', scrollTrigger: { trigger: '.equipe', start: 'top 70%' } });
 g.fromTo('.equipe .photos .b', { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.3, ease: 'power4.inOut', delay: 0.25, scrollTrigger: { trigger: '.equipe', start: 'top 70%' } });
 // Agenda
-g.from('.dates li', { y: 40, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: '.dates', start: 'top 85%' } });
+g.utils.toArray('.dates li').forEach(function (li, i) {
+  g.fromTo(li, { x: i % 2 ? 80 : -80, opacity: 0 }, { x: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger: li, start: 'top 98%', end: 'top 70%', scrub: 0.8 } });
+});
+g.from('.equipe .noms > div', { y: 40, opacity: 0, ease: 'none', stagger: 0.2, scrollTrigger: { trigger: '.equipe .noms', start: 'top 95%', end: 'top 70%', scrub: 0.8 } });
 // Partenaires : défilement continu, accéléré par le scroll
 var piste = document.getElementById('piste-partenaires');
 if (piste) {
@@ -254,8 +293,8 @@ document.querySelectorAll('.fils-deco path').forEach(function (p, i) {
   var l = p.getTotalLength(); g.set(p, { strokeDasharray: l, strokeDashoffset: l });
   g.to(p, { strokeDashoffset: 0, duration: 2, ease: 'power2.inOut', delay: i * 0.15, scrollTrigger: { trigger: '.final', start: 'top 70%' } });
 });
-g.from('.final h2, .final p, .final .bouton', { y: 40, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.12, scrollTrigger: { trigger: '.final', start: 'top 70%' } });
-dessinerFil();
+g.from('.final p, .final .bouton', { y: 40, opacity: 0, ease: 'none', stagger: 0.15, scrollTrigger: { trigger: '.final', start: 'top 75%', end: 'top 35%', scrub: 0.8 } });
+ST.refresh();
 var t; window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(function () { dessinerFil(); ST.refresh(); }, 250); });
 }
 
