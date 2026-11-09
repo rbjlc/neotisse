@@ -1,0 +1,18 @@
+---
+// Carte d'une actualité dans la liste.
+import { categorie, typo, dateLongue, estNouveau } from '../lib/site.js';
+import { attrsImage } from '../lib/images.js';
+const { a, r } = Astro.props;
+const c = categorie(r, a.categorie);
+---
+<article class={`article t-${c.cle}`} data-cat={c.cle}>
+	<a class="lien-carte" href={`/actualites/${a.slug}/`}>
+		{a.image?.src && <div class="img-box"><img src={a.image.src} {...attrsImage(a.image.src, '(max-width: 700px) 100vw, 33vw')} class="photo" alt={a.image.alt || ''} loading="lazy" /></div>}
+		<div class="card-body">
+			<div class="meta"><span class={`tag t-${c.cle}`}>{c.nom}</span>{estNouveau(a.date) && <span class="new">Nouveau</span>}</div>
+			{a.date && <p class="date-article"><time datetime={a.date}>{dateLongue(a.date)}</time></p>}
+			<h3>{typo(a.titre)}</h3>
+			{a.extrait && <p>{typo(a.extrait)}</p>}
+		</div>
+	</a>
+</article>

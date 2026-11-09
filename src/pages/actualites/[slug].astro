@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import SimpleFin from '../../components/SimpleFin.astro';
+import { actualites, reglages, categorie, typo, dateLongue, estNouveau, urlSite } from '../../lib/site.js';
+import { affiche } from '../../lib/html.js';
+import { attrsImage } from '../../lib/images.js';
+
+const [actus, r] = await Promise.all([actualites(), reglages()]);
+const a = actus.find((x) => x.slug === Astro.params.slug);
+if (!a) return Astro.rewrite('/404');
+const c = categorie(r, a.categorie);
+const site = urlSite();
+const ld = {
+	'@context': 'https://schema.org', '@type': 'BlogPosting', headline: a.titre, description: a.extrait,
+	datePublished: a.date, image: a.image?.src ? (a.image.src.startsWith('http') ? a.image.src : site + a.image.src) : undefined,
+	author: { '@type': 'Organization', name: r.nom }, publisher: { '@type': 'Organization', name: r.nom, logo: { '@type': 'ImageObject', url: site + '/images/logo-neotisse.png' } },
+	mainEntityOfPage: site + Astro.url.pathname,
+};
+---
+<Base titre={a.titre} description={a.extrait} image={a.image} ld={ld}>
+	<article class="wrap">
+		<div class="single-wrap">
+			<a class="retour-lien" href="/actualites/">← Toutes les actualités</a>
+			<div class="meta">
+				{estNouveau(a.date) && <span class="new">Nouveau</span>}
+				<span class={`tag t-${c.cle}`}>{c.nom}</span>
+				{a.date && <span>{dateLongue(a.date)}</span>}
+			</div>
+			<h1>{typo(a.titre)}</h1>
+			{a.image?.src && <div class="img-box"><img src={a.image.src} {...attrsImage(a.image.src, '(max-width: 900px) 100vw, 760px')} class="photo" alt={a.image.alt || ''} /></div>}
+			<div class="prose" style="padding:0;max-width:none" set:html={affiche(a.contenu).replace(/<p>/g, '<p class="wp-block-paragraph">')} />
+		</div>
+	</article>
+	<SimpleFin />
+</Base>

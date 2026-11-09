@@ -1,0 +1,52 @@
+---
+import Base from '../../layouts/Base.astro';
+import Groupe from '../../components/Groupe.astro';
+import Une from '../../components/Une.astro';
+import CarteActu from '../../components/CarteActu.astro';
+import Reseaux from '../../components/Reseaux.astro';
+import CtaFinal from '../../components/CtaFinal.astro';
+import { page, reglages, actualites, typo } from '../../lib/site.js';
+
+const [p, r, actus] = await Promise.all([page('actualites'), reglages(), actualites()]);
+const une = actus.find((a) => a.a_la_une) || actus[0];
+const autres = actus.filter((a) => a !== une);
+const types = r.categories.filter((c) => actus.some((a) => a.categorie === c.cle));
+---
+<Base titre={p.seo_titre} description={p.seo_description} image={une?.image}>
+	<div class="contenu-page">
+		<Groupe classe="wrap page-hero stack center">
+			<h1 class="wp-block-heading">{typo(p.entete.titre)}</h1>
+			{p.entete.texte && <p class="lead wp-block-paragraph">{typo(p.entete.texte)}</p>}
+		</Groupe>
+		<Groupe classe="wrap sec-bas">
+			<div class="neo-liste neo-liste-actus">
+				<div class="stack" style="gap:40px">
+					{une && <Une actu={une} r={r} />}
+					{autres.length > 0 && (
+						<Fragment>
+							<div class="actus-entete">
+								<h2 class="h2">{typo(p.liste_titre)}</h2>
+								{types.length > 1 && (
+									<div class="filtres" role="group" aria-label="Filtrer les actualités par type">
+										<button class="filtre" type="button" data-f="tous" aria-pressed="true">Toutes</button>
+										{types.map((c) => <button class={`filtre t-${c.cle}`} type="button" data-f={c.cle} aria-pressed="false"><span class="dot" style="background:var(--c)"></span>{c.nom}</button>)}
+									</div>
+								)}
+							</div>
+							<p class="vide" id="aucune-actu" hidden>Aucune actualité de ce type pour le moment.</p>
+							<div class="articles" id="liste-actus" aria-live="polite">
+								{autres.map((a) => <CarteActu a={a} r={r} />)}
+							</div>
+						</Fragment>
+					)}
+					{actus.length === 0 && <p class="vide">Les premières actualités arrivent bientôt.</p>}
+					<div class="suivre">
+						<p>{typo(p.suivre)}</p>
+						<Reseaux r={r} />
+					</div>
+				</div>
+			</div>
+		</Groupe>
+		<CtaFinal cta={p.cta} />
+	</div>
+</Base>
