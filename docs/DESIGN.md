@@ -1,2 +1,2 @@
 Pour le design j'ai insisté sur le fait que les clientes voulaient que le site soit épuré et évoque la nature. J'ai choisis une base de couleur vert olive, et pour rajouter le 'peps' manquant j'ai rajouté, du bleu, du rouge garance et du jaune.
-![Texte alternatif](chemin/vers/maquetteneotisse.png "Titre optionnel de l'image")
+![Maquette neotisse](../maquetteneotisse.png "Maquette Neotisse")
