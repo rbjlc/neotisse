@@ -1,0 +1,78 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import { COLLECTIONS } from '../../../lib/schemas.js';
+import { lister, lire, ecrire, supprimer } from '../../../lib/donnees.js';
+import { reglages, dateLongue, dateEvenement, categorie } from '../../../lib/site.js';
+
+const col = Astro.params.collection;
+const def = COLLECTIONS[col];
+if (!def) return Astro.rewrite('/404');
+
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	const id = String(f.get('id') || '');
+	const action = f.get('action');
+	if (action === 'supprimer' && id) {
+		await supprimer(col, id);
+		return Astro.redirect(`/admin/${col}/?ok=` + encodeURIComponent('Supprimé.'), 303);
+	}
+	if (action === 'dupliquer' && id) {
+		const x = await lire(col, id);
+		const { id: _i, cree_le: _c, ...copie } = x;
+		const nouvel = await ecrire(col, null, { ...copie, titre: (copie.titre || copie.nom) + ' (copie)', slug: '', publie: false, a_la_une: false });
+		return Astro.redirect(`/admin/${col}/${nouvel}/?ok=` + encodeURIComponent('Copie créée (cachée du site). Modifiez-la puis cochez « Visible sur le site ».'), 303);
+	}
+}
+
+const r = await reglages();
+const aujourdhui = new Date().toISOString().slice(0, 10);
+let items = await lister(col);
+const tri = def.ordre.replace('-', ''), desc = def.ordre.startsWith('-');
+items.sort((a, b) => {
+	const x = a[tri] ?? '', y = b[tri] ?? '';
+	const c = typeof x === 'number' || typeof y === 'number' ? (Number(x) || 0) - (Number(y) || 0) : String(x).localeCompare(String(y));
+	return desc ? -c : c;
+});
+const passes = col === 'evenements' ? items.filter((e) => (e.date_fin || e.date_debut || '') < aujourdhui && !e.a_confirmer) : [];
+if (col === 'evenements') items = items.filter((e) => !passes.includes(e));
+const vignette = (x) => x.image?.src || x.logo?.src;
+const sous = (x) => {
+	if (col === 'evenements') return [dateEvenement(x), x.lieu, categorie(r, x.categorie).nom].filter(Boolean).join(' · ');
+	if (col === 'actualites') return [dateLongue(x.date), categorie(r, x.categorie).nom, x.a_la_une ? '★ À la une' : ''].filter(Boolean).join(' · ');
+	if (col === 'ateliers') return x.surtitre || x.nom_court;
+	if (col === 'partenaires') return [x.lien ? x.lien.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : 'Pas de site internet', x.avis ? 'avec un avis' : ''].filter(Boolean).join(' · ');
+	return '';
+};
+---
+<Admin titre={def.nom} actif={col}>
+	<div class="adm-titre">
+		<div><h1>{def.nom}</h1><p>{def.aide}</p></div>
+		<a class="b b-principal" href={`/admin/${col}/nouveau/`}>+ {def.nouveau}</a>
+	</div>
+
+	{[['', items], ...(passes.length ? [['Dates passées (plus affichées sur le site)', [...passes].reverse()]] : [])].map(([titre, liste]) => (
+		<Fragment>
+			{titre && <h2>{titre}</h2>}
+			{liste.length === 0 ? <p class="adm-info">Rien pour l’instant. Cliquez sur « {def.nouveau} » pour commencer.</p> : (
+				<ul class="liste">
+					{liste.map((x) => (
+						<li>
+							{col !== 'evenements' && (vignette(x) ? <img class="liste-vignette" src={vignette(x)} alt="" loading="lazy" /> : <span class="liste-vignette" aria-hidden="true"></span>)}
+							<div class="principal">
+								<a href={`/admin/${col}/${x.id}/`}>{x.titre || x.nom}</a>
+								{x.publie === false && <span class="etiquette cachee" style="margin-left:8px">Caché</span>}
+								<p class="sous">{sous(x)}</p>
+							</div>
+							<a class="b b-principal b-petit" href={`/admin/${col}/${x.id}/`}>Modifier</a>
+							<form method="post" style="display:contents">
+								<input type="hidden" name="id" value={x.id} />
+								{col === 'evenements' && <button class="b b-second b-petit" name="action" value="dupliquer" title="Créer une nouvelle date à partir de celle-ci">Dupliquer</button>}
+								<button class="b b-danger b-petit" name="action" value="supprimer" data-confirmer={`Supprimer définitivement « ${x.titre || x.nom} » ?`}>Supprimer</button>
+							</form>
+						</li>
+					))}
+				</ul>
+			)}
+		</Fragment>
+	))}
+</Admin>

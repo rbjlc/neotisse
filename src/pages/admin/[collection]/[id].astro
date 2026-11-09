@@ -1,0 +1,64 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import Champ from '../../../components/admin/Champ.astro';
+import { COLLECTIONS } from '../../../lib/schemas.js';
+import { lister, lire, ecrire, supprimer } from '../../../lib/donnees.js';
+import { formulaireEnObjet, convertir, sourcesAdmin, adresseUnique } from '../../../lib/admin.js';
+
+const col = Astro.params.collection;
+const def = COLLECTIONS[col];
+if (!def) return Astro.rewrite('/404');
+const id = Astro.params.id === 'nouveau' ? null : Astro.params.id;
+let fiche = id ? await lire(col, id) : {};
+if (id && !fiche) return Astro.redirect(`/admin/${col}/?erreur=` + encodeURIComponent('Cet élément n’existe plus.'));
+let erreur = '';
+
+if (Astro.request.method === 'POST') {
+	const fd = await Astro.request.formData();
+	if (fd.get('_action') === 'supprimer' && id) {
+		await supprimer(col, id);
+		return Astro.redirect(`/admin/${col}/?ok=` + encodeURIComponent('Supprimé.'), 303);
+	}
+	const data = convertir(def.champs, formulaireEnObjet(fd));
+	const manque = def.champs.filter((c) => c.requis && !data[c.cle]).map((c) => c.label);
+	if (data.date_fin && data.date_debut && data.date_fin < data.date_debut) manque.push('Date de fin (elle est avant la date de début)');
+	if (manque.length) {
+		erreur = 'À compléter : ' + manque.join(', ') + '.';
+		fiche = { ...fiche, ...data };
+	} else {
+		const tous = await lister(col);
+		if ('slug' in data) data.slug = adresseUnique(data.slug || data.titre || data.nom, tous, id);
+		if (col === 'actualites' && data.a_la_une) {
+			for (const a of tous.filter((x) => x.a_la_une && x.id !== id)) await ecrire(col, a.id, { ...a, a_la_une: false });
+		}
+		if (data.ordre == null && def.champs.some((c) => c.cle === 'ordre')) data.ordre = tous.length + 1;
+		const nouvelId = await ecrire(col, id, { ...fiche, ...data });
+		const msg = id ? 'Enregistré. Les changements sont déjà en ligne.' : `${def.unNom[0].toUpperCase()}${def.unNom.slice(1)} a été ajouté${col === 'partenaires' || col === 'ateliers' ? '' : 'e'}.`;
+		return Astro.redirect(`/admin/${col}/${nouvelId}/?ok=` + encodeURIComponent(data.publie === false ? msg.replace('Les changements sont déjà en ligne.', '') + ' (caché du site pour l’instant)' : msg), 303);
+	}
+}
+const sources = await sourcesAdmin();
+const titre = id ? fiche.titre || fiche.nom || def.nom : def.nouveau;
+const urlPublique = id && fiche.publie !== false ? def.url(fiche) : null;
+---
+<Admin titre={titre} actif={col}>
+	<div class="adm-titre">
+		<div>
+			<a class="adm-fil" href={`/admin/${col}/`}>← {def.nom}</a>
+			<h1>{titre}</h1>
+		</div>
+		{urlPublique && <a class="b b-second" href={urlPublique} target="_blank" rel="noopener">Voir sur le site ↗</a>}
+	</div>
+	{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+	<form method="post" class="edition">
+		<div class="section"><div class="section-corps" style="padding-top:24px">
+			{def.champs.map((c) => <Champ c={c} nom={c.cle || ''} valeur={c.cle ? fiche[c.cle] : undefined} sources={sources} />)}
+		</div></div>
+		<div class="barre-enregistrer">
+			<button class="b b-principal" type="submit">{id ? 'Enregistrer' : 'Ajouter'}</button>
+			<a class="b b-second" href={`/admin/${col}/`}>Annuler</a>
+			<span class="modifie" data-etat-modif></span>
+			{id && <button class="b b-danger" style="margin-left:auto" type="submit" name="_action" value="supprimer" formnovalidate data-sans-alt data-confirmer="Supprimer définitivement ? Cette action ne peut pas être annulée.">Supprimer</button>}
+		</div>
+	</form>
+</Admin>
