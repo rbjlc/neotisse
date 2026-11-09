@@ -1,0 +1,116 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { lister, purgerVieillesDonnees } from '../../lib/donnees.js';
+import { reglages, evenements, dateLongue, dateEvenement } from '../../lib/site.js';
+import { debutPeriode, NOM_PERIODE } from '../../lib/admin.js';
+import { PAGES } from '../../lib/schemas.js';
+import { modeEnvoi } from '../../lib/courriel.js';
+
+await purgerVieillesDonnees().catch((e) => console.error(e));
+const [r, messages, temoignages, prochains, medias, pages, ateliers, actus, parts] = await Promise.all([
+	reglages(), lister('messages'), lister('temoignages'), evenements(), lister('medias'),
+	lister('pages'), lister('ateliers'), lister('actualites'), lister('partenaires'),
+]);
+
+// Objectif
+const o = r.objectif;
+const debut = debutPeriode(o.periode).toISOString();
+const comptes = messages.filter((m) => (m.cree_le || '') >= debut && (o.categories || []).includes(m.categorie || 'devis'));
+const n = comptes.length, vise = Number(o.nombre) || 0;
+const pct = vise ? Math.min(100, Math.round((n / vise) * 100)) : 0;
+const nomsCats = (o.categories || []).map((c) => r.categories_messages.find((x) => x.cle === c)?.nom?.toLowerCase()).filter(Boolean);
+
+const nonLus = messages.filter((m) => !m.lu).sort((a, b) => (b.cree_le || '').localeCompare(a.cree_le || ''));
+const attente = temoignages.filter((t) => t.statut === 'attente');
+
+// Photos sans description, partout sur le site
+const sansAlt = [];
+const fouille = (o, ou) => {
+	if (!o || typeof o !== 'object') return;
+	if (typeof o.src === 'string' && o.src && !String(o.alt || '').trim()) sansAlt.push(ou);
+	for (const v of Object.values(o)) fouille(v, ou);
+};
+for (const p of pages) fouille(p, { nom: PAGES[p.id]?.nom || p.id, url: `/admin/pages/${p.id}/` });
+for (const a of ateliers) fouille(a, { nom: 'Atelier : ' + a.titre, url: `/admin/ateliers/${a.id}/` });
+for (const a of actus) fouille(a, { nom: 'Actualité : ' + a.titre, url: `/admin/actualites/${a.id}/` });
+for (const a of parts) fouille(a, { nom: 'Partenaire : ' + a.nom, url: `/admin/partenaires/${a.id}/` });
+const medSansAlt = medias.filter((m) => !String(m.alt || '').trim()).length;
+const uniques = [...new Map(sansAlt.map((x) => [x.url, x])).values()];
+
+const heure = new Date().getHours();
+const bonjour = heure < 18 ? 'Bonjour' : 'Bonsoir';
+---
+<Admin titre="Tableau de bord" actif="">
+	<div class="adm-titre">
+		<div>
+			<h1>{bonjour} !</h1>
+			<p>Voici ce qui se passe sur le site. Tout se modifie avec le menu à gauche.</p>
+		</div>
+	</div>
+
+	<div class="grille">
+		<section class="carte" aria-labelledby="t-obj">
+			<h2 id="t-obj">Objectif {NOM_PERIODE[o.periode] || ''}</h2>
+			<p><span class="chiffre">{n}</span> <span style="font-size:20px">/ {vise}</span></p>
+			<div class:list={['jauge', { atteint: n >= vise && vise > 0 }]} role="img" aria-label={`${n} sur ${vise}`}><span style={`width:${pct}%`}></span></div>
+			<p class="carte-aide" style="margin-top:0">
+				{n >= vise && vise > 0 ? 'Objectif atteint, bravo !' : `Il en manque ${Math.max(0, vise - n)}.`} On compte : {nomsCats.join(', ') || 'aucune catégorie choisie'}.
+			</p>
+			<a href="/admin/reglages/#objectif">Changer l’objectif</a>
+		</section>
+
+		<section class="carte" aria-labelledby="t-msg">
+			<h2 id="t-msg">Messages</h2>
+			<p><span class="chiffre">{nonLus.length}</span> <span style="font-size:20px">non lu{nonLus.length > 1 ? 's' : ''}</span></p>
+			{nonLus.slice(0, 3).map((m) => <p><a href={`/admin/messages/${m.id}/`}><strong>{m.nom}</strong>{m.institution ? ` · ${m.institution}` : ''}</a></p>)}
+			<a href="/admin/messages/">Voir tous les messages</a>
+		</section>
+
+		<section class="carte" aria-labelledby="t-tem">
+			<h2 id="t-tem">Témoignages</h2>
+			<p><span class="chiffre">{attente.length}</span> <span style="font-size:20px">à relire</span></p>
+			<p class="carte-aide" style="margin-top:0">Ils n’apparaissent sur le site qu’une fois publiés par vous.</p>
+			<a href="/admin/temoignages/">Relire les témoignages</a>
+		</section>
+	</div>
+
+	<section class="carte" aria-labelledby="t-faire">
+		<h2 id="t-faire">Ajouter rapidement</h2>
+		<div class="b-groupe">
+			<a class="b b-principal" href="/admin/evenements/nouveau/">+ Une date au calendrier</a>
+			<a class="b b-second" href="/admin/actualites/nouveau/">+ Une actualité</a>
+			<a class="b b-second" href="/admin/photos/">+ Des photos</a>
+			<a class="b b-second" href="/admin/partenaires/nouveau/">+ Un partenaire</a>
+			<a class="b b-second" href="/admin/messages/nouveau/">+ Une demande reçue par téléphone</a>
+		</div>
+	</section>
+
+	<div class="grille">
+		<section class="carte" aria-labelledby="t-cal">
+			<h2 id="t-cal">Prochaines dates</h2>
+			{prochains.length === 0 && <p class="vide">Aucune date à venir. Le calendrier du site affiche un message d’attente.</p>}
+			{prochains.slice(0, 4).map((e) => <p><a href={`/admin/evenements/${e.id}/`}><strong>{e.titre}</strong></a><br /><span class="carte-aide">{dateEvenement(e)}{e.lieu ? ` · ${e.lieu}` : ''}</span></p>)}
+			<a href="/admin/evenements/">Gérer le calendrier</a>
+		</section>
+
+		<section class="carte" aria-labelledby="t-alt">
+			<h2 id="t-alt">Descriptions des photos</h2>
+			{uniques.length === 0 && medSansAlt === 0 ? (
+				<p>✓ Toutes les photos ont une description. Parfait pour l’accessibilité et pour Google.</p>
+			) : (
+				<Fragment>
+					<p>Ces photos n’ont pas de description (utile aux personnes malvoyantes et à Google) :</p>
+					<ul style="margin:0;padding-left:20px">
+						{uniques.slice(0, 6).map((x) => <li><a href={x.url}>{x.nom}</a></li>)}
+						{medSansAlt > 0 && <li><a href="/admin/photos/">{medSansAlt} photo{medSansAlt > 1 ? 's' : ''} de la bibliothèque</a></li>}
+					</ul>
+				</Fragment>
+			)}
+		</section>
+	</div>
+
+	<p class="carte-aide" style="margin-top:0">{modeEnvoi()
+		? `✓ Chaque demande de devis et chaque témoignage sont aussi envoyés par e-mail à ${process.env.NOTIFICATION_EMAIL || r.email}.`
+		: '⚠ Les demandes de devis ne sont pas encore envoyées par e-mail : elles arrivent seulement ici, dans « Messages reçus ». (Réglage technique à faire par l’agence, voir LISEZ-MOI.)'}</p>
+	<p class="carte-aide" style="margin-top:0">Les messages et témoignages de plus de 3 ans sont supprimés automatiquement (RGPD). Dernière actualité publiée : {dateLongue(actus.map((a) => a.date).sort().pop() || '') || 'aucune'}.</p>
+</Admin>

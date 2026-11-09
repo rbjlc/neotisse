@@ -1,0 +1,73 @@
+---
+// Gabarit du back-office : menu à gauche, contenu à droite.
+import { lister, modeSupabase } from '../lib/donnees.js';
+
+const { titre, actif = '', large = false } = Astro.props;
+const u = Astro.locals.utilisateur;
+const [messages, temoignages] = await Promise.all([lister('messages'), lister('temoignages')]);
+const nonLus = messages.filter((m) => !m.lu).length;
+const enAttente = temoignages.filter((t) => t.statut === 'attente').length;
+const ok = Astro.url.searchParams.get('ok');
+const erreur = Astro.url.searchParams.get('erreur');
+
+const menu = [
+	['', 'Tableau de bord', '/admin/', '🏠'],
+	['messages', 'Messages reçus', '/admin/messages/', '✉️', nonLus],
+	['temoignages', 'Témoignages', '/admin/temoignages/', '💬', enAttente],
+	['-', 'Le site'],
+	['pages', 'Textes des pages', '/admin/pages/', '📝'],
+	['ateliers', 'Ateliers', '/admin/ateliers/', '🧶'],
+	['evenements', 'Calendrier', '/admin/evenements/', '📅'],
+	['actualites', 'Actualités', '/admin/actualites/', '📰'],
+	['partenaires', 'Partenaires', '/admin/partenaires/', '🤝'],
+	['photos', 'Photos', '/admin/photos/', '🖼️'],
+	['-', 'Paramètres'],
+	['reglages', 'Réglages', '/admin/reglages/', '⚙️'],
+	['aide', 'Aide', '/admin/aide/', '❓'],
+];
+---
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="robots" content="noindex, nofollow" />
+	<title>{titre} · Espace Neotisse</title>
+	<link rel="icon" href="/images/logo-neotisse.png" type="image/png" />
+	<link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="adm">
+	<a class="adm-saut" href="#adm-contenu">Aller au contenu</a>
+	<header class="adm-haut">
+		<button class="adm-burger" type="button" aria-expanded="false" aria-controls="adm-menu">Menu</button>
+		<a class="adm-marque" href="/admin/" aria-label="Espace Neotisse : tableau de bord"><img src="/images/logo-neotisse.png" alt="" width="34" height="29" /> <span>Espace Neotisse</span></a>
+		<div class="adm-haut-droite">
+			<a class="adm-voir" href="/" target="_blank" rel="noopener">Voir le site ↗</a>
+			<span class="adm-qui">{u?.email}</span>
+			<form method="post" action="/admin/deconnexion/"><button type="submit" class="adm-lien">Se déconnecter</button></form>
+		</div>
+	</header>
+	{!modeSupabase() && (
+		<p class="adm-demo">Mode démo : les changements sont enregistrés sur cet ordinateur seulement. Reliez Supabase pour la mise en ligne (voir le fichier LISEZ-MOI).</p>
+	)}
+	<div class="adm-cadre">
+		<nav class="adm-menu" id="adm-menu" aria-label="Menu du back-office">
+			<ul>
+				{menu.map(([cle, nom, url, icone, badge]) =>
+					cle === '-' ? <li class="adm-menu-titre">{nom}</li> : (
+						<li><a href={url} aria-current={actif === cle ? 'page' : undefined}><span aria-hidden="true">{icone}</span> {nom}{badge ? <span class="adm-badge" title={`${badge} à traiter`}>{badge}</span> : null}</a></li>
+					))}
+			</ul>
+		</nav>
+		<main class:list={['adm-contenu', { large }]} id="adm-contenu">
+			{ok && <p class="adm-ok" role="status">✓ {ok}</p>}
+			{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+			<slot />
+		</main>
+		<datalist id="adm-pages">
+			{['/', '/qui-sommes-nous/', '/ateliers/', '/calendrier/', '/actualites/', '/livre-or/', '/livre-or/#partenaires', '/livre-or/#temoigner', '/contact/', '/mentions-legales/'].map((u) => <option value={u} />)}
+		</datalist>
+	</div>
+	<script is:inline src="/js/admin.js" defer></script>
+</body>
+</html>
