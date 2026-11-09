@@ -1,0 +1,17 @@
+---
+// Sections dépliables d'un formulaire (une par bloc de la page).
+import Champ from './Champ.astro';
+import { valeurDe } from '../../lib/admin.js';
+const { sections, valeurs, sources, ouvrirTout = false } = Astro.props;
+---
+{sections.map((s, i) => (
+	<details class="section" open={ouvrirTout || i === 1 || sections.length <= 2} id={s.ancre}>
+		<summary>{s.titre}</summary>
+		<div class="section-corps">
+			{s.aide && <p class="section-aide">{s.aide}</p>}
+			{s.champs.map((c) => (
+				<Champ c={c} nom={s.cle ? `${s.cle}.${c.cle}` : c.cle} valeur={c.cle ? valeurDe(s.cle ? valeurs?.[s.cle] || {} : valeurs || {}, c.cle) : undefined} sources={sources} />
+			))}
+		</div>
+	</details>
+))}

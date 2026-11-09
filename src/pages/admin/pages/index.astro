@@ -1,0 +1,28 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import { PAGES } from '../../../lib/schemas.js';
+const principales = Object.entries(PAGES).filter(([, p]) => !p.legal);
+const legales = Object.entries(PAGES).filter(([, p]) => p.legal);
+---
+<Admin titre="Textes des pages" actif="pages">
+	<div class="adm-titre"><div><h1>Textes des pages</h1><p>Choisissez une page pour modifier ses titres, textes, photos et boutons.</p></div></div>
+	<ul class="liste">
+		{principales.map(([cle, p]) => (
+			<li>
+				<div class="principal"><a href={`/admin/pages/${cle}/`}>{p.nom}</a>{p.note && <p class="sous">{p.note}</p>}</div>
+				<a class="b b-second b-petit" href={p.url} target="_blank" rel="noopener">Voir ↗</a>
+				<a class="b b-principal b-petit" href={`/admin/pages/${cle}/`}>Modifier</a>
+			</li>
+		))}
+	</ul>
+	<h2>Pages légales</h2>
+	<ul class="liste">
+		{legales.map(([cle, p]) => (
+			<li>
+				<div class="principal"><a href={`/admin/pages/${cle}/`}>{p.nom}</a></div>
+				<a class="b b-second b-petit" href={p.url} target="_blank" rel="noopener">Voir ↗</a>
+				<a class="b b-principal b-petit" href={`/admin/pages/${cle}/`}>Modifier</a>
+			</li>
+		))}
+	</ul>
+</Admin>

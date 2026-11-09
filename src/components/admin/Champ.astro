@@ -1,0 +1,145 @@
+---
+// Affiche un champ de formulaire du back-office selon son type.
+// Props : c (définition), valeur, nom (nom complet du champ), sources (listes de choix).
+import { propre } from '../../lib/html.js';
+
+const { c, valeur, nom, sources = {} } = Astro.props;
+const id = 'c-' + nom.replace(/[^a-zA-Z0-9]+/g, '-') + '-' + Math.random().toString(36).slice(2, 6);
+const v = valeur ?? (c.defaut === 'aujourdhui' ? new Date().toISOString().slice(0, 10) : c.defaut);
+const options = c.options || (sources[c.source] || []);
+const resumeItem = (it) => {
+	if (c.simple) return it?.alt || (it?.src ? it.src.split('/').pop() : 'Photo');
+	const r = it?.[c.resume];
+	return (typeof r === 'string' ? r.replace(/<[^>]+>/g, '') : '') || 'Nouvel élément';
+};
+const items = c.type === 'liste' ? (Array.isArray(v) ? v : []).map((it) => (c.simple ? { [c.simple]: it } : it)) : [];
+const suggestions = c.suggestions ? sources[c.suggestions] || [] : [];
+---
+{c.groupe ? (
+	<div>
+		<p class="groupe-titre">{c.groupe}</p>
+		{c.aide && <p class="aide" style="color:var(--fusain);font-size:15px;margin-top:4px">{c.aide}</p>}
+	</div>
+) : c.type === 'cache' ? (
+	<input type="hidden" name={nom} value={v ?? ''} />
+) : c.type === 'case' ? (
+	<div class="champ">
+		<input type="hidden" name={nom} value="0" />
+		<label class="case" for={id}><input type="checkbox" id={id} name={nom} value="1" checked={v === true || v === '1'} /> {c.label}</label>
+		{c.aide && <span class="aide">{c.aide}</span>}
+	</div>
+) : c.type === 'multiple' ? (
+	<fieldset class="champ">
+		<legend>{c.label}</legend>
+		<input type="hidden" name={`${nom}[]`} value="" />
+		<div class="cases">
+			{options.map(([val, txt]) => (
+				<label><input type="checkbox" name={`${nom}[]`} value={val} checked={(v || []).includes(val)} /> {txt}</label>
+			))}
+		</div>
+		{c.aide && <span class="aide">{c.aide}</span>}
+	</fieldset>
+) : c.type === 'image' ? (
+	<fieldset class="champ">
+		<legend>{c.label}</legend>
+		{c.aide && <span class="aide">{c.aide}</span>}
+		<div class="photo-champ" data-photo>
+			<div class:list={['photo-apercu', { pleine: v?.src }]} style={v?.src ? `background-image:url('${v.src}')` : undefined}>Aucune photo</div>
+			<div class="photo-infos">
+				<input type="hidden" name={`${nom}.src`} value={v?.src || ''} data-src />
+				<div class="b-groupe">
+					<button type="button" class="b b-second b-petit" data-choisir>{v?.src ? 'Changer la photo' : 'Choisir une photo'}</button>
+					<button type="button" class="b b-danger b-petit" data-retirer hidden={!v?.src}>Retirer</button>
+				</div>
+				<label class="label" for={id}>Description de la photo</label>
+				<input type="text" id={id} name={`${nom}.alt`} value={v?.alt || ''} data-alt maxlength="180" placeholder="Ex. : Enfant tissant sur un carton" />
+				<span class="aide">Décrivez ce qu’on voit, en une phrase. Lu aux personnes malvoyantes et utilisé par Google.</span>
+			</div>
+		</div>
+	</fieldset>
+) : c.type === 'bouton' ? (
+	<fieldset class="champ">
+		<legend>{c.label}</legend>
+		<div class="duo">
+			<div class="champ"><label class="aide" for={id}>Texte du bouton</label><input type="text" id={id} name={`${nom}.texte`} value={v?.texte || ''} /></div>
+			<div class="champ"><label class="aide" for={id + 'l'}>Lien (page du site ou adresse https://…)</label><input type="text" id={id + 'l'} name={`${nom}.lien`} value={v?.lien || ''} list="adm-pages" /></div>
+		</div>
+		<span class="aide">{c.aide || 'Laissez le texte vide pour cacher le bouton.'}</span>
+	</fieldset>
+) : c.type === 'riche' ? (
+	<div class="champ">
+		<span class="label" id={id + 't'}>{c.label}</span>
+		{c.aide && <span class="aide">{c.aide}</span>}
+		<div class:list={['editeur', { grand: c.grand }]} data-editeur>
+			<div class="editeur-outils" role="toolbar" aria-label={`Mise en forme : ${c.label}`}>
+				<button type="button" data-cmd="bold" title="Gras"><b>G</b></button>
+				<button type="button" data-cmd="italic" title="Italique"><i>I</i></button>
+				<button type="button" data-cmd="lien" title="Ajouter un lien">🔗 Lien</button>
+				<span class="sep"></span>
+				<button type="button" data-cmd="h2" title="Intertitre">Titre</button>
+				<button type="button" data-cmd="h3" title="Petit intertitre">Sous-titre</button>
+				<button type="button" data-cmd="p" title="Texte normal">Texte</button>
+				<span class="sep"></span>
+				<button type="button" data-cmd="insertUnorderedList" title="Liste à puces">• Liste</button>
+				<button type="button" data-cmd="insertOrderedList" title="Liste numérotée">1. Liste</button>
+				<span class="sep"></span>
+				<button type="button" data-cmd="removeFormat" title="Enlever la mise en forme">Effacer</button>
+			</div>
+			<div class="editeur-zone" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby={id + 't'} set:html={propre(v || '') || '<p><br></p>'}></div>
+			<textarea name={nom} hidden set:html={propre(v || '')}></textarea>
+		</div>
+	</div>
+) : c.type === 'liste' ? (
+	<fieldset class="champ">
+		<legend>{c.label}</legend>
+		{c.aide && <span class="aide">{c.aide}</span>}
+		<div class="repeteur" data-base={nom} data-max={c.max || ''}>
+			{items.map((it, i) => (
+				<div class="rep-item ferme">
+					<div class="rep-tete" data-ouvrir>
+						<span class="rep-nom">{resumeItem(c.simple ? it[c.simple] : it)}</span>
+						<button type="button" data-monter title="Monter" aria-label="Monter">↑</button>
+						<button type="button" data-descendre title="Descendre" aria-label="Descendre">↓</button>
+						<button type="button" class="suppr" data-supprimer title="Retirer" aria-label="Retirer">✕</button>
+					</div>
+					<div class="rep-corps">
+						{c.champs.map((sc) => <Astro.self c={sc} valeur={it?.[sc.cle]} nom={`${nom}.${i}.${sc.cle}`} sources={sources} />)}
+					</div>
+				</div>
+			))}
+		</div>
+		<template data-modele>
+			<div class="rep-item">
+				<div class="rep-tete" data-ouvrir>
+					<span class="rep-nom">Nouvel élément</span>
+					<button type="button" data-monter title="Monter" aria-label="Monter">↑</button>
+					<button type="button" data-descendre title="Descendre" aria-label="Descendre">↓</button>
+					<button type="button" class="suppr" data-supprimer title="Retirer" aria-label="Retirer">✕</button>
+				</div>
+				<div class="rep-corps">
+					{c.champs.map((sc) => <Astro.self c={sc} valeur={undefined} nom={`${nom}.#.${sc.cle}`} sources={sources} />)}
+				</div>
+			</div>
+		</template>
+		<div><button type="button" class="b b-second b-petit" data-ajouter>+ {c.ajout || 'Ajouter'}</button></div>
+	</fieldset>
+) : (
+	<div class="champ">
+		<label for={id}>{c.label}{c.requis && <span class="requis"> *</span>}</label>
+		{c.aide && <span class="aide">{c.aide}</span>}
+		{c.type === 'long' || c.type === 'lignes' ? (
+			<textarea id={id} name={nom} required={c.requis} data-max={c.max} rows={c.type === 'lignes' ? Math.max(3, (v || []).length + 1) : undefined}>{c.type === 'lignes' ? (v || []).join('\n') : v || ''}</textarea>
+		) : c.type === 'choix' ? (
+			<select id={id} name={nom}>
+				{options.map(([val, txt]) => <option value={val} selected={v === val}>{txt}</option>)}
+			</select>
+		) : c.type === 'date' ? (
+			<input type="date" id={id} name={nom} value={v || ''} required={c.requis} />
+		) : c.type === 'nombre' ? (
+			<input type="number" id={id} name={nom} value={v ?? ''} step="1" min="0" />
+		) : (
+			<input type="text" id={id} name={nom} value={v || ''} required={c.requis} data-max={c.max} inputmode={c.lien ? 'url' : undefined} placeholder={c.lien ? 'https://' : undefined} list={suggestions.length ? id + 's' : undefined} />
+		)}
+		{suggestions.length > 0 && <datalist id={id + 's'}>{suggestions.map(([val, txt]) => <option value={val} label={txt} />)}</datalist>}
+	</div>
+)}
