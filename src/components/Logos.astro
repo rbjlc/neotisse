@@ -1,0 +1,20 @@
+---
+// Logos (ou noms) des partenaires.
+const { partenaires, classe = 'logos' } = Astro.props;
+---
+{partenaires.length > 0 && (
+	<ul class={classe} role="list">
+		{partenaires.map((p) => {
+			const contenu = p.logo?.src
+				? `<img src="${p.logo.src}" alt="${(p.nom || '').replace(/"/g, '&quot;')}" loading="lazy">`
+				: `<span class="logo-nom">${(p.nom || '').replace(/</g, '&lt;')}</span>`;
+			return (
+				<li class="logo-item">
+					{p.lien
+						? <a href={p.lien} target="_blank" rel="noopener" set:html={contenu} />
+						: <Fragment set:html={contenu} />}
+				</li>
+			);
+		})}
+	</ul>
+)}

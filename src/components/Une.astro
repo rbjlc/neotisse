@@ -1,0 +1,25 @@
+---
+// Actualité « À la une » (accueil et page Actualités).
+import { categorie, typo } from '../lib/site.js';
+import { attrsImage } from '../lib/images.js';
+const { actu, r, accueil = false } = Astro.props;
+const c = categorie(r, actu.categorie);
+const url = `/actualites/${actu.slug}/`;
+---
+{accueil && (
+	<div class="meta"><span class="new">À la une</span><span class={`tag t-${c.cle}`}>{c.nom}</span></div>
+)}
+<div class={`une t-${c.cle}`} data-cat={accueil ? undefined : c.cle}>
+	<div class="txt">
+		{!accueil && <div class="meta"><span class="new">À la une</span><span class={`tag t-${c.cle}`}>{c.nom}</span></div>}
+		{accueil
+			? <h3><a href={url} style="text-decoration:none">{typo(actu.titre)}</a></h3>
+			: <h2 class="h2"><a href={url} style="text-decoration:none">{typo(actu.titre)}</a></h2>}
+		<p style="color:var(--fusain)">{typo(actu.extrait)}</p>
+		<div class="btns">
+			<a class="btn btn-sec" href={url}>{accueil ? 'Lire la suite' : 'Lire l’article'}<span class="screen-reader-text"> : {actu.titre}</span></a>
+			{accueil && <a class="btn btn-sec" href="/actualites/">Toutes les actualités</a>}
+		</div>
+	</div>
+	{actu.image?.src && <div class="img-box"><img src={actu.image.src} {...attrsImage(actu.image.src)} class="photo" alt={actu.image.alt || ''} loading="lazy" /></div>}
+</div>

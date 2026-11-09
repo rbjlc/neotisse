@@ -1,0 +1,18 @@
+---
+// Bandeau de fin de page « Un atelier sur mesure ? ».
+import Groupe from './Groupe.astro';
+import Boutons from './Boutons.astro';
+import { affiche, brut } from '../lib/html.js';
+import { typo } from '../lib/site.js';
+const { cta } = Astro.props;
+const texte = cta?.texte?.includes('<') ? affiche(cta.texte).replace(/^<p>|<\/p>$/g, '') : typo(cta?.texte || '');
+---
+{cta?.titre && (
+	<Groupe classe="cta-final sec">
+		<Groupe classe="wrap stack center">
+			<h2 class="wp-block-heading h2">{typo(cta.titre)}</h2>
+			{brut(cta.texte) && <p class="lead wp-block-paragraph" set:html={texte} />}
+			<Boutons liste={[cta.bouton, cta.bouton2 && { ...cta.bouton2, contour: true }]} />
+		</Groupe>
+	</Groupe>
+)}

@@ -1,0 +1,91 @@
+---
+import Base from '../layouts/Base.astro';
+import Groupe from '../components/Groupe.astro';
+import Image from '../components/Image.astro';
+import Boutons from '../components/Boutons.astro';
+import CtaFinal from '../components/CtaFinal.astro';
+import Une from '../components/Une.astro';
+import Logos from '../components/Logos.astro';
+import { page, reglages, ateliers, actualites, partenaires, typo, insecables } from '../lib/site.js';
+import { affiche } from '../lib/html.js';
+
+const [p, r, listeAteliers, actus, parts] = await Promise.all([page('accueil'), reglages(), ateliers(), actualites(), partenaires()]);
+const une = actus.find((a) => a.a_la_une) || actus[0];
+const h = p.hero;
+const ligne = (t) => insecables(typo(t));
+---
+<Base titre={p.seo_titre} description={p.seo_description} image={h.image}>
+	<div class="contenu-page">
+		<Groupe classe="wrap hero-zone">
+			<Groupe classe="hero-cover">
+				<Image image={h.image} classe="hero-fond" priorite sizes="(max-width: 1340px) 100vw, 1340px" />
+				<Groupe classe="hero-texte">
+					<h1 class="wp-block-heading hero-nom">{h.titre}</h1>
+					{h.accroche && <p class="hero-accroche wp-block-paragraph" set:html={ligne(h.accroche)} />}
+					{h.sous_titre && <p class="hero-sous-titre wp-block-paragraph">{typo(h.sous_titre)}</p>}
+					<Boutons surPhoto liste={[h.bouton1, h.bouton2 && { ...h.bouton2, contour: true }]} />
+				</Groupe>
+			</Groupe>
+		</Groupe>
+
+		<Groupe classe="sec">
+			<Groupe classe="wrap geste-duo">
+				<Groupe classe="collage collage-geste">
+					{p.presentation.photos.slice(0, 5).map((ph) => <Image image={ph} classe="collage-photo" />)}
+				</Groupe>
+				<Groupe classe="stack geste-texte">
+					<h2 class="wp-block-heading h2">{typo(p.presentation.titre)}</h2>
+					<Fragment set:html={affiche(p.presentation.texte, { savoirFaire: true }).replace(/<p>/g, '<p class="wp-block-paragraph">')} />
+					<Boutons liste={[p.presentation.bouton]} />
+				</Groupe>
+			</Groupe>
+		</Groupe>
+
+		<Groupe classe="ateliers-duo">
+			<Groupe classe="ateliers-sombre">
+				<Groupe classe="sombre-contenu stack">
+					<h2 class="wp-block-heading h2">{typo(p.ateliers.titre)}</h2>
+					<div class="neo-liste neo-liste-ateliers-sombre">
+						<ul class="ateliers-liste" role="list">
+							{listeAteliers.map((a) => (
+								<li><a href={`/ateliers/#atelier-${a.slug}`}><span class="al-titre">{typo(a.nom_court || a.titre)}</span><span class="al-texte">{typo(a.resume)}</span></a></li>
+							))}
+						</ul>
+					</div>
+					<Boutons surPhoto liste={[p.ateliers.bouton && { ...p.ateliers.bouton, contour: true }]} />
+				</Groupe>
+			</Groupe>
+			<Image image={p.ateliers.photo} classe="ateliers-photo" />
+		</Groupe>
+
+		<Groupe classe="band-olive sec">
+			<Groupe classe="wrap duo">
+				<Groupe classe="stack">
+					<h2 class="wp-block-heading h2">{typo(p.equipe.titre)}</h2>
+					<Fragment set:html={affiche(p.equipe.texte).replace(/<p>/g, '<p class="wp-block-paragraph">')} />
+					<Boutons surPhoto liste={[p.equipe.bouton && { ...p.equipe.bouton, contour: true }]} />
+				</Groupe>
+				<Image image={p.equipe.photo} classe="fondatrices-photo" />
+			</Groupe>
+		</Groupe>
+
+		{une && (
+			<Groupe classe="sec une-zone">
+				<Groupe classe="wrap">
+					<div class="neo-liste neo-liste-une"><Une actu={une} r={r} accueil /></div>
+				</Groupe>
+			</Groupe>
+		)}
+
+		<Groupe classe="band-laine sec confiance">
+			<Groupe classe="wrap stack center">
+				<h2 class="wp-block-heading h2">{typo(p.confiance.titre)}</h2>
+				{p.confiance.texte && <p class="lead wp-block-paragraph">{typo(p.confiance.texte)}</p>}
+				<div class="neo-liste neo-liste-partenaires-bandeau"><Logos partenaires={parts} /></div>
+				<Boutons liste={[p.confiance.bouton && { ...p.confiance.bouton, contour: true }]} />
+			</Groupe>
+		</Groupe>
+
+		<CtaFinal cta={p.cta} />
+	</div>
+</Base>
