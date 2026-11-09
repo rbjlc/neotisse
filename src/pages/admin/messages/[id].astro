@@ -1,0 +1,65 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import { lire, ecrire, supprimer } from '../../../lib/donnees.js';
+import { reglages, dateLongue } from '../../../lib/site.js';
+
+const id = Astro.params.id;
+const nouveau = id === 'nouveau';
+const r = await reglages();
+let m = nouveau ? { categorie: 'info' } : await lire('messages', id);
+if (!m) return Astro.redirect('/admin/messages/?erreur=' + encodeURIComponent('Ce message n’existe plus.'));
+let erreur = '';
+
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	const action = f.get('action');
+	if (action === 'supprimer') { await supprimer('messages', id); return Astro.redirect('/admin/messages/?ok=' + encodeURIComponent('Message supprimé.'), 303); }
+	if (action === 'categorie') { await ecrire('messages', id, { ...m, categorie: f.get('categorie') }); return Astro.redirect(`/admin/messages/${id}/?ok=` + encodeURIComponent('Catégorie changée.'), 303); }
+	if (action === 'nonlu') { await ecrire('messages', id, { ...m, lu: false }); return Astro.redirect('/admin/messages/', 303); }
+	if (action === 'ajouter') {
+		const d = { categorie: String(f.get('categorie')), nom: String(f.get('nom') || '').trim(), institution: String(f.get('institution') || '').trim(), email: String(f.get('email') || '').trim(), message: String(f.get('message') || '').trim(), source: String(f.get('source') || '').trim(), lu: true, projets: [] };
+		if (!d.nom) { erreur = 'Indiquez au moins un nom.'; m = d; }
+		else { const n = await ecrire('messages', null, d); return Astro.redirect(`/admin/messages/${n}/?ok=` + encodeURIComponent('Demande ajoutée : elle compte dans l’objectif.'), 303); }
+	}
+}
+if (!nouveau && !m.lu && Astro.request.method === 'GET') { await ecrire('messages', id, { ...m, lu: true }); }
+
+const champs = [['Reçu le', m.cree_le && dateLongue(m.cree_le)], ['Nom', m.nom], ['Institution', m.institution], ['E-mail', m.email], ['Reçu par', m.source], ['Type de projet', (m.projets || []).join(', ')], ['Public', m.public], ['Dates souhaitées', m.dates], ['Budget', m.budget], ['Message', m.message]].filter(([, v]) => v);
+const sujet = encodeURIComponent(`Votre demande d’atelier – ${r.nom}`);
+const corps = encodeURIComponent(`Bonjour ${m.nom || ''},\n\nMerci pour votre message.\n\n\n\nBien cordialement,\nL’équipe ${r.nom}\n\n---\nVotre message :\n${m.message || ''}`);
+---
+<Admin titre={nouveau ? 'Ajouter une demande' : `Message de ${m.nom}`} actif="messages">
+	<div class="adm-titre"><div><a class="adm-fil" href="/admin/messages/">← Messages reçus</a><h1>{nouveau ? 'Ajouter une demande reçue autrement' : m.nom}</h1>{nouveau && <p>Une demande reçue par téléphone, par e-mail ou lors d’un événement ? Ajoutez-la ici pour qu’elle compte dans l’objectif.</p>}</div></div>
+	{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+	{nouveau ? (
+		<form method="post" class="edition carte">
+			<div class="duo">
+				<div class="champ"><label for="n">Nom *</label><input id="n" name="nom" type="text" required value={m.nom || ''} /></div>
+				<div class="champ"><label for="i">Institution</label><input id="i" name="institution" type="text" value={m.institution || ''} /></div>
+				<div class="champ"><label for="e">E-mail</label><input id="e" name="email" type="email" value={m.email || ''} /></div>
+				<div class="champ"><label for="s">Reçue comment ?</label><input id="s" name="source" type="text" placeholder="Téléphone, e-mail, salon…" value={m.source || ''} /></div>
+			</div>
+			<div class="champ"><label for="c">Catégorie</label><select id="c" name="categorie">{r.categories_messages.map((c) => <option value={c.cle} selected={m.categorie === c.cle}>{c.nom}</option>)}</select></div>
+			<div class="champ"><label for="msg">Résumé de la demande</label><textarea id="msg" name="message">{m.message || ''}</textarea></div>
+			<div class="b-groupe"><button class="b b-principal" name="action" value="ajouter">Ajouter</button><a class="b b-second" href="/admin/messages/">Annuler</a></div>
+		</form>
+	) : (
+		<Fragment>
+			<div class="carte fiche-message">
+				<dl>{champs.map(([k, v]) => <Fragment><dt>{k}</dt><dd>{v}</dd></Fragment>)}</dl>
+			</div>
+			<div class="b-groupe">
+				{m.email && <a class="b b-principal" href={`mailto:${m.email}?subject=${sujet}&body=${corps}`}>Répondre par e-mail</a>}
+				<form method="post" class="b-groupe">
+					<label for="cat" class="sr">Catégorie</label>
+					<select id="cat" name="categorie" style="width:auto">{r.categories_messages.map((c) => <option value={c.cle} selected={(m.categorie || 'devis') === c.cle}>{c.nom}</option>)}</select>
+					<button class="b b-second" name="action" value="categorie">Changer la catégorie</button>
+				</form>
+				<form method="post" class="b-groupe">
+					<button class="b b-second" name="action" value="nonlu">Marquer non lu</button>
+					<button class="b b-danger" name="action" value="supprimer" data-confirmer="Supprimer ce message ? Il ne comptera plus dans l’objectif.">Supprimer</button>
+				</form>
+			</div>
+		</Fragment>
+	)}
+</Admin>

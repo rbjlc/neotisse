@@ -1,0 +1,88 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { lister, lire, ecrire, supprimer } from '../../lib/donnees.js';
+import { dateLongue } from '../../lib/site.js';
+
+let erreur = '';
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	const id = String(f.get('id') || ''), action = f.get('action');
+	const t = id && (await lire('temoignages', id));
+	let ok = '';
+	if (t && action === 'publier') { await ecrire('temoignages', id, { ...t, statut: 'publie' }); ok = 'Témoignage publié sur le site.'; }
+	if (t && action === 'refuser') { await ecrire('temoignages', id, { ...t, statut: 'refuse' }); ok = 'Témoignage refusé (il n’apparaît pas sur le site).'; }
+	if (t && action === 'attente') { await ecrire('temoignages', id, { ...t, statut: 'attente' }); ok = 'Témoignage retiré du site.'; }
+	if (t && action === 'supprimer') { await supprimer('temoignages', id); ok = 'Témoignage supprimé.'; }
+	if (t && action === 'modifier') { await ecrire('temoignages', id, { ...t, nom: String(f.get('nom')).trim(), ou: String(f.get('ou')).trim(), message: String(f.get('message')).trim() }); ok = 'Témoignage modifié.'; }
+	if (action === 'ajouter') {
+		const n = { nom: String(f.get('nom') || '').trim(), ou: String(f.get('ou') || '').trim(), message: String(f.get('message') || '').trim(), statut: 'publie', accord: f.get('accord') === '1', source: 'ajouté par l’équipe' };
+		if (!n.nom || !n.message) erreur = 'Indiquez le nom et le témoignage.';
+		else if (!n.accord) erreur = 'Cochez la case : la personne doit avoir donné son accord pour être publiée.';
+		else { await ecrire('temoignages', null, n); ok = 'Témoignage ajouté et publié.'; }
+	}
+	if (ok) return Astro.redirect('/admin/temoignages/?ok=' + encodeURIComponent(ok), 303);
+}
+const tous = (await lister('temoignages')).sort((a, b) => (b.cree_le || '').localeCompare(a.cree_le || ''));
+const groupes = [
+	['attente', 'À relire', 'Ils ne sont pas encore visibles sur le site.'],
+	['publie', 'Publiés', 'Visibles sur la page Témoignages.'],
+	['refuse', 'Refusés', 'Gardés ici, jamais affichés. Vous pouvez les supprimer.'],
+];
+---
+<Admin titre="Témoignages" actif="temoignages">
+	<div class="adm-titre"><div><h1>Témoignages</h1><p>Les visiteurs laissent leur témoignage depuis la page Témoignages. Rien n’est publié sans votre accord.</p></div></div>
+	{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+	{groupes.map(([statut, titre, aide]) => {
+		const liste = tous.filter((t) => (t.statut || 'attente') === statut);
+		if (!liste.length && statut !== 'attente') return null;
+		return (
+			<section style="display:flex;flex-direction:column;gap:12px">
+				<h2>{titre} ({liste.length})</h2>
+				<p class="carte-aide" style="margin:0">{aide}</p>
+				{liste.length === 0 ? <p class="adm-info">Aucun témoignage à relire. 🎉</p> : (
+					<ul class="liste">
+						{liste.map((t) => (
+							<li style="align-items:flex-start">
+								<div class="principal">
+									<p style="font-size:18px">« {t.message} »</p>
+									<p class="sous">{t.nom}{t.ou ? ` · ${t.ou}` : ''} · reçu le {dateLongue(t.cree_le)}</p>
+									<details style="margin-top:8px">
+										<summary style="cursor:pointer;color:var(--olive);font-weight:600">Corriger une faute</summary>
+										<form method="post" class="edition" style="gap:10px;margin-top:10px">
+											<input type="hidden" name="id" value={t.id} />
+											<div class="duo"><input name="nom" value={t.nom} aria-label="Nom" /><input name="ou" value={t.ou || ''} aria-label="Atelier ou lieu" placeholder="Atelier ou lieu" /></div>
+											<textarea name="message" aria-label="Témoignage">{t.message}</textarea>
+											<div><button class="b b-second b-petit" name="action" value="modifier">Enregistrer la correction</button></div>
+										</form>
+									</details>
+								</div>
+								<form method="post" class="b-groupe">
+									<input type="hidden" name="id" value={t.id} />
+									{statut !== 'publie' && <button class="b b-principal b-petit" name="action" value="publier">Publier</button>}
+									{statut === 'publie' && <button class="b b-second b-petit" name="action" value="attente">Retirer du site</button>}
+									{statut === 'attente' && <button class="b b-second b-petit" name="action" value="refuser">Refuser</button>}
+									<button class="b b-danger b-petit" name="action" value="supprimer" data-confirmer="Supprimer ce témoignage définitivement ?">Supprimer</button>
+								</form>
+							</li>
+						))}
+					</ul>
+				)}
+			</section>
+		);
+	})}
+	<details class="section">
+		<summary>Ajouter un témoignage reçu autrement</summary>
+		<div class="section-corps">
+			<p class="section-aide">Par exemple un mot laissé sur le livre d’or papier, ou un message reçu par e-mail.</p>
+			<form method="post" class="edition" style="gap:14px">
+				<div class="duo">
+					<div class="champ"><label for="tn">Nom (le prénom suffit)</label><input id="tn" name="nom" type="text" required /></div>
+					<div class="champ"><label for="to">Atelier ou lieu</label><input id="to" name="ou" type="text" /></div>
+				</div>
+				<div class="champ"><label for="tm">Témoignage</label><textarea id="tm" name="message" required></textarea></div>
+				<label class="case"><input type="checkbox" name="accord" value="1" /> La personne a accepté que son témoignage soit publié sur le site.</label>
+				<div><button class="b b-principal" name="action" value="ajouter">Ajouter et publier</button></div>
+			</form>
+		</div>
+	</details>
+</Admin>

@@ -1,0 +1,54 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import { lister, lire, ecrire, supprimer } from '../../../lib/donnees.js';
+import { reglages, dateLongue } from '../../../lib/site.js';
+
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	const id = String(f.get('id') || ''), action = f.get('action');
+	const m = id && (await lire('messages', id));
+	if (m && action === 'supprimer') await supprimer('messages', id);
+	if (m && action === 'lu') await ecrire('messages', id, { ...m, lu: !m.lu });
+	if (action === 'tout-lu') for (const x of (await lister('messages')).filter((x) => !x.lu)) await ecrire('messages', x.id, { ...x, lu: true });
+	return Astro.redirect('/admin/messages/' + Astro.url.search, 303);
+}
+
+const r = await reglages();
+const filtre = Astro.url.searchParams.get('voir') || 'tous';
+const tous = (await lister('messages')).sort((a, b) => (b.cree_le || '').localeCompare(a.cree_le || ''));
+const liste = tous.filter((m) => filtre === 'tous' || (filtre === 'nonlus' ? !m.lu : (m.categorie || 'devis') === filtre));
+const nomCat = (c) => r.categories_messages.find((x) => x.cle === (c || 'devis'))?.nom || c;
+const heure = (iso) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' });
+---
+<Admin titre="Messages reçus" actif="messages">
+	<div class="adm-titre">
+		<div><h1>Messages reçus</h1><p>Les demandes envoyées depuis la page Contact arrivent ici. Classez-les par catégorie : le tableau de bord compte celles qui correspondent à votre objectif.</p></div>
+		<a class="b b-principal" href="/admin/messages/nouveau/">+ Ajouter une demande reçue autrement</a>
+	</div>
+	<nav class="filtres" aria-label="Filtrer les messages">
+		<a href="?voir=tous" aria-current={filtre === 'tous' ? 'page' : undefined}>Tous ({tous.length})</a>
+		<a href="?voir=nonlus" aria-current={filtre === 'nonlus' ? 'page' : undefined}>Non lus ({tous.filter((m) => !m.lu).length})</a>
+		{r.categories_messages.map((c) => <a href={`?voir=${c.cle}`} aria-current={filtre === c.cle ? 'page' : undefined}>{c.nom} ({tous.filter((m) => (m.categorie || 'devis') === c.cle).length})</a>)}
+	</nav>
+	{liste.length === 0 ? <p class="adm-info">Aucun message ici pour l’instant.</p> : (
+		<ul class="liste">
+			{liste.map((m) => (
+				<li class:list={{ nonlu: !m.lu }}>
+					<div class="principal">
+						<a href={`/admin/messages/${m.id}/`}>{m.nom || 'Sans nom'}{m.institution ? ` · ${m.institution}` : ''}</a>
+						<p class="sous">{dateLongue(m.cree_le)} à {heure(m.cree_le)} · <span class="etiquette">{nomCat(m.categorie)}</span> {!m.lu && <strong style="color:var(--garance)">Non lu</strong>}</p>
+						<p class="sous">{String(m.message || '').slice(0, 140)}{String(m.message || '').length > 140 ? '…' : ''}</p>
+					</div>
+					<a class="b b-principal b-petit" href={`/admin/messages/${m.id}/`}>Lire</a>
+					<form method="post" style="display:contents">
+						<input type="hidden" name="id" value={m.id} />
+						<button class="b b-second b-petit" name="action" value="lu">{m.lu ? 'Marquer non lu' : 'Marquer lu'}</button>
+						<button class="b b-danger b-petit" name="action" value="supprimer" data-confirmer="Supprimer ce message ? Il ne comptera plus dans l’objectif.">Supprimer</button>
+					</form>
+				</li>
+			))}
+		</ul>
+	)}
+	{tous.some((m) => !m.lu) && <form method="post"><button class="b b-second b-petit" name="action" value="tout-lu">Tout marquer comme lu</button></form>}
+	<p class="carte-aide" style="margin:0">Les messages sont supprimés automatiquement 3 ans après leur réception (RGPD).</p>
+</Admin>
