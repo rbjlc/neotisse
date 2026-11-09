@@ -1,0 +1,107 @@
+---
+import Base from '../layouts/Base.astro';
+import Groupe from '../components/Groupe.astro';
+import Logos from '../components/Logos.astro';
+import Faq from '../components/Faq.astro';
+import { page, partenaires, temoignages, ateliers, typo } from '../lib/site.js';
+
+const [p, parts, avis, listeAteliers] = await Promise.all([page('livre-or'), partenaires(), temoignages(), ateliers()]);
+const avisPartenaires = parts.filter((x) => x.avis);
+const etat = Astro.url.searchParams.get('temoignage');
+const manque = (Astro.url.searchParams.get('manque') || '').split(',');
+---
+<Base titre={p.seo_titre} description={p.seo_description}>
+	<div class="contenu-page">
+		<Groupe id="partenaires" classe="band-olive sec partenaires-haut">
+			<Groupe classe="wrap stack center">
+				<h1 class="wp-block-heading h2">{typo(p.entete.titre)}</h1>
+				{p.entete.texte && <p class="wp-block-paragraph">{typo(p.entete.texte)}</p>}
+				<div class="neo-liste neo-liste-logos-partenaires"><Logos partenaires={parts} classe="logos logos-haut" /></div>
+			</Groupe>
+		</Groupe>
+
+		<Groupe classe="sec avis-partenaires-zone">
+			<Groupe classe="wrap stack">
+				<Groupe classe="stack center"><h2 class="wp-block-heading h2">{typo(p.avis_partenaires.titre)}</h2></Groupe>
+				<div class="neo-liste neo-liste-avis-seuls-partenaires">
+					{avisPartenaires.length ? (
+						<div class="avis avis-part">
+							{avisPartenaires.map((x) => (
+								<blockquote>
+									{x.logo?.src && <span class="avis-logo"><img src={x.logo.src} alt="" loading="lazy" /></span>}
+									<p>« {typo(x.avis)} »</p>
+									<cite>{[x.auteur_avis, x.nom].filter(Boolean).join(', ')}</cite>
+								</blockquote>
+							))}
+						</div>
+					) : <p class="vide">{typo(p.avis_partenaires.vide)}</p>}
+				</div>
+			</Groupe>
+		</Groupe>
+
+		<Groupe classe="sec fond-laine">
+			<Groupe classe="wrap temoignages-duo">
+				<Groupe classe="stack temoignages-col">
+					<h2 class="wp-block-heading h2">{typo(p.temoignages.titre)}</h2>
+					<div class="neo-liste neo-liste-temoignages">
+						{avis.length ? (
+							<div class="avis">
+								{avis.map((t) => (
+									<blockquote>
+										<p>« {typo(t.message)} »</p>
+										<cite>{t.nom}{t.ou ? ` · ${t.ou}` : ''}</cite>
+									</blockquote>
+								))}
+							</div>
+						) : <p class="vide">{typo(p.temoignages.vide)}</p>}
+					</div>
+				</Groupe>
+				<Groupe id="temoigner" classe="carte-blanche stack form-col">
+					<h2 class="wp-block-heading h3-form">{typo(p.formulaire.titre)}</h2>
+					{p.formulaire.note && <p class="note wp-block-paragraph">{typo(p.formulaire.note)}</p>}
+					<div class="neo-liste neo-liste-form-temoignage">
+						{etat === 'merci' && <p class="retour" role="status" tabindex="-1">{typo(p.formulaire.merci)}</p>}
+						{etat === 'erreur' && <p class="retour erreur" role="alert" tabindex="-1">Il manque une information obligatoire (votre nom, votre témoignage ou votre accord). Complétez-la puis envoyez de nouveau.</p>}
+						<form action="/api/temoignage" method="post" id="form-avis">
+							<div class="champs">
+								<div class="champ plein">
+									<label for="author">Votre nom <span class="opt">(le prénom suffit)</span></label>
+									<input id="author" name="nom" type="text" autocomplete="name" required maxlength="60" aria-invalid={manque.includes('nom') ? 'true' : undefined} />
+								</div>
+								<div class="champ plein">
+									<label for="neo_ou">À quel atelier ou événement ? <span class="opt">(facultatif)</span></label>
+									<select id="neo_ou" name="ou">
+										<option value="">Je ne sais plus / je préfère ne pas le dire</option>
+										{listeAteliers.length > 0 && (
+											<optgroup label="Ateliers (musée, école, structure)">
+												{listeAteliers.map((a) => <option value={a.titre}>{a.titre}</option>)}
+											</optgroup>
+										)}
+										<option value="autre">Autre (je précise)</option>
+									</select>
+								</div>
+								<div class="champ plein" id="champ-lieu">
+									<label for="neo_lieu">Précisez où <span class="opt">(facultatif)</span></label>
+									<input id="neo_lieu" name="lieu" type="text" placeholder="Ex. : musée de Lodève, fête de la science…" maxlength="80" />
+								</div>
+								<div class="champ plein">
+									<label for="comment">Votre témoignage</label>
+									<textarea id="comment" name="message" required maxlength="1500" aria-invalid={manque.includes('message') ? 'true' : undefined}></textarea>
+								</div>
+							</div>
+							<input type="hidden" name="t" value={Date.now()} />
+							<p class="hp" aria-hidden="true"><label for="site_web_a">Ne pas remplir</label><input id="site_web_a" name="site_web" type="text" tabindex="-1" autocomplete="off" /></p>
+							<label class="consent" for="neo_ok">
+								<input id="neo_ok" name="accord" type="checkbox" value="1" required />
+								<span>J’accepte que mon nom, le lieu indiqué et mon témoignage soient conservés et publiés sur ce site après relecture par l’équipe, pendant 3 ans maximum. Je peux demander leur retrait à tout moment en écrivant à l’association. <a href="/politique-de-confidentialite/">Politique de confidentialité</a></span>
+							</label>
+							<div><button class="btn btn-main" type="submit">Envoyer mon témoignage</button></div>
+						</form>
+					</div>
+				</Groupe>
+			</Groupe>
+		</Groupe>
+
+		<Faq faq={p.faq} />
+	</div>
+</Base>
