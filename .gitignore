@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.netlify/
+.env
+.donnees/
+public/envois/
+.DS_Store
+Thumbs.db
