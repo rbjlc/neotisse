@@ -1,0 +1,263 @@
+// Neotisse v2 : animations de la page d'accueil.
+// Le fil teint mené par une aiguille, les mots qui glissent, le carrousel des ateliers, les apparitions au défilement.
+// Tout est désactivé si l'appareil demande moins d'animations.
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+var g = gsap, ST = ScrollTrigger;
+var calme = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var chargement = document.getElementById('chargement');
+
+  /* Carrousel à glisser */
+var car = document.getElementById('carrousel'), barre = document.getElementById('progression');
+if (car && barre) {
+var x = 0, departX = 0, baseX = 0, prise = false;
+function limites() { return Math.min(0, window.innerWidth - car.scrollWidth); }
+function placer(v, anime) {
+x = Math.max(limites(), Math.min(0, v));
+if (g && anime && !calme) g.to(car, { x: x, duration: 0.8, ease: 'power3.out' }); else car.style.transform = 'translateX(' + x + 'px)';
+var p = limites() ? x / limites() : 0;
+barre.style.transform = 'scaleX(' + (0.25 + 0.75 * p) + ')';
+}
+var glisse = 0;
+car.addEventListener('pointerdown', function (e) { if (e.pointerType === 'mouse' && e.button !== 0) return; prise = true; glisse = 0; departX = e.clientX; baseX = x; car.classList.add('prise'); });
+car.addEventListener('click', function (e) { if (glisse > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
+car.addEventListener('pointermove', function (e) { if (!prise) return; glisse = Math.max(glisse, Math.abs(e.clientX - departX)); if (glisse > 6) placer(baseX + (e.clientX - departX) * 1.2, false); });
+['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { car.addEventListener(t, function () { prise = false; car.classList.remove('prise'); }); });
+car.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight') placer(x - 300, true); if (e.key === 'ArrowLeft') placer(x + 300, true); });
+window.addEventListener('resize', function () { placer(x, false); });
+}
+
+/* Fil aux quatre couleurs, de haut en bas de la page */
+/* ---------- Le fil rouge ----------
+ Un seul fil de laine garance, mené par une aiguille. Il passe derrière les photos et les cartes
+ (comme un fil de trame), fait une boucle près de certains titres et finit noué sur le bouton de contact. */
+var aiguille = null, traceFil = null, longueurFil = 0;
+function pos() {
+// premier élément trouvé parmi les sélecteurs donnés (une section peut être vide dans le back-office)
+var el = null;
+for (var i = 0; i < arguments.length && !el; i++) el = document.querySelector(arguments[i]);
+var main = document.getElementById('haut'), m = main.getBoundingClientRect();
+if (!el) return { x: m.width * 0.1, y: m.height * 0.5, w: m.width * 0.8, h: 10 };
+var r = el.getBoundingClientRect();
+return { x: r.left - m.left, y: r.top - m.top, w: r.width, h: r.height };
+}
+// Courbe douce qui passe par tous les points (Catmull-Rom convertie en courbes de Bézier)
+function courbe(pts) {
+var d = 'M ' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+for (var i = 0; i < pts.length - 1; i++) {
+  var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2, t = 5.2;
+  d += ' C ' + (p1[0] + (p2[0] - p0[0]) / t).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) / t).toFixed(1) + ', ' +
+    (p2[0] - (p3[0] - p1[0]) / t).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) / t).toFixed(1) + ', ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+}
+return d;
+}
+// Petite boucle : le fil fait un tour sur lui-même autour du point (x, y)
+function boucle(x, y, r, sens) {
+var s = sens || 1, pts = [[x - r * 2.2 * s, y - r * 0.6]];
+// le fil entre, fait un tour complet bien rond, puis repart
+[150, 200, 250, 300, 350, 40, 90, 130].forEach(function (deg) {
+  var a = deg * Math.PI / 180;
+  pts.push([x + Math.cos(a) * r * s, y + Math.sin(a) * r]);
+});
+pts.push([x + r * 0.2 * s, y + r * 2.4]);
+return pts;
+}
+/* Souplesse : les longs passages pendent un peu, comme un fil tenu à ses deux bouts */
+var pointsFil = [];
+function assouplir(pts) {
+var r = [pts[0]];
+for (var i = 1; i < pts.length; i++) {
+  var a = pts[i - 1], b = pts[i], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+  var n = Math.floor(L / 140);
+  for (var k = 1; k <= n; k++) {
+    var t = k / (n + 1), creux = Math.sin(Math.PI * t) * Math.min(38, L * 0.06);
+    // le fil s'affaisse vers le bas (gravité) et ondule un peu sur le côté
+    r.push([a[0] + dx * t + Math.sin(k * 1.7 + i) * 6, a[1] + dy * t + creux]);
+  }
+  r.push(b);
+}
+return r;
+}
+/* Le fil ondule quand on fait défiler, puis se calme */
+var energie = 0, dernierY = window.scrollY, temps = 0, filAnime = false;
+function onduler() {
+var v = window.scrollY - dernierY; dernierY = window.scrollY;
+energie += (Math.min(34, Math.abs(v) * 0.9) - energie) * (Math.abs(v) * 0.9 > energie ? 0.18 : 0.035);
+temps += 0.016;
+var amp = 1.6 + energie;
+if (pointsFil.length) {
+  var n = pointsFil.length;
+  var d = courbe(pointsFil.map(function (p, i) {
+    if (i < 2 || i > n - 3) return p; // les deux bouts restent attachés
+    var phase = temps * 2.4 + p[1] * 0.0045;
+    return [p[0] + Math.sin(phase) * amp, p[1] + Math.cos(phase * 0.8) * amp * 0.35];
+  }));
+  var svg = document.getElementById('fil');
+  svg.querySelectorAll('path[data-fil]').forEach(function (pa) { pa.setAttribute('d', d); });
+  if (traceFil) traceFil.setAttribute('d', d);
+  if (aiguille && placerAiguilleFil) placerAiguilleFil();
+}
+requestAnimationFrame(onduler);
+}
+var placerAiguilleFil = null;
+
+function dessinerFil() {
+var svg = document.getElementById('fil'), main = svg.parentElement;
+var W = main.clientWidth, H = main.scrollHeight, etroit = W < 760;
+svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+if (ST) ST.getAll().forEach(function (t) { if (/^fil/.test(t.vars.id || '')) t.kill(); });
+var hero = pos('.hero');
+var mani = pos('#manifeste', '.manifeste');
+var pri = pos('.principes .grille', '#manifeste');
+var ate = pos('.ateliers');
+var car = pos('.carte .img', '.ateliers');
+var res = pos('.respiration', '.ateliers');
+var equ = pos('.equipe h2');
+var pho = pos('.equipe .photos', '.equipe');
+var age = pos('.dates', '.agenda h2');
+var bou = pos('.final .bouton', '.final h2');
+var pts;
+if (etroit) {
+  // Téléphone : le fil longe le bord gauche, avec une boucle à chaque grande section.
+  var x = 10;
+  pts = [[W / 2, hero.y + hero.h - 50], [W / 2, hero.y + hero.h + 40], [x + 6, mani.y - 30]];
+  [mani.y + mani.h / 2, ate.y + 60, equ.y + 10, age.y - 20].forEach(function (y, i) {
+    pts.push([x, y - 120]); boucle(x + 1, y, 6, 1).forEach(function (p) { pts.push(p); }); pts.push([x + 2, y + 140]);
+  });
+  pts.push([x, bou.y - 160], [x + 2, bou.y + bou.h * 0.5 - 30], [bou.x - 14, bou.y + bou.h * 0.5 + 4], [bou.x + 8, bou.y + bou.h * 0.5]);
+} else {
+  var cy = car.y + car.h * 0.55;
+  pts = [
+    [W / 2, hero.y + hero.h - 50], [W / 2, hero.y + hero.h + 60],
+    [mani.x - 70, mani.y + mani.h * 0.35]
+  ].concat(boucle(mani.x - 90, mani.y + mani.h * 0.62, 24, 1)).concat([
+    [mani.x - 40, mani.y + mani.h + 40],
+    [W * 0.55, pri.y - 30], [W * 0.92, pri.y + pri.h * 0.4], [W * 0.94, ate.y + 40],
+    // dans la section ateliers : le fil passe derrière les cartes, d'un bord à l'autre
+    [W * 0.86, cy - 120], [W * 0.5, cy], [W * 0.04, cy + 40],
+    [W * 0.08, res.y - 60],
+    // derrière la grande photo
+    [W * 0.35, res.y + res.h * 0.5], [W * 0.62, res.y + res.h + 40],
+    [pho.x + pho.w + 20, equ.y - 30]
+  ]).concat(boucle(equ.x - 70, equ.y + 30, 20, -1)).concat([
+    [pho.x + pho.w * 0.6, pho.y + pho.h + 50], [age.x - 44, age.y - 150], [age.x - 36, age.y - 30], [age.x - 30, age.y + age.h * 0.5],
+    [age.x - 20, age.y + age.h + 40], [W * 0.5, age.y + age.h + 120],
+    // passe sous le bandeau des partenaires, puis longe le bord droit jusqu'au bouton
+    [W * 0.95, bou.y - 420], [W * 0.93, bou.y - 120], [bou.x + bou.w + 150, bou.y + bou.h * 0.2]
+  ]).concat(boucle(bou.x + bou.w + 70, bou.y + bou.h * 0.5, 16, -1)).concat([[bou.x + bou.w + 18, bou.y + bou.h * 0.55], [bou.x + bou.w - 8, bou.y + bou.h * 0.5]]);
+}
+pts = assouplir(pts);
+pointsFil = pts;
+var d = courbe(pts);
+var ep = etroit ? 2.4 : 3.2;
+// Teinture du fil : la couleur suit le fond de chaque section pour rester bien visible
+var debutY = hero.y + hero.h - 60, finY = bou.y + bou.h, span = Math.max(1, finY - debutY);
+var off = function (y) { return Math.max(0, Math.min(1, (y - debutY) / span)).toFixed(4); };
+var arrets = [
+  [debutY, '#A8321F'], [mani.y + mani.h * 0.6, '#A8321F'], [pri.y + pri.h * 0.5, '#2E5A8A'],
+  [ate.y + 40, '#E8B42F'], [ate.y + ate.h - 40, '#E8B42F'], [pho.y + pho.h * 0.3, '#4F5233'],
+  [age.y, '#A8321F'], [age.y + age.h + 60, '#A8321F'], [bou.y - 260, '#E8B42F'], [finY, '#E8B42F']
+];
+var degrade = '<linearGradient id="teinte" gradientUnits="userSpaceOnUse" x1="0" y1="' + debutY.toFixed(0) + '" x2="0" y2="' + finY.toFixed(0) + '">' +
+  arrets.map(function (a) { return '<stop offset="' + off(a[0]) + '" stop-color="' + a[1] + '"/>'; }).join('') + '</linearGradient>';
+svg.innerHTML = '<defs>' + degrade +
+  '<mask id="masque-fil" maskUnits="userSpaceOnUse" x="-40" y="0" width="' + (W + 80) + '" height="' + H + '"><path id="trace" d="' + d + '" stroke="#fff" stroke-width="' + (ep + 7) + '" fill="none" stroke-linecap="round" stroke-linejoin="round"/></mask>' +
+  '</defs>' +
+  '<g mask="url(#masque-fil)" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
+    // ombre portée très légère sur le fond
+    '<path data-fil d="' + d + '" stroke="#26222A" stroke-opacity=".13" stroke-width="' + (ep + 1.5) + '" transform="translate(1.5,3)"/>' +
+    // l'âme du fil, teinte à la garance
+    '<path data-fil d="' + d + '" stroke="url(#teinte)" stroke-width="' + ep + '"/>' +
+    // les deux brins du fil retors : petites torsions sombres
+    '<path data-fil d="' + d + '" stroke="#26222A" stroke-opacity=".32" stroke-width="' + ep + '" stroke-dasharray="1.2 3.4"/>' +
+    // reflet de la laine
+    '<path data-fil d="' + d + '" stroke="#FFF3DD" stroke-opacity=".5" stroke-width="' + (ep * 0.3).toFixed(2) + '" stroke-dasharray="6 2.5" transform="translate(-.6,-.7)"/>' +
+    // quelques fibres qui dépassent
+    '<path data-fil d="' + d + '" stroke="url(#teinte)" stroke-opacity=".45" stroke-width=".6" stroke-dasharray=".8 9 .6 14" transform="translate(1.4,.4)"/>' +
+  '</g>' +
+  '<g id="aiguille" aria-hidden="true"><line x1="-26" y1="0" x2="10" y2="0" stroke="#8C8F96" stroke-width="2.4" stroke-linecap="round"/><line x1="-24" y1="-.6" x2="8" y2="-.6" stroke="#E9EBEF" stroke-width=".8" stroke-linecap="round"/><ellipse cx="-20" cy="0" rx="3.4" ry="1.1" fill="#F4EFE6" stroke="#8C8F96" stroke-width=".8"/><path d="M10 -1.2 L 16 0 L 10 1.2 Z" fill="#8C8F96"/></g>';
+traceFil = document.getElementById('trace'); longueurFil = traceFil.getTotalLength();
+aiguille = document.getElementById('aiguille');
+if (!g || !ST || calme) { g && g.set(aiguille, { opacity: 0 }); return; }
+g.set(traceFil, { strokeDasharray: longueurFil + ' ' + (longueurFil * 4), strokeDashoffset: longueurFil });
+var placerAiguille = function () {
+  var fait = longueurFil - (parseFloat(traceFil.style.strokeDashoffset) || 0);
+  var p = traceFil.getPointAtLength(Math.max(0, fait)), q = traceFil.getPointAtLength(Math.min(longueurFil, fait + 4));
+  var angle = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+  aiguille.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') rotate(' + angle.toFixed(1) + ')');
+  aiguille.style.opacity = fait > 4 && fait < longueurFil - 6 ? 1 : 0;
+};
+placerAiguilleFil = placerAiguille;
+if (!filAnime) { filAnime = true; requestAnimationFrame(onduler); }
+g.to(traceFil, { strokeDashoffset: 0, ease: 'none', onUpdate: placerAiguille,
+  scrollTrigger: { id: 'fil-trace', trigger: '.manifeste', start: 'top 92%', endTrigger: '.final .bouton', end: 'top 60%', scrub: 0.9 } });
+placerAiguille();
+}
+
+
+function animations() {
+if (calme) { if (chargement) chargement.remove(); dessinerFil(); return; }
+document.documentElement.classList.add('js-anim');
+var tl = g.timeline();
+if (chargement && document.documentElement.classList.contains('premiere-visite')) {
+  // Première visite : « NEOTISSE » s'écrit pendant qu'un fil se dessine, puis quatre fils se lèvent
+  var chFil = document.getElementById('ch-fil'), L = chFil.getTotalLength();
+  g.set(chFil, { strokeDasharray: L, strokeDashoffset: L });
+  tl.from('#ch-nom', { opacity: 0, y: 10, duration: 0.6, ease: 'power2.out' })
+    .to(chFil, { strokeDashoffset: 0, duration: 1.1, ease: 'power2.inOut' }, 0.1)
+    .to('.chargement svg', { opacity: 0, duration: 0.3 })
+    .set(chargement, { background: 'transparent' })
+    .fromTo('.chargement .fils span', { scaleY: 1 }, { scaleY: 0, transformOrigin: 'bottom', duration: 0.8, ease: 'power3.inOut', stagger: 0.08 })
+    .add(function () { chargement.remove(); document.documentElement.classList.remove('premiere-visite'); });
+} else if (chargement) {
+  chargement.remove();
+}
+tl.from('.hero h1 .ligne > span', { yPercent: 110, duration: 1.2, ease: 'power4.out', stagger: 0.1 }, chargement && tl.duration() ? '-=0.55' : 0.05)
+  .from('.hero .apparait', { y: 24, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.15 }, '-=0.9')
+  .from('#hero-img', { scale: 1.15, duration: 2.4, ease: 'power2.out' }, '-=1.6');
+// Hero en parallaxe
+g.to('#hero-img', { yPercent: 14, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+// Manifeste mot à mot
+var m = document.getElementById('manifeste');
+if (m) m.innerHTML = m.innerHTML.replace(/(<em>.*?<\/em>)|([^\s<]+)/g, function (t) { return '<span class="mot">' + t + '</span>'; });
+if (m) g.to('#manifeste .mot', { opacity: 1, stagger: 0.06, ease: 'none', scrollTrigger: { trigger: m, start: 'top 82%', end: 'bottom 45%', scrub: true } });
+// Principes : chiffres qui défilent
+g.from('.principe', { y: 50, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.12, scrollTrigger: { trigger: '.principes', start: 'top 82%' } });
+// Mots qui glissent au rythme du défilement (une ligne vers la gauche, l'autre vers la droite)
+if (document.getElementById('rang-1')) g.fromTo('#rang-1', { x: function () { return window.innerWidth * 0.05; } }, { x: function () { return -(document.getElementById('rang-1').scrollWidth - window.innerWidth * 0.95); }, ease: 'none', scrollTrigger: { trigger: '.mots', start: 'top bottom', end: 'bottom top', scrub: 0.6, invalidateOnRefresh: true } });
+if (document.getElementById('rang-2')) g.fromTo('#rang-2', { x: function () { return -(document.getElementById('rang-2').scrollWidth - window.innerWidth * 0.95); } }, { x: function () { return window.innerWidth * 0.05; }, ease: 'none', scrollTrigger: { trigger: '.mots', start: 'top bottom', end: 'bottom top', scrub: 0.6, invalidateOnRefresh: true } });
+// Ateliers
+g.from('.carte', { x: 120, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: '.ateliers', start: 'top 70%' } });
+g.from('.ateliers h2', { y: 50, opacity: 0, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: '.ateliers', start: 'top 78%' } });
+// Grande photo
+g.fromTo('.respiration', { clipPath: 'inset(8% 6% 8% 6%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none', scrollTrigger: { trigger: '.respiration', start: 'top bottom', end: 'top 25%', scrub: true } });
+g.to('#respiration-img', { yPercent: 10, ease: 'none', scrollTrigger: { trigger: '.respiration', start: 'top bottom', end: 'bottom top', scrub: true } });
+g.from('.respiration blockquote, .respiration cite', { y: 40, opacity: 0, duration: 1.1, ease: 'power3.out', stagger: 0.12, scrollTrigger: { trigger: '.respiration', start: 'top 45%' } });
+// Équipe
+document.querySelectorAll('[data-vitesse]').forEach(function (im) {
+  g.fromTo(im, { yPercent: -4, scale: 1.12 }, { yPercent: +im.getAttribute('data-vitesse'), ease: 'none', scrollTrigger: { trigger: '.equipe', start: 'top bottom', end: 'bottom top', scrub: true } });
+});
+g.fromTo('.equipe .photos .a', { clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)', duration: 1.3, ease: 'power4.inOut', scrollTrigger: { trigger: '.equipe', start: 'top 70%' } });
+g.fromTo('.equipe .photos .b', { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.3, ease: 'power4.inOut', delay: 0.25, scrollTrigger: { trigger: '.equipe', start: 'top 70%' } });
+// Agenda
+g.from('.dates li', { y: 40, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: '.dates', start: 'top 85%' } });
+// Partenaires : défilement continu, accéléré par le scroll
+var piste = document.getElementById('piste-partenaires');
+if (piste) {
+var tw = g.fromTo(piste, { xPercent: 0 }, { xPercent: -50, duration: 30, ease: 'none', repeat: -1 });
+ST.create({ trigger: piste, start: 'top bottom', end: 'bottom top', onUpdate: function (s) { tw.timeScale(1 + Math.min(5, Math.abs(s.getVelocity()) / 300)); g.to(tw, { timeScale: 1, duration: 1, overwrite: true }); } });
+}
+// Final
+document.querySelectorAll('.fils-deco path').forEach(function (p, i) {
+  var l = p.getTotalLength(); g.set(p, { strokeDasharray: l, strokeDashoffset: l });
+  g.to(p, { strokeDashoffset: 0, duration: 2, ease: 'power2.inOut', delay: i * 0.15, scrollTrigger: { trigger: '.final', start: 'top 70%' } });
+});
+g.from('.final h2, .final p, .final .bouton', { y: 40, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.12, scrollTrigger: { trigger: '.final', start: 'top 70%' } });
+dessinerFil();
+var t; window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(function () { dessinerFil(); ST.refresh(); }, 250); });
+}
+
+if (document.readyState === 'complete') animations();
+else window.addEventListener('load', animations);

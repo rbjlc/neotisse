@@ -51,45 +51,65 @@ export const pages = {
 	accueil: {
 		seo_titre: 'Ateliers textiles anciens à Montpellier',
 		seo_description: 'Ateliers textiles anciens et activités culturelles : filage, tissage et teinture végétale par des archéologues de Montpellier, pour musées et écoles.',
-		hero: {
+		entree: {
 			image: img('/images/table-demonstration-outils.webp', 'Ateliers textiles anciens : table de démonstration avec fuseaux, écheveaux teints et outils de tissage'),
-			titre: 'Neotisse',
-			accroche: 'Faire vivre les savoir-faire textiles du passé',
-			sous_titre: 'Ateliers textiles anciens, du Néolithique au Moyen Âge',
-			bouton1: btn('Demander un devis', '/contact/'),
-			bouton2: btn('Voir les ateliers', '/ateliers/'),
+			sur_titre: 'Archéologie textile · Montpellier',
+			titre: 'Faire vivre\nles savoir-faire\ndu passé',
+			mot_couleur: 'savoir-faire',
+			texte: 'Filage, tissage et teinture végétale, du Néolithique au Moyen Âge : des ateliers d’archéologues pour les musées, les sites et les écoles.',
+			bouton: btn('Découvrir les ateliers', '/ateliers/'),
 		},
-		presentation: {
-			photos: [
-				img('/images/bain-teinture-vegetale.webp', 'Bain de teinture végétale'),
-				img('/images/tissage-tablettes.webp', 'Tissage aux tablettes en cours'),
-				img('/images/enfant-tissage-carton.webp', 'Enfant tissant sur un carton'),
-				img('/images/echeveaux-teints.webp', 'Écheveaux de laine teints aux plantes'),
-				img('/images/atelier-plein-air.webp', 'Atelier de tissage en plein air avec le public'),
+		manifeste: {
+			libelle: 'L’association',
+			texte: 'Les textiles sont partout dans les sociétés anciennes, et presque invisibles dans les musées. Neotisse les fait',
+			suite: 'comprendre par le geste.',
+		},
+		principes: {
+			liste: [
+				{ titre: 'L’originalité', texte: 'Le filage, le tissage et la teinture végétale au premier plan, là où la médiation parle surtout de poterie ou de feu.' },
+				{ titre: 'La rigueur scientifique', texte: 'Chaque atelier s’appuie sur la recherche archéologique. L’expérimentation complète les connaissances, sans s’y substituer.' },
+				{ titre: 'La flexibilité', texte: 'Chaque intervention est pensée pour son lieu, son public et ses contraintes.' },
 			],
-			titre: 'Une association d’archéologues pour le patrimoine textile',
-			texte: '<p>Fondée à Montpellier en 2024, Neotisse conçoit des activités culturelles et des ateliers de médiation scientifique pour les musées, les sites patrimoniaux et les scolaires.</p><p>Manipuler les fibres, découvrir les outils, apprendre les gestes : nos ateliers associent archéologie, expérimentation et médiation, pour petits et grands.</p>',
-			bouton: btn('Notre démarche', '/qui-sommes-nous/'),
 		},
-		ateliers: {
-			titre: 'Nos ateliers textiles anciens',
-			bouton: btn('Voir les détails', '/ateliers/'),
-			photo: img('/images/panier-echeveaux.webp', 'Panier d’écheveaux teints'),
+		mots: {
+			ligne1: ['Filage', 'tissage', 'teinture végétale', 'fuseau', 'écheveau', 'métier à tisser'],
+			ligne2: ['Garance', 'gaude', 'Guède', 'Néolithique', 'Âge du Bronze', 'Moyen Âge'],
 		},
-		equipe: {
+		ateliers_bloc: {
+			libelle: 'Nos ateliers',
+			titre: 'Des gestes à vivre, du fil à l’étoffe',
+		},
+		citation: {
+			image: img('/images/atelier-plein-air.webp', 'Atelier de tissage en plein air avec le public'),
+			texte: 'Les savoir-faire textiles se comprennent pleinement quand on les met en pratique.',
+			source: 'La conviction à l’origine de Neotisse',
+		},
+		fondatrices: {
+			libelle: 'L’équipe',
 			titre: 'Entre recherche archéologique et pratique du geste',
-			texte: '<p><strong>Émilie Roma Sert</strong>, doctorante en archéologie spécialiste des systèmes de tissage, et <strong>Marie-Salomé Perrichon</strong>, égyptologue spécialiste du vocabulaire textile, se sont formées au tissage et à la teinture auprès de l’association La Couenne.</p>',
+			texte: 'Deux archéologues formées au tissage et à la teinture auprès de l’association La Couenne, qui ont fondé Neotisse à Montpellier en mai 2024.',
+			photo1: img('/images/bain-teinture-vegetale.webp', 'Bain de teinture végétale'),
+			photo2: img('/images/metier-a-tisser-vertical.webp', 'Métier à tisser vertical à poids'),
+			membres: [
+				{ nom: 'Émilie Roma Sert', role: 'Doctorante en archéologie, systèmes de tissage' },
+				{ nom: 'Marie-Salomé Perrichon', role: 'Égyptologue, vocabulaire textile' },
+			],
 			bouton: btn('Rencontrer l’équipe', '/qui-sommes-nous/'),
-			photo: img('/images/conference.webp', 'Conférence sur l’archéologie des textiles'),
 		},
-		confiance: {
-			titre: 'Ceux qui nous ont fait confiance',
-			texte: 'Musées, sites archéologiques et festivals ont accueilli nos ateliers et nos conférences.',
-			bouton: btn('Voir nos partenaires et leurs avis', '/livre-or/#partenaires'),
+		agenda: {
+			libelle: 'Prochaines dates',
+			titre: 'Où nous retrouver',
+			lien: btn('Tout le calendrier', '/calendrier/'),
+			vide: 'De nouvelles dates arrivent bientôt.',
 		},
-		cta,
+		appel: {
+			libelle: 'Musées, sites, écoles',
+			titre: 'Un atelier sur mesure ?',
+			mot_couleur: 'sur mesure',
+			texte: 'Chaque intervention s’adapte à votre public, à la durée souhaitée et à vos contraintes. Nous la concevons avec vous.',
+			bouton: btn('Parlez-nous de votre projet', '/contact/'),
+		},
 	},
-
 	'qui-sommes-nous': {
 		seo_titre: 'Savoir-faire textiles anciens : l’équipe Neotisse',
 		seo_description: 'Savoir-faire textiles anciens : association loi 1901 fondée à Montpellier en 2024 par deux archéologues, entre recherche, expérimentation et médiation.',
@@ -293,7 +313,7 @@ export const pages = {
 export const ateliers = [
 	{
 		id: 'a1', ordre: 1, publie: true,
-		titre: 'Filage, tissage et teinture végétale', slug: 'filage-tissage-et-teinture-vegetale',
+		titre: 'Filage, tissage et teinture végétale', slug: 'filage-tissage-et-teinture-vegetale', etiquette: 'Tous publics',
 		nom_court: 'Démonstratifs', resume: 'Filage, tissage et teinture végétale, en trois pôles modulables.',
 		surtitre: 'Atelier démonstratif · Tous publics',
 		image: img('/images/echeveaux-teints.webp', 'Écheveaux de laine teints aux plantes'),
@@ -304,7 +324,7 @@ export const ateliers = [
 	},
 	{
 		id: 'a2', ordre: 2, publie: true,
-		titre: 'Tissage aux tablettes', slug: 'tissage-aux-tablettes',
+		titre: 'Tissage aux tablettes', slug: 'tissage-aux-tablettes', etiquette: 'Participatif',
 		nom_court: 'Tissage aux tablettes', resume: 'Un atelier participatif : chacun repart avec son galon.',
 		surtitre: 'Atelier participatif',
 		image: img('/images/tissage-tablettes.webp', 'Tissage aux tablettes en cours'),
@@ -315,7 +335,7 @@ export const ateliers = [
 	},
 	{
 		id: 'a3', ordre: 3, publie: true,
-		titre: 'Découvrir le textile en expérimentant', slug: 'decouvrir-le-textile-en-experimentant',
+		titre: 'Découvrir le textile en expérimentant', slug: 'decouvrir-le-textile-en-experimentant', etiquette: 'Jeune public',
 		nom_court: 'Jeune public', resume: 'Tissage sur carton et teinture végétale.',
 		surtitre: 'Jeune public',
 		image: img('/images/enfant-tissage-carton.webp', 'Enfant tissant sur un carton'),
@@ -326,7 +346,7 @@ export const ateliers = [
 	},
 	{
 		id: 'a4', ordre: 4, publie: true,
-		titre: 'Expérimentation et conférences', slug: 'experimentation-et-conferences',
+		titre: 'Expérimentation et conférences', slug: 'experimentation-et-conferences', etiquette: 'Chercheurs',
 		nom_court: 'Recherche et conférences', resume: 'Pour les chercheurs, les étudiants et le grand public.',
 		surtitre: 'Chercheurs, institutions, étudiants',
 		image: img('/images/conference.webp', 'Conférence sur l’archéologie des textiles'),

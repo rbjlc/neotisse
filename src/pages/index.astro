@@ -1,91 +1,171 @@
 ---
+// Accueil (design v2) : grandes photos, sections vert forêt, fil teint mené par une aiguille.
 import Base from '../layouts/Base.astro';
-import Groupe from '../components/Groupe.astro';
-import Image from '../components/Image.astro';
-import Boutons from '../components/Boutons.astro';
-import CtaFinal from '../components/CtaFinal.astro';
-import Une from '../components/Une.astro';
-import Logos from '../components/Logos.astro';
-import { page, reglages, ateliers, actualites, partenaires, typo, insecables } from '../lib/site.js';
-import { affiche } from '../lib/html.js';
+import { page, reglages, ateliers, evenements, partenaires, categorie, typo, moisCourt, jourCourt } from '../lib/site.js';
+import { attrsImage } from '../lib/images.js';
 
-const [p, r, listeAteliers, actus, parts] = await Promise.all([page('accueil'), reglages(), ateliers(), actualites(), partenaires()]);
-const une = actus.find((a) => a.a_la_une) || actus[0];
-const h = p.hero;
-const ligne = (t) => insecables(typo(t));
+const [p, r, listeAteliers, dates, parts] = await Promise.all([page('accueil'), reglages(), ateliers(), evenements(), partenaires()]);
+const e = p.entree;
+const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/** Met en couleur (italique) un mot choisi dans le back-office. */
+const colorer = (texte, mot, balise = 'em') => {
+	const t = esc(typo(texte));
+	const m = esc(typo(mot || ''));
+	return m && t.includes(m) ? t.replace(m, `<${balise}>${m.replace(/-/g, '&#8209;')}</${balise}>`) : t;
+};
+const lignesTitre = String(e.titre || '').split(/\r?\n/).filter(Boolean);
+const num = (i) => String(i + 1).padStart(2, '0');
+const prochaines = dates.slice(0, 3);
+const jours = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+const infoDate = (ev) => {
+	if (ev.a_confirmer) return { jour: moisCourt(ev.date_debut), sous: `${ev.date_debut.slice(0, 4)} · à confirmer` };
+	const d = new Date(ev.date_debut + 'T12:00:00Z');
+	const plusieurs = ev.date_fin && ev.date_fin !== ev.date_debut;
+	return { jour: `${jourCourt(ev)} ${moisCourt(ev.date_debut)}`, sous: `${plusieurs ? 'Plusieurs jours' : jours[d.getUTCDay()]} · ${ev.date_debut.slice(0, 4)}` };
+};
+const COULEURS = { gaude: ['var(--gaude)', 'var(--encre)'], garance: ['var(--garance)', 'var(--lin)'], guede: ['var(--guede)', 'var(--lin)'], olive: ['var(--olive)', 'var(--lin)'] };
+const teinte = (cle) => COULEURS[categorie(r, cle).couleur] || COULEURS.olive;
+const pastilles = [['var(--gaude)', 'var(--encre)'], ['var(--garance)', 'var(--blanc)'], ['var(--guede)', 'var(--blanc)'], ['var(--olive-clair)', 'var(--encre)']];
+const pointsMots = ['var(--garance)', 'var(--gaude)', 'var(--guede)', 'var(--olive)'];
+const motsRepetes = (liste) => [...liste, ...liste, ...liste.slice(0, 3)];
 ---
-<Base titre={p.seo_titre} description={p.seo_description} image={h.image}>
-	<div class="contenu-page">
-		<Groupe classe="wrap hero-zone">
-			<Groupe classe="hero-cover">
-				<Image image={h.image} classe="hero-fond" priorite sizes="(max-width: 1340px) 100vw, 1340px" />
-				<Groupe classe="hero-texte">
-					<h1 class="wp-block-heading hero-nom">{h.titre}</h1>
-					{h.accroche && <p class="hero-accroche wp-block-paragraph" set:html={ligne(h.accroche)} />}
-					{h.sous_titre && <p class="hero-sous-titre wp-block-paragraph">{typo(h.sous_titre)}</p>}
-					<Boutons surPhoto liste={[h.bouton1, h.bouton2 && { ...h.bouton2, contour: true }]} />
-				</Groupe>
-			</Groupe>
-		</Groupe>
+<Base titre={p.seo_titre} description={p.seo_description} image={e.image} accueil>
+	<div id="haut" class="trame">
+		<svg class="fil" id="fil" aria-hidden="true"></svg>
 
-		<Groupe classe="sec">
-			<Groupe classe="wrap geste-duo">
-				<Groupe classe="collage collage-geste">
-					{p.presentation.photos.slice(0, 5).map((ph) => <Image image={ph} classe="collage-photo" />)}
-				</Groupe>
-				<Groupe classe="stack geste-texte">
-					<h2 class="wp-block-heading h2">{typo(p.presentation.titre)}</h2>
-					<Fragment set:html={affiche(p.presentation.texte, { savoirFaire: true }).replace(/<p>/g, '<p class="wp-block-paragraph">')} />
-					<Boutons liste={[p.presentation.bouton]} />
-				</Groupe>
-			</Groupe>
-		</Groupe>
-
-		<Groupe classe="ateliers-duo">
-			<Groupe classe="ateliers-sombre">
-				<Groupe classe="sombre-contenu stack">
-					<h2 class="wp-block-heading h2">{typo(p.ateliers.titre)}</h2>
-					<div class="neo-liste neo-liste-ateliers-sombre">
-						<ul class="ateliers-liste" role="list">
-							{listeAteliers.map((a) => (
-								<li><a href={`/ateliers/#atelier-${a.slug}`}><span class="al-titre">{typo(a.nom_court || a.titre)}</span><span class="al-texte">{typo(a.resume)}</span></a></li>
-							))}
-						</ul>
+		<section class="hero" aria-label="Présentation">
+			<div class="media">{e.image?.src && <img id="hero-img" src={e.image.src} {...attrsImage(e.image.src, '100vw')} alt={e.image.alt || ''} fetchpriority="high" />}</div>
+			<div class="contenu env">
+				<div class="l">
+					<div>
+						{e.sur_titre && <p class="libelle trait apparait" style="color:var(--gaude);margin-bottom:22px">{e.sur_titre}</p>}
+						<h1>{lignesTitre.map((ligne) => <span class="ligne"><span set:html={colorer(ligne, e.mot_couleur)} /></span>)}</h1>
 					</div>
-					<Boutons surPhoto liste={[p.ateliers.bouton && { ...p.ateliers.bouton, contour: true }]} />
-				</Groupe>
-			</Groupe>
-			<Image image={p.ateliers.photo} classe="ateliers-photo" />
-		</Groupe>
+					<div class="cote apparait">
+						{e.texte && <p>{typo(e.texte)}</p>}
+						{e.bouton?.texte && <a class="bouton clair" href={e.bouton.lien} data-page={e.bouton.texte}>{e.bouton.texte} <span class="f" aria-hidden="true">→</span></a>}
+					</div>
+				</div>
+			</div>
+			<div class="defiler" aria-hidden="true">Défiler<i></i></div>
+		</section>
 
-		<Groupe classe="band-olive sec">
-			<Groupe classe="wrap duo">
-				<Groupe classe="stack">
-					<h2 class="wp-block-heading h2">{typo(p.equipe.titre)}</h2>
-					<Fragment set:html={affiche(p.equipe.texte).replace(/<p>/g, '<p class="wp-block-paragraph">')} />
-					<Boutons surPhoto liste={[p.equipe.bouton && { ...p.equipe.bouton, contour: true }]} />
-				</Groupe>
-				<Image image={p.equipe.photo} classe="fondatrices-photo" />
-			</Groupe>
-		</Groupe>
+		<section class="manifeste env" aria-labelledby="t-manifeste">
+			<div class="l">
+				<p class="libelle" id="t-manifeste">{p.manifeste.libelle}</p>
+				<p class="grand" id="manifeste">{typo(p.manifeste.texte)} {p.manifeste.suite && <em>{typo(p.manifeste.suite)}</em>}</p>
+			</div>
+		</section>
 
-		{une && (
-			<Groupe classe="sec une-zone">
-				<Groupe classe="wrap">
-					<div class="neo-liste neo-liste-une"><Une actu={une} r={r} accueil /></div>
-				</Groupe>
-			</Groupe>
+		{p.principes.liste.length > 0 && (
+			<section class="principes env" aria-label="Nos principes">
+				<div class="l grille">
+					{p.principes.liste.map((x, i) => (
+						<div class="principe"><p class="n" aria-hidden="true">{num(i)}</p><h2 style="font-size:clamp(24px,2.4vw,32px);margin:18px 0 12px">{typo(x.titre)}</h2><p>{typo(x.texte)}</p></div>
+					))}
+				</div>
+			</section>
 		)}
 
-		<Groupe classe="band-laine sec confiance">
-			<Groupe classe="wrap stack center">
-				<h2 class="wp-block-heading h2">{typo(p.confiance.titre)}</h2>
-				{p.confiance.texte && <p class="lead wp-block-paragraph">{typo(p.confiance.texte)}</p>}
-				<div class="neo-liste neo-liste-partenaires-bandeau"><Logos partenaires={parts} /></div>
-				<Boutons liste={[p.confiance.bouton && { ...p.confiance.bouton, contour: true }]} />
-			</Groupe>
-		</Groupe>
+		{(p.mots.ligne1.length > 0 || p.mots.ligne2.length > 0) && (
+			<section class="mots" aria-label={[...p.mots.ligne1, ...p.mots.ligne2].join(', ')}>
+				{p.mots.ligne1.length > 0 && <div class="rang" id="rang-1" aria-hidden="true">{motsRepetes(p.mots.ligne1).map((m, i) => <span class:list={{ it: i % 2 === 1 }} style={`--c:${pointsMots[i % 4]}`}>{m}</span>)}</div>}
+				{p.mots.ligne2.length > 0 && <div class="rang creux" id="rang-2" aria-hidden="true">{motsRepetes(p.mots.ligne2).map((m, i) => <span class:list={{ it: i % 2 === 1 }} style={`--c:${pointsMots[(i + 2) % 4]}`}>{m}</span>)}</div>}
+			</section>
+		)}
 
-		<CtaFinal cta={p.cta} />
+		<section class="ateliers" aria-labelledby="t-ateliers">
+			<div class="env"><div class="l entete">
+				<div><p class="libelle trait">{p.ateliers_bloc.libelle}</p><h2 id="t-ateliers" style="margin-top:18px">{typo(p.ateliers_bloc.titre)}</h2></div>
+				<p class="glisser" aria-hidden="true">Glisser <span>⟷</span></p>
+			</div></div>
+			<div class="carrousel" id="carrousel" tabindex="0" aria-label="Ateliers : faire glisser, ou utiliser les flèches gauche et droite du clavier">
+				{listeAteliers.map((a, i) => (
+					<article class="carte" style={`--c:${pastilles[i % 4][0]};--cf:${pastilles[i % 4][1]}`}>
+						<div class="img">
+							{a.image?.src && <img src={a.image.src} {...attrsImage(a.image.src, '420px')} alt={a.image.alt || ''} loading="lazy" draggable="false" />}
+							{a.etiquette && <span class="pastille">{a.etiquette}</span>}
+						</div>
+						<h3>{typo(a.titre)}</h3>
+						{a.resume && <p>{typo(a.resume)}</p>}
+						<a class="lien" href={`/ateliers/#atelier-${a.slug}`} data-page="Ateliers" draggable="false">En savoir plus<span class="sr"> : {a.titre}</span> →</a>
+					</article>
+				))}
+			</div>
+			<div class="env"><div class="l"><div class="progression" aria-hidden="true"><span id="progression"></span></div></div></div>
+		</section>
+
+		{p.citation.texte && (
+			<section class="respiration" aria-label="Notre conviction">
+				{p.citation.image?.src && <img id="respiration-img" src={p.citation.image.src} {...attrsImage(p.citation.image.src, '100vw')} alt={p.citation.image.alt || ''} loading="lazy" />}
+				<div class="legende env"><div class="l">
+					<blockquote>« {typo(p.citation.texte).replace(/^«\s*|\s*»$/g, '')} »</blockquote>
+					{p.citation.source && <cite>{p.citation.source}</cite>}
+				</div></div>
+			</section>
+		)}
+
+		<section class="equipe env" aria-labelledby="t-equipe">
+			<div class="l">
+				<div class="photos">
+					{p.fondatrices.photo1?.src && <div class="a"><img data-vitesse="-8" src={p.fondatrices.photo1.src} {...attrsImage(p.fondatrices.photo1.src, '40vw')} alt={p.fondatrices.photo1.alt || ''} loading="lazy" /></div>}
+					{p.fondatrices.photo2?.src && <div class="b"><img data-vitesse="8" src={p.fondatrices.photo2.src} {...attrsImage(p.fondatrices.photo2.src, '30vw')} alt={p.fondatrices.photo2.alt || ''} loading="lazy" /></div>}
+				</div>
+				<div>
+					<p class="libelle trait">{p.fondatrices.libelle}</p>
+					<h2 id="t-equipe">{typo(p.fondatrices.titre)}</h2>
+					{p.fondatrices.texte && <p>{typo(p.fondatrices.texte)}</p>}
+					{p.fondatrices.membres.length > 0 && (
+						<div class="noms">{p.fondatrices.membres.map((m) => <div><strong>{m.nom}</strong><span>{typo(m.role)}</span></div>)}</div>
+					)}
+					{p.fondatrices.bouton?.texte && <a class="lien" href={p.fondatrices.bouton.lien} data-page={p.fondatrices.bouton.texte}>{p.fondatrices.bouton.texte} →</a>}
+				</div>
+			</div>
+		</section>
+
+		<section class="agenda env" aria-labelledby="t-agenda">
+			<div class="l">
+				<div class="entete">
+					<div><p class="libelle trait">{p.agenda.libelle}</p><h2 id="t-agenda" style="margin-top:16px">{typo(p.agenda.titre)}</h2></div>
+					{p.agenda.lien?.texte && <a class="lien" href={p.agenda.lien.lien} data-page="Calendrier">{p.agenda.lien.texte} →</a>}
+				</div>
+				{prochaines.length === 0 ? <p style="color:var(--fusain)">{typo(p.agenda.vide)}</p> : (
+					<ul class="dates">
+						{prochaines.map((ev) => {
+							const [c, cf] = teinte(ev.categorie);
+							const d = infoDate(ev);
+							return (
+								<li style={`--c:${c};--cf:${cf}`}>
+									<p class="jour">{d.jour}<small>{d.sous}</small></p>
+									<div><h3>{typo(ev.titre)}</h3><p class="lieu">{typo(ev.lieu || 'Lieu à confirmer')}</p></div>
+									<span class="tag">{categorie(r, ev.categorie).nom}</span>
+								</li>
+							);
+						})}
+					</ul>
+				)}
+			</div>
+		</section>
+
+		{parts.length > 0 && (
+			<section class="partenaires" aria-label={`Ils nous ont accueillies : ${parts.map((x) => x.nom).join(', ')}`}>
+				<div class="piste" id="piste-partenaires" aria-hidden="true">{[...parts, ...parts, ...parts, ...parts].map((x) => <span>{x.nom}</span>)}</div>
+			</section>
+		)}
+
+		<section class="final env" id="contact-rapide" aria-labelledby="t-final">
+			<svg class="fils-deco" viewBox="0 0 1200 240" preserveAspectRatio="none" aria-hidden="true">
+				<path d="M0 120 C 200 20, 400 220, 600 120 S 1000 20, 1200 120" stroke="#E8B42F" stroke-width="2" fill="none"></path>
+				<path d="M0 132 C 200 40, 400 230, 600 132 S 1000 40, 1200 132" stroke="#A8321F" stroke-width="2" fill="none"></path>
+				<path d="M0 108 C 200 0, 400 210, 600 108 S 1000 0, 1200 108" stroke="#2E5A8A" stroke-width="2" fill="none"></path>
+			</svg>
+			<div class="l" style="position:relative">
+				{p.appel.libelle && <p class="libelle" style="color:var(--gaude)">{p.appel.libelle}</p>}
+				<h2 id="t-final" style="margin-top:20px" set:html={colorer(p.appel.titre, p.appel.mot_couleur)} />
+				{p.appel.texte && <p>{typo(p.appel.texte)}</p>}
+				{p.appel.bouton?.texte && <a class="bouton" href={p.appel.bouton.lien} data-page="Contact">{p.appel.bouton.texte} <span class="f" aria-hidden="true">→</span></a>}
+			</div>
+		</section>
 	</div>
+	<script>import '../scripts/accueil.js';</script>
 </Base>
