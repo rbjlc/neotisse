@@ -1,0 +1,1054 @@
+/* Neotisse : design du site (repris du thème WordPress). */
+/* Polices hébergées sur le site (pas d'appel à Google Fonts : conforme RGPD) */
+@font-face{font-family:'Fraunces';font-style:normal;font-weight:300;font-display:swap;src:url(/fonts/fraunces-latin-300-normal.woff2) format('woff2')}
+@font-face{font-family:'Fraunces';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fraunces-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Fraunces';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/fraunces-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Atkinson Hyperlegible Next';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/atkinson-hyperlegible-next-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Atkinson Hyperlegible Next';font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/atkinson-hyperlegible-next-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Atkinson Hyperlegible Next';font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/atkinson-hyperlegible-next-latin-700-normal.woff2) format('woff2')}
+
+/* Layout : site éditorial clair, une colonne aérée par page, bandeau « galon » tissé aux couleurs des teintures sous l'en-tête */
+:root{
+  color-scheme: light;
+  --lin:#F6F2EA; --creme:#FAF6EE; --laine:#EDE4D6; --trait:#DDD5C8;
+  --olive:#4F5233; --olive-clair:#E9E6D6;
+  --encre:#2D2832; --fusain:#55505C;
+  --garance:#A8321F; --garance-fonce:#8C2918;
+  --gaude:#E8B42F; --guede:#2E5A8A;
+  --blanc:#FFFFFF;
+  --f-titre:'Fraunces', Georgia, 'Times New Roman', serif;
+  --f-texte:'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mesure: 36rem;
+}
+*{box-sizing:border-box}
+body{background:var(--lin);color:var(--encre);font-family:var(--f-texte);font-size:18px;line-height:1.65}
+h1,h2,h3{font-family:var(--f-titre);font-weight:300;line-height:1.15;margin:0;text-wrap:balance;color:var(--encre)}
+p{margin:0}
+a{color:var(--encre)}
+:focus-visible{outline:3px solid var(--guede);outline-offset:3px}
+img{max-width:100%;display:block}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.eyebrow{font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--olive)}
+.lead{font-size:20px;color:var(--fusain);max-width:var(--mesure)}
+.photo{width:100%;height:100%;object-fit:cover;filter:saturate(.85) sepia(.06)}
+
+/* Boutons : garance = action principale, olive = secondaire */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;font:600 15px/1 var(--f-texte);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;border:2px solid transparent;cursor:pointer;transition:background-color .2s, color .2s, transform .2s}
+.btn-main{background:var(--garance);color:var(--blanc)}
+.btn-main:hover{background:var(--garance-fonce)}
+.btn-sec{background:transparent;color:var(--olive);border-color:var(--olive)}
+.btn-sec:hover{background:var(--olive);color:var(--blanc)}
+.btn-clair{background:var(--creme);color:var(--encre)}
+.btn-clair:hover{background:var(--blanc)}
+.btns{display:flex;flex-wrap:wrap;gap:12px}
+
+/* Étiquettes de type d'événement : couleur + mot */
+.tag{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--encre)}
+.tag::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--c, var(--olive));flex:none}
+.t-atelier{--c:var(--gaude)} .t-colloque{--c:var(--guede)} .t-festival{--c:var(--garance)} .t-cafe{--c:var(--olive)}
+.new{display:inline-block;background:var(--gaude);color:var(--encre);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px}
+
+/* En-tête */
+header.site{background:var(--creme);border-bottom:1px solid var(--trait)}
+.hdr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px;padding-block:20px}
+.logo{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--olive)}
+.logo img{height:48px;width:auto}
+.logo span{font-family:var(--f-titre);font-weight:400;font-size:28px;letter-spacing:.16em}
+nav.main{display:flex;flex-wrap:wrap;align-items:center;gap:4px 26px}
+nav.main ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 26px}
+nav.main a{font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:12px 0;border-bottom:2px solid transparent}
+nav.main a[aria-current="page"],nav.main .current-menu-item > a,nav.main .current_page_parent > a{border-bottom-color:var(--olive);color:var(--olive)}
+nav.main a.btn{padding:0 20px;border:0}
+nav.main a.btn[aria-current="page"]{background:var(--garance-fonce);color:var(--blanc)}
+
+/* Galon : bande tissée aux couleurs des teintures */
+.galon{height:14px;background:
+  repeating-linear-gradient(135deg, transparent 0 6px, rgba(0,0,0,.08) 6px 7px),
+  linear-gradient(90deg, var(--olive) 0 46%, var(--garance) 46% 64%, var(--gaude) 64% 82%, var(--guede) 82% 100%)}
+
+/* Pages */
+main{min-height:60vh}
+main#contenu{animation:entre .5s ease}
+@keyframes entre{from{transform:translateY(10px);opacity:.35}to{transform:none;opacity:1}}
+.sec{padding-block:72px}
+.sec-tight{padding-block:48px}
+.band-olive{background:var(--olive);color:var(--creme)}
+.band-olive h2,.band-olive h3{color:var(--creme)}
+.band-olive .eyebrow{color:var(--olive-clair)}
+.band-olive p{color:var(--olive-clair)}
+.band-laine{background:var(--laine)}
+.band-creme{background:var(--creme)}
+.stack{display:flex;flex-direction:column;gap:20px}
+.center{text-align:center;align-items:center}
+.center .lead{margin-inline:auto}
+
+/* Accueil */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;padding-block:64px 72px}
+.hero h1{font-size:clamp(3rem, 2rem + 4.5vw, 5.6rem);letter-spacing:.12em;color:var(--olive);font-weight:400}
+.hero .accroche{font-family:var(--f-titre);font-size:clamp(1.6rem,1.2rem + 1.4vw,2.3rem);line-height:1.2;color:var(--encre)}
+.hero .periode{font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--fusain)}
+.hero-img{aspect-ratio:4/5;max-height:620px;overflow:hidden;max-width:100%}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.split > *{min-width:0}
+.img-box{aspect-ratio:4/3;overflow:hidden;max-width:100%}
+.img-tall{aspect-ratio:3/4}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.card{background:var(--creme);display:flex;flex-direction:column;text-decoration:none;color:inherit;border:1px solid var(--trait);transition:transform .25s, box-shadow .25s}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(45,40,50,.08)}
+.card .img-box{aspect-ratio:1/1}
+.card-body{padding:20px 20px 24px;display:flex;flex-direction:column;gap:8px}
+.card h3{font-size:22px;font-weight:400}
+.card p{font-size:16px;color:var(--fusain)}
+.une{display:grid;grid-template-columns:1fr 1.2fr;gap:0;background:var(--creme);border:1px solid var(--trait)}
+.une > *{min-width:0}
+.une .txt{padding:40px;display:flex;flex-direction:column;gap:16px;justify-content:center}
+.une h3{font-size:clamp(1.6rem,1.3rem + 1vw,2.1rem)}
+.une .img-box{aspect-ratio:4/3;height:auto}
+
+/* Qui sommes-nous */
+.principes{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.principe{border-top:2px solid var(--olive);padding-top:20px;display:flex;flex-direction:column;gap:10px}
+.principe h3{font-size:24px;font-weight:400}
+.principe p{font-size:17px;color:var(--fusain)}
+.citation{font-family:var(--f-titre);font-size:clamp(1.5rem,1.2rem + 1.2vw,2.2rem);line-height:1.3;max-width:34em;font-weight:300}
+.equipe{display:grid;grid-template-columns:repeat(2,1fr);gap:40px}
+.membre{display:grid;grid-template-columns:160px 1fr;gap:24px;align-items:start}
+.membre > *{min-width:0}
+.portrait{aspect-ratio:3/4;background:var(--laine) repeating-linear-gradient(0deg, rgba(45,40,50,.05) 0 1px, transparent 1px 3px);display:flex;align-items:center;justify-content:center;font-family:var(--f-titre);font-size:40px;color:var(--olive);border:1px solid var(--trait)}
+.membre h3{font-size:24px;font-weight:400}
+.membre .role{font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--olive)}
+.membre p{font-size:16px;color:var(--fusain)}
+.benevoles{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.benevole{background:var(--creme);border:1px solid var(--trait);padding:24px;display:flex;flex-direction:column;gap:6px}
+.benevole h3{font-size:22px;font-weight:400}
+.benevole p{font-size:16px;color:var(--fusain)}
+
+/* Ateliers */
+.onglets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.onglets a{font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:10px 16px;border:1px solid var(--trait);background:var(--creme)}
+.onglets a:hover{border-color:var(--olive)}
+.atelier{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding-block:56px;border-top:1px solid var(--trait)}
+.atelier > *{min-width:0}
+.atelier.inv .img-box{order:2}
+.atelier h2{font-size:clamp(1.9rem,1.5rem + 1.2vw,2.6rem)}
+.poles{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.poles li{display:grid;grid-template-columns:36px 1fr;gap:8px;font-size:17px}
+.poles b{font-family:var(--f-titre);font-weight:400;color:var(--olive);font-size:20px}
+.repart{font-weight:600;color:var(--olive)}
+
+/* Calendrier */
+.filtres{display:flex;flex-wrap:wrap;gap:8px}
+.filtre{font:600 14px/1 var(--f-texte);letter-spacing:.06em;text-transform:uppercase;padding:12px 16px;border:1px solid var(--trait);background:var(--creme);color:var(--encre);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.filtre[aria-pressed="true"]{background:var(--olive);color:var(--blanc);border-color:var(--olive)}
+.filtre .dot{width:10px;height:10px;border-radius:50%;background:var(--c, var(--fusain))}
+.mois{font-family:var(--f-titre);font-size:28px;font-weight:300;padding-top:32px;padding-bottom:8px;border-bottom:1px solid var(--trait);color:var(--olive)}
+.evt{display:grid;grid-template-columns:88px 1fr auto;gap:24px;align-items:center;padding-block:22px;border-bottom:1px solid var(--trait)}
+.evt > *{min-width:0}
+.date{text-align:center;border:1px solid var(--trait);background:var(--creme);padding:10px 4px}
+.date .j{display:block;font-family:var(--f-titre);font-size:30px;line-height:1;color:var(--encre)}
+.date .d{display:block;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--fusain);margin-top:4px}
+.evt h3{font-size:22px;font-weight:400;margin-top:6px}
+.evt .lieu{font-size:16px;color:var(--fusain)}
+.reperes{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:14px;color:var(--fusain)}
+.reperes span{border:1px solid var(--trait);padding:2px 8px;background:var(--creme)}
+.note-demo{font-size:15px;color:var(--fusain);background:var(--creme);border:1px dashed var(--trait);padding:10px 14px}
+.legende{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.legende div{display:flex;flex-direction:column;gap:6px;font-size:15px;color:var(--fusain)}
+
+/* Actualités */
+.articles{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.article{background:var(--creme);border:1px solid var(--trait);display:flex;flex-direction:column}
+.article .img-box{aspect-ratio:3/2}
+.article .card-body{gap:10px}
+.article h3{font-size:22px;font-weight:400}
+.article p{font-size:16px;color:var(--fusain)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px;color:var(--fusain)}
+
+/* Partenaires */
+.partenaires{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.partenaire{background:var(--creme);border:1px solid var(--trait);padding:24px;display:flex;flex-direction:column;gap:12px}
+.partenaire .lg{height:72px;background:var(--laine);display:flex;align-items:center;justify-content:center;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--fusain)}
+.partenaire h3{font-size:19px;font-weight:400}
+.partenaire p{font-size:15px;color:var(--fusain)}
+.collab{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+
+/* Livre d'or */
+.avis{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.avis blockquote{margin:0;background:var(--creme);border:1px solid var(--trait);padding:28px;display:flex;flex-direction:column;gap:14px}
+.avis blockquote p{font-family:var(--f-titre);font-size:20px;line-height:1.4;font-weight:300}
+.avis cite{font-style:normal;font-size:15px;color:var(--fusain)}
+.exemple{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--fusain);border:1px solid var(--trait);padding:2px 8px;align-self:flex-start}
+
+/* Formulaires */
+form{display:flex;flex-direction:column;gap:20px}
+.champs{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.champ{display:flex;flex-direction:column;gap:6px;min-width:0}
+.champ.plein{grid-column:1 / -1}
+label,.legend{font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.opt{font-weight:400;text-transform:none;letter-spacing:0;color:var(--fusain)}
+input[type=text],input[type=email],select,textarea{font:17px/1.4 var(--f-texte);color:var(--encre);background:var(--blanc);border:1px solid #B9B1A3;padding:12px 14px;width:100%}
+textarea{min-height:140px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:3px solid var(--guede);outline-offset:1px}
+fieldset{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.choix{display:flex;flex-wrap:wrap;gap:8px}
+.choix label{text-transform:none;letter-spacing:0;font-weight:400;font-size:16px;display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--trait);background:var(--creme);cursor:pointer}
+.choix input{accent-color:var(--olive);width:18px;height:18px}
+.choix label:has(input:checked){border-color:var(--olive);background:var(--olive-clair)}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--fusain)}
+.consent input{accent-color:var(--olive);width:20px;height:20px;margin-top:3px;flex:none}
+.retour{background:var(--olive-clair);border-left:4px solid var(--olive);padding:14px 16px;font-size:16px}
+.contact-grid{display:grid;grid-template-columns:1.4fr .8fr;gap:56px;align-items:start}
+.contact-grid > *{min-width:0}
+.aside{display:flex;flex-direction:column;gap:28px}
+.boite{background:var(--creme);border:1px solid var(--trait);padding:28px;display:flex;flex-direction:column;gap:12px}
+.mail{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.mail code{font-family:var(--f-texte);font-size:18px;font-weight:600;user-select:all;color:var(--olive);overflow-wrap:anywhere}
+.copier{font:600 13px/1 var(--f-texte);letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;border:1px solid var(--olive);background:transparent;color:var(--olive);cursor:pointer}
+.etapes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:e}
+.etapes li{display:grid;grid-template-columns:32px 1fr;gap:8px;font-size:16px;counter-increment:e}
+.etapes li::before{content:counter(e);font-family:var(--f-titre);font-size:22px;color:var(--olive);line-height:1.2}
+
+/* Pied de page */
+footer.site{background:var(--olive);color:var(--olive-clair);padding-block:56px 32px}
+.ftr{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px}
+.ftr > *{min-width:0}
+.ftr .nom{font-family:var(--f-titre);font-size:28px;letter-spacing:.16em;color:var(--creme)}
+.ftr p{font-size:16px}
+.ftr a{color:var(--creme);text-decoration:none;font-size:16px}
+.ftr a:hover{text-decoration:underline}
+.ftr ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ftr .mention{grid-column:1 / -1;border-top:1px solid rgba(250,246,238,.25);padding-top:20px;font-size:14px}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);background:var(--encre);color:var(--creme);padding:12px 18px;font-size:15px;max-width:calc(100% - 32px);z-index:20}
+
+@media (max-width: 980px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .partenaires{grid-template-columns:repeat(2,1fr)}
+  .legende{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width: 820px){
+  .hero,.split,.atelier,.une,.contact-grid{grid-template-columns:1fr;gap:32px}
+  .atelier.inv .img-box{order:0}
+  .hero-img{aspect-ratio:4/3}
+  .principes,.articles,.avis,.collab,.equipe,.benevoles{grid-template-columns:1fr}
+  .ftr{grid-template-columns:1fr}
+  .sec{padding-block:56px}
+  .une .txt{padding:28px}
+}
+@media (max-width: 560px){
+  body{font-size:17px}
+  .cards,.partenaires,.legende,.champs{grid-template-columns:1fr}
+  .membre{grid-template-columns:1fr}
+  .membre .portrait{max-width:200px}
+  .evt{grid-template-columns:72px 1fr}
+  .evt .btn{grid-column:1 / -1;justify-self:start}
+  nav.main{gap:0 16px}
+  nav.main a{font-size:13px;padding:10px 0}
+  .hdr{padding-block:14px}
+  .logo span{font-size:24px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---------- Spécifique WordPress ---------- */
+body{margin:0;-webkit-font-smoothing:antialiased}
+.screen-reader-text{border:0;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute!important;width:1px;word-wrap:normal!important}
+.skip-link:focus{clip:auto;clip-path:none;height:auto;width:auto;margin:0;left:12px;top:12px;z-index:100000;background:var(--creme);color:var(--encre);padding:12px 18px;font-weight:600}
+.page-hero{padding-block:72px 40px}
+.page-hero h1{font-size:clamp(2.2rem,1.6rem + 2.4vw,3.5rem)}
+.h2{font-size:clamp(1.8rem,1.4rem + 1.2vw,2.5rem)}
+
+/* Contenu éditable des pages (éditeur de blocs) */
+.prose{max-width:46rem;margin:0 auto;padding-block:16px 72px;display:flex;flex-direction:column;gap:20px}
+.prose > *{margin:0}
+.prose h2{font-size:clamp(1.7rem,1.35rem + 1.1vw,2.3rem);margin-top:28px}
+.prose h3{font-size:24px;font-weight:400;margin-top:12px}
+.prose ul,.prose ol{padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.prose a{color:var(--olive);text-underline-offset:3px}
+.prose blockquote,.prose .wp-block-quote{border-left:3px solid var(--olive);padding:4px 0 4px 24px;margin:12px 0}
+.prose blockquote p,.prose .wp-block-quote p{font-family:var(--f-titre);font-size:clamp(1.4rem,1.15rem + .9vw,1.9rem);line-height:1.3;font-weight:300}
+.prose .wp-block-pullquote{border-top:2px solid var(--olive);border-bottom:2px solid var(--olive);padding:28px 0;text-align:center}
+.prose .wp-block-pullquote p{font-family:var(--f-titre);font-size:clamp(1.4rem,1.15rem + .9vw,1.9rem);line-height:1.3;font-weight:300}
+.prose .wp-block-columns{display:flex;flex-wrap:wrap;gap:32px}
+.prose .wp-block-column{flex:1 1 220px;min-width:0}
+.prose .is-style-principe,.prose .principe-col{border-top:2px solid var(--olive);padding-top:18px;display:flex;flex-direction:column;gap:8px}
+.prose .wp-block-image img{width:100%;height:auto}
+.prose figcaption{font-size:14px;color:var(--fusain);margin-top:8px}
+.prose .wp-block-separator{border:0;border-top:1px solid var(--trait);width:100%}
+.prose .eyebrow{margin-top:28px}
+.prose .wp-block-button__link{display:inline-flex;align-items:center;min-height:48px;padding:0 24px;background:var(--garance);color:var(--blanc);font:600 15px/1 var(--f-texte);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;border-radius:0}
+.alignwide{max-width:min(1100px, 100%)}
+
+/* Menus */
+nav.main li{margin:0}
+nav.main .menu-cta{margin-left:4px}
+.ftr ul ul{display:none}
+
+/* Exemples (contenus de départ à remplacer) */
+.exemple-chip{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--fusain);border:1px dashed var(--fusain);padding:2px 8px;margin-left:8px;vertical-align:middle}
+
+/* Article seul */
+.single-wrap{max-width:46rem;margin:0 auto;padding-block:64px 80px;display:flex;flex-direction:column;gap:24px}
+.single-wrap h1{font-size:clamp(2rem,1.5rem + 2vw,3.1rem)}
+.single-wrap .img-box{aspect-ratio:3/2}
+.retour-lien{font-size:15px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--olive);text-decoration:none}
+.retour-lien:hover{text-decoration:underline}
+.pagination{display:flex;gap:8px;justify-content:center;padding-block:32px}
+.pagination .page-numbers{padding:10px 14px;border:1px solid var(--trait);background:var(--creme);text-decoration:none}
+.pagination .current{background:var(--olive);color:var(--blanc);border-color:var(--olive)}
+.vide{padding:32px;border:1px dashed var(--trait);background:var(--creme);color:var(--fusain);text-align:center}
+.article a.lien-carte{text-decoration:none;color:inherit}
+.article a.lien-carte:hover h3{text-decoration:underline;text-underline-offset:3px}
+
+/* Livre d'or : commentaires WordPress */
+.avis .comment-body{display:contents}
+.retour.erreur{background:#F6E3DF;border-left-color:var(--garance)}
+.hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+/* Barre d'admin */
+.admin-bar .toast{bottom:24px}
+[hidden]{display:none!important}
+[aria-invalid="true"]{border-color:var(--garance)!important;outline:2px solid var(--garance);outline-offset:1px}
+img{height:auto}
+.photo{height:100%}
+.consent{text-transform:none;letter-spacing:0;font-weight:400;font-size:15px}
+.consent a{color:var(--olive)}
+@media (max-width: 560px){
+  .evt > .btns{grid-column:1 / -1}
+  .evt .btn{white-space:nowrap}
+}
+
+/* ---------- Bandeau cookies ---------- */
+.cookies-fond{position:fixed;inset:0;z-index:49;background:rgba(45,40,50,.45)}
+html.cookies-ouvert{overflow:hidden}
+.cookies{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50;width:min(480px, calc(100% - 32px));max-height:calc(100% - 32px);overflow-y:auto;background:var(--creme);color:var(--encre);border:1px solid var(--trait);border-top:4px solid var(--olive);box-shadow:0 12px 32px rgba(45,40,50,.18);padding:22px 22px 20px;display:flex;flex-direction:column;gap:12px;font-size:16px;line-height:1.5}
+.cookies-titre{font-family:var(--f-titre);font-size:24px;font-weight:400}
+@media (prefers-reduced-motion: no-preference){.cookies:not([hidden]){animation:cookies-entre .3s ease}}
+@keyframes cookies-entre{from{opacity:0;transform:translate(-50%,-46%)}to{opacity:1;transform:translate(-50%,-50%)}}
+.cookies-texte a{color:var(--olive);font-weight:600;text-underline-offset:3px}
+.cookies-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cookies-btn{flex:1 1 140px;min-height:44px;font-size:14px;background:var(--olive);color:var(--blanc)}
+.cookies-btn:hover{background:var(--encre)}
+.cookies-lien,.lien-cookies{background:none;border:0;padding:8px 0;font:600 14px/1 var(--f-texte);color:var(--olive);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.lien-cookies{color:inherit;font-weight:400;padding:0;font-size:inherit}
+.cookies-details{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--trait);padding-top:12px}
+.cookies-ligne{display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:14px;color:var(--fusain)}
+.cookies-cat{font-weight:700;color:var(--encre);font-size:15px}
+.cookies-cat label{text-transform:none;letter-spacing:0;font-size:15px}
+.cookies-toujours{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--olive);white-space:nowrap}
+.cookies-switch{appearance:none;-webkit-appearance:none;width:46px;height:26px;border-radius:13px;background:#B9B1A3;position:relative;cursor:pointer;flex:none;transition:background .2s}
+.cookies-switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--blanc);transition:transform .2s}
+.cookies-switch:checked{background:var(--olive)}
+.cookies-switch:checked::after{transform:translateX(20px)}
+.prose .wp-block-table{overflow-x:auto}
+.prose table{border-collapse:collapse;width:100%;font-size:16px}
+.prose th,.prose td{border:1px solid var(--trait);padding:10px 12px;text-align:left;vertical-align:top}
+.prose th{background:var(--laine);font-weight:600}
+.prose > .btn,.prose p > .btn{align-self:flex-start}
+.cookies-btn{letter-spacing:.04em}
+
+/* ---------- Pages en blocs ---------- */
+.contenu-page{display:flex;flex-direction:column}
+.contenu-page :where(.wp-block-group, .wp-block-buttons) > *{margin-block:0}
+.contenu-page :where(figure){margin:0}
+.contenu-page .wp-block-group.wrap{width:100%}
+.contenu-page .stack > *{margin:0}
+.sec-bas{padding-bottom:72px}
+.etroit{max-width:780px}
+.page-photo{max-width:1100px;padding-bottom:40px}
+.page-photo .img-box{aspect-ratio:21/9}
+.note{color:var(--fusain)}
+.note a{color:var(--olive);font-weight:600;text-underline-offset:3px}
+.wp-block-image.hero-img,.wp-block-image.img-box{overflow:hidden;max-width:100%}
+.wp-block-image.hero-img img,.wp-block-image.img-box img{width:100%;height:100%;object-fit:cover;filter:saturate(.85) sepia(.06);display:block}
+.wp-block-buttons.btns{display:flex;flex-wrap:wrap;gap:12px}
+.center .wp-block-buttons{justify-content:center}
+.wp-block-button{margin:0}
+.wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;font:600 15px/1 var(--f-texte);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;border:2px solid transparent;border-radius:0;background:var(--garance);color:var(--blanc);cursor:pointer;transition:background-color .2s, color .2s;box-sizing:border-box}
+.wp-block-button__link:hover{background:var(--garance-fonce);color:var(--blanc)}
+.wp-block-button.is-style-outline .wp-block-button__link{background:transparent;color:var(--olive);border-color:var(--olive)}
+.wp-block-button.is-style-outline .wp-block-button__link:hover{background:var(--olive);color:var(--blanc)}
+.band-olive .wp-block-button.is-style-outline .wp-block-button__link{background:var(--creme);color:var(--encre);border-color:var(--creme)}
+.contenu-page .hero h1{margin:0}
+.contenu-page .prose{padding-block:16px 72px}
+/* Dans l'éditeur */
+.neo-liste-editeur{outline:1px dashed #9c9488;outline-offset:6px;margin-block:12px}
+.neo-liste-etiquette{font:600 12px/1.4 system-ui,sans-serif;color:#4F5233;background:#E9E6D6;padding:6px 10px;margin-bottom:12px;display:inline-block}
+.editor-styles-wrapper .wp-block-group.wrap{max-width:1180px;margin-inline:auto}
+/* Les conteneurs internes ajoutés par WordPress (site et éditeur) ne doivent pas casser la mise en page */
+.wp-block-group__inner-container,
+.wp-block-group > .block-editor-inner-blocks,
+.wp-block-group .block-editor-block-list__layout,
+.wp-block-buttons > .block-editor-inner-blocks,
+.wp-block-buttons .block-editor-block-list__layout{display:contents}
+.editor-styles-wrapper .wp-block-buttons.btns{display:flex;flex-wrap:wrap;gap:12px}
+.editor-styles-wrapper .hero-img,.editor-styles-wrapper .wp-block-image.img-box{aspect-ratio:4/3}
+.editor-styles-wrapper .hero-img{aspect-ratio:4/5;max-height:620px}
+.prose .btn{align-self:flex-start}
+/* Éditeur : les sections prennent toute la largeur, comme sur le site */
+.editor-styles-wrapper .is-root-container > .wp-block,
+.editor-styles-wrapper .is-root-container > .wp-block-group{max-width:none;margin-left:0;margin-right:0}
+.editor-styles-wrapper .is-root-container{padding:0}
+
+/* ---------- WPForms aux couleurs de Neotisse ---------- */
+.wpforms-container{
+  --wpforms-field-border-radius:0px;
+  --wpforms-field-border-color:#B9B1A3;
+  --wpforms-field-background-color:#FFFFFF;
+  --wpforms-field-text-color:#2D2832;
+  --wpforms-label-color:#2D2832;
+  --wpforms-label-sublabel-color:#55505C;
+  --wpforms-label-error-color:#A8321F;
+  --wpforms-button-border-radius:0px;
+  --wpforms-button-background-color:#A8321F;
+  --wpforms-button-text-color:#FFFFFF;
+  --wpforms-field-size-font-size:17px;
+  --wpforms-label-size-font-size:14px;
+  --wpforms-button-size-font-size:15px;
+  --wpforms-button-size-height:48px;
+  font-family:var(--f-texte);
+}
+.wpforms-container .wpforms-field-label{font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.wpforms-container .wpforms-field-checkbox li label,.wpforms-container .wpforms-field-label-inline{text-transform:none;letter-spacing:0;font-weight:400}
+.wpforms-container button[type=submit],.wpforms-container .wpforms-submit{font-family:var(--f-texte)!important;font-weight:600!important;letter-spacing:.08em!important;text-transform:uppercase!important}
+.wpforms-container button[type=submit]:hover{background:var(--garance-fonce)!important}
+.wpforms-confirmation-container-full{background:var(--olive-clair)!important;border:0!important;border-left:4px solid var(--olive)!important;color:var(--encre)!important}
+.formulaire-devis .h3-form{font-size:28px;font-weight:400}
+
+/* ---------- Réseaux sociaux ---------- */
+.reseaux{display:flex;flex-wrap:wrap;gap:10px}
+.reseau{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--olive);color:var(--olive);text-decoration:none;font-size:15px;font-weight:600;transition:background-color .2s,color .2s}
+.reseau:hover{background:var(--olive);color:var(--blanc)}
+.reseaux-pied .reseau{border-color:rgba(250,246,238,.5);color:var(--creme)}
+.reseaux-pied .reseau:hover{background:var(--creme);color:var(--olive)}
+.suivre{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:24px 28px;background:var(--creme);border:1px solid var(--trait)}
+.suivre p{color:var(--fusain)}
+
+/* ---------- Infos pratiques des ateliers ---------- */
+.fiche{background:var(--creme);border:1px solid var(--trait);border-top:3px solid var(--olive);padding:20px 22px;display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.fiche-titre{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--olive)}
+.fiche dl{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
+.fiche dl > div{min-width:0}
+.fiche dt{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--fusain)}
+.fiche dd{margin:2px 0 0;font-size:16px;color:var(--encre)}
+.fiche-note{font-size:14px;color:var(--fusain)}
+.fiche-note a{color:var(--olive);font-weight:600}
+@media (max-width:560px){.fiche dl{grid-template-columns:1fr}}
+
+/* ---------- Ceux qui nous ont fait confiance ---------- */
+.logos{list-style:none;margin:12px 0 4px;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:16px}
+.logo-item{flex:0 1 220px;min-height:96px;display:flex;align-items:center;justify-content:center;background:var(--creme);border:1px solid var(--trait);padding:16px 20px}
+.logo-item img{max-height:64px;width:auto;object-fit:contain;filter:grayscale(1);opacity:.85;transition:filter .2s,opacity .2s}
+.logo-item a:hover img,.logo-item:hover img{filter:none;opacity:1}
+.logo-item a{color:inherit;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.logo-nom{font-family:var(--f-titre);font-size:19px;color:var(--olive);text-align:center;line-height:1.25}
+.lg-nom{font-family:var(--f-titre);font-size:17px;color:var(--olive);text-align:center;padding:0 8px}
+.logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));width:100%;max-width:1000px;margin-inline:auto}
+.logo-item{flex:none}
+.partenaire:not(:has(.lg)) h3{font-size:21px}
+.boite p:not(.eyebrow){font-size:16px;color:var(--fusain)}
+.aside > .wp-block-group__inner-container{display:flex;flex-direction:column;gap:28px}
+.boite .reseaux{margin-top:4px}
+.avis-partenaire{margin:8px 0 0;padding-top:12px;border-top:1px solid var(--trait);display:flex;flex-direction:column;gap:6px}
+.avis-partenaire p{font-family:var(--f-titre);font-size:17px;line-height:1.4;color:var(--encre)}
+.avis-partenaire cite{font-style:normal;font-size:14px;color:var(--fusain)}
+.citation-partenaire{margin:8px auto 0;max-width:40rem;display:flex;flex-direction:column;gap:8px;text-align:center}
+.citation-partenaire p{font-family:var(--f-titre);font-size:clamp(1.25rem,1.1rem + .6vw,1.6rem);line-height:1.35;font-weight:300}
+.citation-partenaire cite{font-style:normal;font-size:15px;color:var(--fusain)}
+
+/* =====================================================================
+   Mise en page des maquettes Figma (23/10/2026)
+   ===================================================================== */
+:root{--btn:var(--olive);--btn-fonce:#3B3D26}
+body.boutons-garance{--btn:var(--garance);--btn-fonce:var(--garance-fonce)}
+.btn-main,.wp-block-button__link{background:var(--btn)}
+.btn-main:hover,.wp-block-button__link:hover{background:var(--btn-fonce)}
+.wpforms-container{--wpforms-button-background-color:var(--btn)}
+.wpforms-container button[type=submit]:hover{background:var(--btn-fonce)!important}
+
+/* En-tête centré */
+.galon{display:none}
+header.site{border-bottom:1px solid var(--trait);background:var(--creme)}
+.hdr{flex-direction:column;justify-content:center;gap:14px;padding-block:22px 16px}
+.logo{gap:12px}
+.logo img{height:44px}
+.logo span{font-size:34px;letter-spacing:.2em;font-weight:300}
+nav.main{justify-content:center;gap:4px 28px}
+nav.main ul{justify-content:center;gap:4px 28px}
+nav.main a{font-size:13px;letter-spacing:.12em}
+nav.main a.btn{min-height:38px;padding:0 16px;font-size:13px}
+
+/* Pied de page clair */
+footer.site{background:var(--lin);color:var(--encre);border-top:1px solid var(--trait);padding-block:44px 28px}
+.ftr{grid-template-columns:1fr 1.6fr;align-items:start}
+.ftr .nom{color:var(--olive);font-size:26px}
+.ftr p{color:var(--fusain);font-size:15px}
+.ftr a{color:var(--encre);font-size:14px}
+.ftr-marque{display:flex;flex-direction:column;gap:8px}
+.ftr-liens{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 22px}
+.ftr-liens ul{flex-direction:row;flex-wrap:wrap;gap:6px 22px}
+.ftr .mention{border-top-color:var(--trait);color:var(--fusain)}
+.reseaux-pied .reseau{border-color:var(--olive);color:var(--olive)}
+.reseaux-pied .reseau:hover{background:var(--olive);color:var(--blanc)}
+@media (max-width:820px){.ftr-liens{justify-content:flex-start}}
+
+/* Bandeau final « Un atelier sur mesure ? » */
+.cta-final{background:var(--lin);border-top:1px solid var(--trait)}
+.cta-final .wrap::before{content:"";display:block;width:56px;height:48px;margin:0 auto 4px;background:url(/images/logo-neotisse.png) center/contain no-repeat}
+.cta-final h2{color:var(--olive)}
+
+/* Grande photo d'accueil avec titre */
+.hero-zone{padding-top:36px}
+.hero-cover{position:relative;min-height:440px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-cover .hero-fond{position:absolute;inset:0;margin:0}
+.hero-cover .hero-fond img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-cover .hero-fond::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(45,40,50,.45),rgba(45,40,50,.62))}
+.hero-texte{position:relative;z-index:1;text-align:center;max-width:46rem;padding:72px 24px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.hero-texte h1{color:#FAF6EE;font-size:clamp(2.1rem,1.5rem + 2.6vw,3.6rem);font-weight:300;letter-spacing:0}
+.hero-sous-titre{color:#EDE4D6;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+.sur-photo .wp-block-button__link{background:#FAF6EE;color:var(--encre);border-color:#FAF6EE}
+.sur-photo .wp-block-button__link:hover{background:#FFFFFF;color:var(--encre)}
+.sur-photo .is-style-outline .wp-block-button__link{background:transparent;color:#FAF6EE;border-color:#FAF6EE}
+.sur-photo .is-style-outline .wp-block-button__link:hover{background:#FAF6EE;color:var(--encre)}
+.hero-texte .wp-block-buttons{justify-content:center}
+
+/* Deux colonnes texte + photos */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.duo > *, .duo > .wp-block-group__inner-container > *{min-width:0}
+.duo-haut{align-items:start}
+.asso-photo{max-width:340px;justify-self:end;aspect-ratio:4/5}
+
+/* Collages de photos */
+.collage{display:grid;gap:18px}
+.collage .collage-photo{margin:0;overflow:hidden;box-shadow:0 6px 18px rgba(45,40,50,.12)}
+.collage .collage-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.collage-2{grid-template-columns:1.2fr 1fr;align-items:end}
+.collage-2 .collage-photo:first-child{aspect-ratio:4/5}
+.collage-2 .collage-photo:last-child{aspect-ratio:1/1;margin-bottom:-28px;margin-left:-40px;position:relative}
+.collage-5{grid-template-columns:repeat(6,1fr);grid-auto-rows:120px;margin-block:40px 8px}
+.collage-5 .collage-photo:nth-child(1){grid-column:1/3;grid-row:1/3}
+.collage-5 .collage-photo:nth-child(2){grid-column:3/5;grid-row:1/2;margin-top:24px}
+.collage-5 .collage-photo:nth-child(3){grid-column:5/7;grid-row:1/3;margin-top:-20px}
+.collage-5 .collage-photo:nth-child(4){grid-column:2/4;grid-row:3/5}
+.collage-5 .collage-photo:nth-child(5){grid-column:4/6;grid-row:2/5;margin-top:40px}
+.geste-zone{display:flex;justify-content:flex-end}
+.geste-texte{max-width:30rem}
+
+/* Nos ateliers sur fond sombre */
+.ateliers-duo{display:grid;grid-template-columns:1fr 1fr}
+.ateliers-duo > *{min-width:0}
+.ateliers-sombre{position:relative;overflow:hidden;color:#FAF6EE}
+.ateliers-sombre .sombre-fond{position:absolute;inset:0;margin:0}
+.ateliers-sombre .sombre-fond img{width:100%;height:100%;object-fit:cover}
+.ateliers-sombre .sombre-fond::after{content:"";position:absolute;inset:0;background:rgba(36,33,30,.78)}
+.sombre-contenu{position:relative;z-index:1;padding:56px max(24px,5vw);gap:18px}
+.sombre-contenu h2{color:#FAF6EE}
+.ateliers-liste{list-style:none;margin:0;padding:0}
+.ateliers-liste li{border-bottom:1px solid rgba(250,246,238,.25)}
+.ateliers-liste a{display:flex;flex-direction:column;gap:4px;padding:14px 0;color:#FAF6EE;text-decoration:none}
+.ateliers-liste a:hover .al-titre{text-decoration:underline;text-underline-offset:3px}
+.al-titre{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.al-texte{font-size:15px;color:#E4DCCB}
+.ateliers-photo{margin:0;min-height:100%}
+.ateliers-photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Bandeaux olive : boutons et textes clairs */
+.band-olive .lead,.band-olive p{color:var(--olive-clair)}
+.band-olive .wp-block-button__link{background:#FAF6EE;color:var(--encre)}
+.band-olive .is-style-outline .wp-block-button__link{background:#FAF6EE;color:var(--encre);border-color:#FAF6EE}
+
+/* Trois principes / étapes numérotées */
+.principes{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:12px}
+.principe{border-top:1px solid currentColor;padding-top:18px;display:flex;flex-direction:column;gap:8px}
+.band-olive .principe{border-top-color:rgba(250,246,238,.4)}
+.principe .num{font-family:var(--f-titre);font-size:22px;color:var(--olive)}
+.band-olive .principe .num{color:#FAF6EE}
+.principe h3{font-size:22px;font-weight:400}
+.band-olive .principe h3{color:#FAF6EE}
+.principe p:not(.num){font-size:16px;color:var(--fusain)}
+.band-olive .principe p:not(.num){color:var(--olive-clair)}
+.citation{font-family:var(--f-titre);font-size:clamp(1.5rem,1.2rem + 1.2vw,2.2rem);line-height:1.3;font-weight:300;color:var(--encre)}
+
+/* Fondatrices */
+.fondatrices{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:16px}
+.fondatrice{gap:10px}
+.fondatrice h3{color:#FAF6EE;font-size:26px;font-weight:400}
+.portrait-vide{aspect-ratio:4/3;background:#D9D4C8;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.portrait-vide p{color:var(--fusain)!important;font-size:14px;font-weight:600}
+.fondatrice .wp-block-image{margin:0 0 8px;aspect-ratio:4/3;overflow:hidden}
+.fondatrice .wp-block-image img{width:100%;height:100%;object-fit:cover}
+
+/* Calendrier : date olive, repères */
+.date{background:var(--olive);border-color:var(--olive);color:#FAF6EE;padding:12px 4px}
+.date .m{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--olive-clair)}
+.date .j{color:#FAF6EE;font-size:32px;margin-top:2px}
+.date .d{color:var(--olive-clair)}
+.mois{font-size:30px;letter-spacing:.06em;color:var(--encre)}
+.reperes-boite{background:var(--laine);padding:28px;margin-top:32px;display:flex;flex-direction:column;gap:16px}
+.reperes-boite .legende{grid-template-columns:repeat(3,1fr)}
+.reperes-boite .legende div{gap:4px;color:var(--fusain);font-size:15px}
+.reperes-boite strong{color:var(--encre);font-size:16px}
+.photo-duo{display:grid;grid-template-columns:1fr 1.2fr}
+.photo-duo > *{min-width:0}
+.photo-duo .duo-photo{margin:0;min-height:360px}
+.photo-duo .duo-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-duo .duo-texte{padding:64px max(24px,5vw);justify-content:center}
+.photo-duo h2{color:#FAF6EE}
+
+/* Actualité à la une : photo à gauche, sans cadre */
+.une-zone .une{grid-template-columns:1fr 1fr;gap:48px;background:transparent;border:0;align-items:center}
+.une-zone .une .img-box{order:-1;aspect-ratio:3/2}
+.une-zone .une .txt{padding:0}
+.une-zone .meta{margin-bottom:12px}
+
+/* Témoignages */
+.avis-olive{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:32px;width:100%;margin-top:8px;border-top:1px solid rgba(250,246,238,.35);padding-top:28px}
+.avis-olive blockquote{margin:0;display:flex;flex-direction:column;gap:10px;text-align:left}
+.avis-olive p{font-family:var(--f-titre);font-size:20px;line-height:1.4;color:#FAF6EE!important}
+.avis-olive cite{font-style:normal;font-size:14px;color:var(--olive-clair)}
+.logos-olive .logo-item{background:rgba(250,246,238,.08);border-color:rgba(250,246,238,.3)}
+.logos-olive .logo-nom{color:#FAF6EE}
+.logos-olive img{filter:grayscale(1) brightness(2);opacity:.9}
+.carte-blanche{background:var(--blanc);padding:32px;box-shadow:0 2px 16px rgba(45,40,50,.06)}
+.bord-haut{border-top:1px solid var(--trait)}
+
+/* Contact */
+.contact-grid{grid-template-columns:1.5fr .8fr}
+.aside .neo-liste-contact-mail .boite{background:var(--olive);border-color:var(--olive)}
+.aside .neo-liste-contact-mail .boite .eyebrow,.aside .neo-liste-contact-mail .boite p,.aside .neo-liste-contact-mail code{color:#FAF6EE!important}
+.aside .neo-liste-contact-mail .copier{border-color:#FAF6EE;color:#FAF6EE}
+.aside .neo-liste-contact-mail .reseau{border-color:#FAF6EE;color:#FAF6EE}
+.boite-simple{display:flex;flex-direction:column;gap:12px;padding:4px 0}
+.boite-simple .etapes li{border-bottom:1px solid var(--trait);padding-bottom:10px}
+.contact-photo{aspect-ratio:3/4}
+.h3-form{font-size:28px;font-weight:400}
+
+/* Ateliers : un atelier sur deux sur fond laine, liste numérotée */
+.atelier.inv{background:var(--laine);box-shadow:0 0 0 100vmax var(--laine);clip-path:inset(0 -100vmax);border-top:0}
+.atelier .prose ul{list-style:none;padding:0;counter-reset:pole;gap:0}
+.atelier .prose ul li{counter-increment:pole;display:grid;grid-template-columns:40px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--trait)}
+.atelier .prose ul li::before{content:counter(pole, decimal-leading-zero);font-family:var(--f-titre);font-size:20px;color:var(--olive)}
+
+@media (max-width:820px){
+  .duo,.ateliers-duo,.photo-duo,.fondatrices,.principes,.une-zone .une{grid-template-columns:1fr;gap:32px}
+  .asso-photo{justify-self:start}
+  .collage-5{grid-template-columns:repeat(2,1fr);grid-auto-rows:auto}
+  .collage-5 .collage-photo{grid-column:auto!important;grid-row:auto!important;margin:0!important;aspect-ratio:1/1}
+  .collage-5 .collage-photo:nth-child(5){grid-column:1/-1!important;aspect-ratio:16/9}
+  .collage-2 .collage-photo:last-child{margin:0 0 0 -24px}
+  .reperes-boite .legende{grid-template-columns:1fr}
+  .ateliers-photo{aspect-ratio:4/3}
+  .hero-cover{min-height:380px}
+  .logo span{font-size:26px}
+}
+.neo-liste-partenaires-bandeau,.neo-liste-avis-partenaires{width:100%}
+.logos{grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr))}
+.asso-photo{max-width:280px}
+.ateliers-duo{height:clamp(460px,46vw,600px)}
+.ateliers-duo .ateliers-photo{height:100%;min-height:0}
+.ateliers-sombre{height:100%}
+.sombre-contenu{height:100%;overflow:auto}
+@media (max-width:820px){
+  .contact-grid{grid-template-columns:1fr}
+  .ateliers-duo{height:auto}
+  .ateliers-duo .ateliers-photo{height:auto;aspect-ratio:4/3}
+  .sombre-contenu{height:auto}
+}
+.atelier .prose ul li{display:block;position:relative;padding:10px 0 10px 44px}
+.atelier .prose ul li::before{position:absolute;left:0;top:8px}
+nav.main a.btn[aria-current="page"]{background:var(--btn-fonce)}
+.duo h1{font-size:clamp(2rem,1.5rem + 2vw,3rem)}
+.date .d{font-size:10px;letter-spacing:.06em}
+
+/* =====================================================================
+   Touches de couleur des teintures (garance, gaude, guède) sur la base olive
+   ===================================================================== */
+/* Fin galon tissé sous l'en-tête */
+.galon{display:block;height:5px}
+/* Chiffres 01 / 02 / 03 aux couleurs des teintures */
+.principes .principe:nth-child(3n+1) .num{color:var(--garance)}
+.principes .principe:nth-child(3n+2) .num{color:#B07E10}
+.principes .principe:nth-child(3n+3) .num{color:var(--guede)}
+.band-olive .principes .principe:nth-child(3n+1) .num{color:#F2A08F}
+.band-olive .principes .principe:nth-child(3n+2) .num{color:var(--gaude)}
+.band-olive .principes .principe:nth-child(3n+3) .num{color:#9DC0E8}
+.principes .principe:nth-child(3n+1){border-top:2px solid var(--garance)}
+.principes .principe:nth-child(3n+2){border-top:2px solid var(--gaude)}
+.principes .principe:nth-child(3n+3){border-top:2px solid var(--guede)}
+.atelier .prose ul li:nth-child(3n+1)::before{color:var(--garance)}
+.atelier .prose ul li:nth-child(3n+2)::before{color:#B07E10}
+.atelier .prose ul li:nth-child(3n+3)::before{color:var(--guede)}
+/* Petit trait de couleur sous les titres de section */
+.contenu-page .stack.center > .h2::after,.contenu-page .stack.center > .wp-block-group__inner-container > .h2::after,
+.contenu-page .page-hero h1::after{content:"";display:block;width:56px;height:3px;margin:16px auto 0;background:linear-gradient(90deg,var(--garance) 0 33%,var(--gaude) 33% 66%,var(--guede) 66%)}
+/* Liste des ateliers sur fond sombre : titres en jaune gaude */
+.al-titre{color:var(--gaude)}
+/* Sur-titres des bandeaux olive en jaune gaude */
+.band-olive .eyebrow{color:var(--gaude)}
+/* Guillemets des avis en garance */
+.avis blockquote p::first-letter{color:var(--garance)}
+.citation-partenaire p::first-letter,.avis-olive p::first-letter{color:var(--gaude)}
+/* Survol des cartes et liens : touche garance */
+.card:hover h3,.article a.lien-carte:hover h3{color:var(--garance)}
+.logo-item:hover{border-color:var(--gaude)}
+/* Mois du calendrier soulignés en gaude */
+.mois{border-bottom:2px solid var(--gaude)}
+/* Liens « Devenir partenaire », « Demander un devis » dans les fiches */
+.note a,.fiche-note a{color:var(--garance)}
+/* Sous-titre de la grande photo : séparateurs colorés */
+.hero-sous-titre{color:#F4E3B8}
+/* Bandeau final : bordure supérieure galon */
+.cta-final{border-top:0;box-shadow:inset 0 5px 0 -0px transparent;position:relative}
+.cta-final::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:repeating-linear-gradient(135deg, transparent 0 6px, rgba(0,0,0,.08) 6px 7px),linear-gradient(90deg,var(--olive) 0 46%,var(--garance) 46% 64%,var(--gaude) 64% 82%,var(--guede) 82% 100%)}
+
+/* ---------- Plus de peps ---------- */
+/* 1. Actualités « éclatantes » : bandeau de couleur selon le type */
+.article{border-top:6px solid var(--c, var(--olive))}
+.article .img-box{border-bottom:0}
+.une{border-left:6px solid var(--c, var(--olive))}
+.une-zone .une{border-left:0}
+.une-zone .une .img-box{box-shadow:-10px 10px 0 var(--c, var(--olive))}
+/* 3. Étiquettes en pastilles pleines */
+.tag{background:var(--c, var(--olive));color:var(--blanc);padding:4px 10px 4px 9px;font-size:12px;letter-spacing:.08em;line-height:1.2}
+.tag::before{width:7px;height:7px;background:rgba(255,255,255,.75)}
+.tag.t-atelier{color:var(--encre)}
+.tag.t-atelier::before{background:rgba(45,40,50,.55)}
+.reperes-boite .tag,.legende .tag{align-self:flex-start}
+/* 2. « Ceux qui nous ont fait confiance » sur fond jaune gaude clair */
+.confiance{background:#F6E6B4}
+.confiance .eyebrow{color:#7A5A06}
+.confiance .lead{color:#4A4535}
+.confiance .logo-item{background:var(--blanc);border-color:#E8D18A}
+.confiance .citation-partenaire cite{color:#4A4535}
+
+/* Grande photo d'accueil : plus haute et plus large */
+.hero-zone{max-width:1440px;padding-top:24px}
+.hero-cover{min-height:clamp(520px, 72vh, 780px)}
+.hero-texte{padding:96px 24px}
+.hero-texte h1{font-size:clamp(2.4rem,1.6rem + 3.2vw,4.4rem)}
+@media (max-width:820px){.hero-cover{min-height:460px}.hero-zone{padding-top:16px}}
+
+/* « Nos ateliers » : fond olive uni (la photo de fond est réservée à l'accueil) */
+.ateliers-sombre{background:var(--olive)}
+.ateliers-sombre .sombre-fond{display:none}
+.ateliers-liste li{border-bottom-color:rgba(250,246,238,.3)}
+.al-texte{color:var(--olive-clair)}
+
+/* Accueil : grand nom « Neotisse » puis la phrase d'accroche */
+.hero-texte h1.hero-nom{font-size:clamp(3.2rem,1.8rem + 6vw,7rem);font-weight:300;letter-spacing:.14em;text-transform:uppercase;line-height:1;margin-right:-.14em}
+.hero-texte .hero-accroche{font-family:'Fraunces',Georgia,serif;font-weight:300;color:#FAF6EE;font-size:clamp(1.35rem,1.05rem + 1.3vw,2.3rem);line-height:1.25;max-width:36rem;margin:0}
+
+/* Questions fréquentes (questions dépliables) */
+.faq{max-width:52rem}
+.faq-q{border-bottom:1px solid var(--laine,#EDE4D6);padding:0}
+.faq-q:first-of-type{border-top:1px solid var(--laine,#EDE4D6)}
+.faq-q summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 0;font-family:'Fraunces',Georgia,serif;font-size:1.15rem;line-height:1.35;color:var(--encre)}
+.faq-q summary::-webkit-details-marker{display:none}
+.faq-q summary::after{content:"+";flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--olive);color:#FAF6EE;font-family:inherit;font-size:1.2rem;transition:transform .2s}
+.faq-q[open] summary::after{content:"–";background:var(--garance)}
+.faq-q summary:focus-visible{outline:2px solid var(--guede);outline-offset:4px}
+.faq-q p{margin:0 0 18px;max-width:46rem}
+.faq-q a{color:var(--olive);text-decoration:underline;text-underline-offset:3px}
+.faq-photo{margin:0 0 8px}
+.faq-photo img{width:100%;aspect-ratio:16/7;object-fit:cover;display:block}
+@media (max-width:820px){.faq-photo img{aspect-ratio:4/3}}
+
+/* Accueil : rangée de 4 photos, puis photo du bain de teinture + texte côte à côte */
+.collage-4{grid-template-columns:repeat(4,minmax(0,1fr));align-items:start;margin-block:40px 0}
+.collage-4 .collage-photo{aspect-ratio:4/5}
+.collage-4 .collage-photo:nth-child(even){margin-top:36px}
+.collage-3{grid-template-columns:repeat(3,minmax(0,1fr));margin-block:40px 0}
+.collage-3 .collage-photo{aspect-ratio:4/5}
+.geste-duo{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(32px,6vw,88px);align-items:center;margin-top:clamp(40px,6vw,72px)}
+.geste-duo > *{min-width:0}
+.geste-photo{margin:0;aspect-ratio:4/5;max-height:620px;overflow:hidden;box-shadow:0 6px 18px rgba(45,40,50,.12)}
+.geste-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.geste-duo .geste-texte{max-width:32rem}
+@media (max-width:820px){
+  .collage-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .collage-4 .collage-photo:nth-child(even){margin-top:20px}
+  .geste-duo{grid-template-columns:1fr;gap:28px}
+  .geste-photo{aspect-ratio:4/3}
+}
+.geste-photo{aspect-ratio:1/1;max-height:none}
+.geste-photo img{object-position:50% 60%}
+@media (max-width:820px){.geste-photo{aspect-ratio:4/3}}
+
+/* Rangée de 4 photos en « bric-à-brac » : tailles, hauteurs et chevauchements variés */
+.collage-4{grid-template-columns:1.15fr .85fr 1.05fr .9fr;gap:18px;align-items:start}
+.collage-4 .collage-photo{position:relative}
+.collage-4 .collage-photo:nth-child(1){aspect-ratio:4/5;margin-top:0}
+.collage-4 .collage-photo:nth-child(2){aspect-ratio:1/1;margin:84px 0 0 -42px;z-index:2}
+.collage-4 .collage-photo:nth-child(3){aspect-ratio:5/4;margin-top:18px}
+.collage-4 .collage-photo:nth-child(4){aspect-ratio:3/4;margin:64px 0 0 -36px;z-index:2}
+@media (max-width:820px){
+  .collage-4{grid-template-columns:1.1fr .9fr;gap:14px}
+  .collage-4 .collage-photo:nth-child(1){aspect-ratio:4/5}
+  .collage-4 .collage-photo:nth-child(2){margin:48px 0 0 -26px}
+  .collage-4 .collage-photo:nth-child(3){margin-top:-28px}
+  .collage-4 .collage-photo:nth-child(4){margin:0 0 0 -22px}
+}
+@media (max-width:820px){
+  .collage-4 .collage-photo:nth-child(3){margin-top:12px}
+  .collage-4 .collage-photo:nth-child(4){margin:32px 0 0 -22px}
+}
+
+/* Accueil : un seul collage « bric-à-brac » (bain de teinture au centre) + texte à droite */
+.geste-duo{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(32px,5vw,72px);margin-top:clamp(32px,5vw,56px)}
+.collage-geste{grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:clamp(28px,3.4vw,46px);gap:0;margin:0}
+.collage-geste .collage-photo{position:relative;margin:0!important;aspect-ratio:auto!important}
+.collage-geste .collage-photo:nth-child(1){grid-column:3/11;grid-row:3/11;z-index:1}
+.collage-geste .collage-photo:nth-child(2){grid-column:1/5;grid-row:1/5;z-index:2}
+.collage-geste .collage-photo:nth-child(3){grid-column:9/13;grid-row:2/6;z-index:2}
+.collage-geste .collage-photo:nth-child(4){grid-column:1/6;grid-row:9/13;z-index:2}
+.collage-geste .collage-photo:nth-child(5){grid-column:9/13;grid-row:8/13;z-index:2}
+.collage-geste .collage-photo:nth-child(n+6){display:none}
+.collage-geste .collage-photo:nth-child(1) img{object-position:50% 65%}
+@media (max-width:820px){
+  .geste-duo{grid-template-columns:1fr}
+  .collage-geste{grid-auto-rows:clamp(22px,7vw,40px)}
+}
+.collage-geste .collage-photo:nth-child(3){grid-row:1/5}
+
+/* ---------- Harmonie des couleurs : jamais deux sections voisines de la même couleur ---------- */
+/* « Nos ateliers » en bleu guède (distinct du bandeau olive des fondatrices juste en dessous) */
+.ateliers-sombre{background:var(--guede)}
+.ateliers-sombre .al-titre{color:#F6E6B4}
+.ateliers-sombre .al-texte{color:#E4EAF2}
+.ateliers-liste li{border-bottom-color:rgba(250,246,238,.28)}
+.ateliers-sombre :focus-visible{outline-color:#F6E6B4}
+/* Questions fréquentes sur fond laine (se détache des sections lin voisines) */
+.faq-zone{background:var(--laine)}
+.faq-q,.faq-q:first-of-type{border-color:rgba(45,40,50,.14)}
+/* Témoignages : formulaire sur fond laine, questions sur fond lin juste après */
+#temoigner{background:var(--laine);border-top:0}
+#temoigner + .faq-zone{background:var(--lin)}
+.ateliers-photo img{object-position:50% 85%}
+
+/* Accueil allégé : texte de l'association à côté du collage, une photo pour les fondatrices */
+.geste-duo{margin-top:0}
+.geste-duo .geste-texte{max-width:34rem}
+.fondatrices-photo{margin:0;aspect-ratio:4/3;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.fondatrices-photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ---------- Accessibilité des couleurs (contraste WCAG AA) ---------- */
+/* Jaune gaude sur vert olive : teinte un peu plus claire (4,9:1 au lieu de 4,25:1) */
+.band-olive .eyebrow,.band-olive .principes .principe:nth-child(3n+2) .num{color:#F0C452}
+/* Chiffres 01 / 02 / 03 : plus grands (grand texte) et jaune plus foncé sur fond clair (4,9:1) */
+.principe .num{font-size:28px;line-height:1.1}
+.principes .principe:nth-child(3n+2) .num{color:#8A6208}
+/* Contour de focus clavier visible sur les fonds foncés (vert, bleu, photo) */
+.band-olive :focus-visible,.hero-cover :focus-visible,.ateliers-sombre :focus-visible,.cta-final :focus-visible{outline:3px solid #F6E6B4;outline-offset:3px}
+/* Liens dans le texte sur les fonds foncés : clairs et soulignés */
+.band-olive p a:not(.wp-block-button__link),.ateliers-sombre p a:not(.wp-block-button__link){color:#FAF6EE;text-decoration:underline;text-underline-offset:3px}
+
+/* =====================================================================
+   Modernisation : images à plat, titres plus affirmés, sur-titres en
+   minuscules, voile d'accueil allégé, animations discrètes.
+   ===================================================================== */
+
+/* 1. Images à plat (plus d'ombres floues) — l'ombre colorée décalée de l'actualité reste */
+.collage .collage-photo,.geste-photo,.fondatrices-photo,.carte-blanche{box-shadow:none}
+
+/* 2. Titres plus affirmés : un cran plus épais, plus grands, plus serrés */
+h1,h2,h3{font-weight:400;letter-spacing:-.012em;line-height:1.08}
+.h2{font-size:clamp(2rem,1.45rem + 1.7vw,3rem)}
+.page-hero h1{font-size:clamp(2.4rem,1.6rem + 2.6vw,3.9rem)}
+.hero-texte h1.hero-nom{font-weight:300;letter-spacing:.14em}
+
+/* 3. Sur-titres en minuscules colorées (les majuscules restent pour le menu et les boutons) */
+.eyebrow{text-transform:none;letter-spacing:0;font-size:16px;font-weight:700}
+.hero-sous-titre{text-transform:none;letter-spacing:.02em;font-size:16px}
+
+/* 4. Grande photo d'accueil : voile allégé, sombre seulement derrière le texte */
+.hero-cover .hero-fond::after{background:radial-gradient(ellipse 62% 58% at 50% 52%, rgba(30,26,34,.66) 0%, rgba(30,26,34,.42) 55%, rgba(30,26,34,.14) 100%)}
+.hero-texte{text-shadow:0 2px 16px rgba(20,16,24,.45)}
+.hero-texte .wp-block-button__link{text-shadow:none}
+
+/* 5. Survol : les photos zooment légèrement, les boutons se soulèvent */
+.collage-photo,.geste-photo,.fondatrices-photo,.ateliers-photo,.une-zone .img-box,.img-box,.faq-photo{overflow:hidden}
+.collage-photo img,.geste-photo img,.fondatrices-photo img,.ateliers-photo img,.une-zone .img-box img,.img-box img,.faq-photo img{transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+.collage-photo:hover img,.geste-photo:hover img,.fondatrices-photo:hover img,.ateliers-photo:hover img,.une-zone .une:hover .img-box img,.img-box:hover img,.faq-photo:hover img{transform:scale(1.05)}
+.collage-geste .collage-photo{transition:transform .45s cubic-bezier(.2,.7,.2,1), opacity .8s ease}
+.collage-geste .collage-photo:hover{transform:rotate(-1.5deg) scale(1.04);z-index:6}
+.collage-geste .collage-photo:nth-child(even):hover{transform:rotate(1.5deg) scale(1.04)}
+.wp-block-button__link,.btn{transition:background-color .2s, color .2s, transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s}
+.wp-block-button__link:hover,.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px -8px rgba(45,40,50,.45)}
+
+/* 6. Apparition en douceur au défilement (seulement si le JavaScript est actif) */
+.anime .revele{opacity:0;transform:translateY(28px);transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1)}
+.anime .revele.visible{opacity:1;transform:none}
+.anime .collage-geste .collage-photo.revele{transform:translateY(28px) scale(.96)}
+.anime .collage-geste .collage-photo.revele.visible{transform:none}
+.anime .collage-geste .collage-photo.revele.visible:hover{transform:rotate(-1.5deg) scale(1.04)}
+.anime .collage-geste .collage-photo.revele.visible:nth-child(even):hover{transform:rotate(1.5deg) scale(1.04)}
+.anime .collage-geste .collage-photo:nth-child(2){transition-delay:.08s}
+.anime .collage-geste .collage-photo:nth-child(3){transition-delay:.16s}
+.anime .collage-geste .collage-photo:nth-child(4){transition-delay:.24s}
+.anime .collage-geste .collage-photo:nth-child(5){transition-delay:.32s}
+
+/* Personnes qui ont désactivé les animations : tout reste immobile */
+@media (prefers-reduced-motion: reduce){
+  .anime .revele,.anime .revele.visible{opacity:1!important;transform:none!important;transition:none!important}
+  .collage-photo img,.geste-photo img,.fondatrices-photo img,.ateliers-photo img,.img-box img,.faq-photo img,.wp-block-button__link,.btn,.collage-geste .collage-photo{transition:none!important}
+  .collage-photo:hover img,.geste-photo:hover img,.fondatrices-photo:hover img,.ateliers-photo:hover img,.une-zone .une:hover .img-box img,.img-box:hover img,.faq-photo:hover img,.wp-block-button__link:hover,.btn:hover,.collage-geste .collage-photo:hover{transform:none!important}
+}
+
+/* Page Témoignages : partenaires en haut, familles + formulaire côte à côte */
+.band-olive h1{color:var(--creme)}
+.partenaires-haut .wp-block-buttons{justify-content:center}
+.partenaires-haut p:not(.eyebrow){max-width:40rem;margin-inline:auto;color:var(--olive-clair)}
+.temoignages-duo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,5vw,72px);align-items:start}
+.temoignages-duo > *{min-width:0}
+.temoignages-col .neo-liste-temoignages,.temoignages-col .avis-liste{width:100%}
+#temoigner.form-col{background:var(--blanc);scroll-margin-top:24px}
+#temoigner + .faq-zone{background:var(--laine)}
+@media (max-width:820px){.temoignages-duo{grid-template-columns:1fr}}
+.temoignages-col > *,.temoignages-col .wp-block-group__inner-container > *{width:100%}
+.temoignages-col .avis{grid-template-columns:1fr;gap:18px;width:100%}
+.temoignages-col .avis blockquote{border-left:4px solid var(--gaude)}
+.temoignages-col .avis blockquote:nth-child(3n+2){border-left-color:var(--garance)}
+.temoignages-col .avis blockquote:nth-child(3n+3){border-left-color:var(--guede)}
+/* Bandeau des partenaires : encart comme la grande photo d'accueil (le liseré du menu reste visible) */
+.partenaires-haut{width:calc(100% - 32px);max-width:1408px;margin:24px auto 0}
+@media (max-width:820px){.partenaires-haut{margin-top:16px}}
+/* Témoignages v3 : logos en haut, avis des partenaires, puis visiteurs + formulaire */
+.logos-haut{margin-top:8px}
+.logos-haut .logo-item{background:var(--creme);border-color:transparent}
+.logos-haut .logo-nom{font-family:var(--f-titre);font-size:18px;color:var(--encre);text-align:center}
+.avis-part{grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr))}
+.avis-part blockquote{border-top:4px solid var(--olive)}
+.avis-part blockquote:nth-child(3n+2){border-top-color:var(--garance)}
+.avis-part blockquote:nth-child(3n+3){border-top-color:var(--guede)}
+.avis-logo img{max-height:44px;width:auto;object-fit:contain}
+.avis-partenaires-zone .vide{text-align:center;color:var(--fusain)}
+.fond-laine{background:var(--laine)}
+.fond-laine + .faq-zone{background:var(--lin)}
+.fond-laine .temoignages-col .avis blockquote{background:var(--creme)}
+.neo-liste-logos-partenaires{width:100%;min-width:0}
+.logos-haut{grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));width:100%}
+@media (max-width:820px){.logos-haut{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.logos-haut .logo-item{min-height:80px;padding:12px}.logos-haut .logo-nom{font-size:16px}}
+/* Témoignage : liste des ateliers et événements */
+#neo_ou{appearance:none;-webkit-appearance:none;padding-right:44px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%232B2520' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer}
+#champ-lieu[hidden]{display:none}
+
+/* Calendrier : nom du lieu cliquable (site du lieu) */
+.evt .lieu-lien{color:var(--encre);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.evt .lieu-lien:hover{color:var(--olive);text-decoration-thickness:2px}
+
+/* Politique de cookies : sur téléphone, le tableau devient une fiche par cookie */
+@media (max-width: 600px){
+  .table-cookies{overflow:visible}
+  .table-cookies table, .table-cookies tbody, .table-cookies tr, .table-cookies td{display:block;width:100%}
+  .table-cookies thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .table-cookies tr{border:1px solid var(--trait);background:var(--creme);margin-bottom:12px;padding:10px 12px}
+  .table-cookies td, .table-cookies table{border:0 !important;padding:4px 0 !important;background:none !important}
+  .table-cookies table{padding:0 !important}
+  .table-cookies td::before{display:block;font-size:13px;font-weight:700;color:var(--olive)}
+  .table-cookies td:nth-child(1){font-weight:700}
+  .table-cookies td:nth-child(1)::before{content:"Cookie"}
+  .table-cookies td:nth-child(2)::before{content:"À quoi il sert"}
+  .table-cookies td:nth-child(3)::before{content:"Durée"}
+  .table-cookies td:nth-child(4)::before{content:"Votre accord"}
+}
+
+/* ---------- Galon « fil torsadé » : une cordelette filée aux couleurs des teintures ---------- */
+:root{
+  --fil-couleurs: linear-gradient(90deg, var(--olive) 0 46%, var(--garance) 46% 64%, var(--gaude) 64% 82%, var(--guede) 82% 100%);
+  --fil-torsade: repeating-linear-gradient(118deg, rgba(255,255,255,.26) 0 2px, rgba(255,255,255,0) 2px 4.5px, rgba(0,0,0,.16) 4.5px 6px, rgba(0,0,0,0) 6px 8px);
+  --fil-relief: linear-gradient(180deg, rgba(255,255,255,.22) 0, rgba(255,255,255,0) 35%, rgba(0,0,0,0) 60%, rgba(0,0,0,.22) 100%);
+}
+.galon{height:10px;margin:3px 0;background:var(--fil-relief), var(--fil-torsade), var(--fil-couleurs);background-size:100% 100%, 8px 100%, 100% 100%;border-radius:5px}
+header.site + .galon, .galon{box-shadow:0 1px 0 rgba(45,40,50,.06)}
+.cta-final::before{height:6px;background:var(--fil-relief), var(--fil-torsade), var(--fil-couleurs);background-size:100% 100%, 8px 100%, 100% 100%}
+/* Au chargement, le fil se tord une fois, comme sous les doigts de la fileuse */
+@media (prefers-reduced-motion: no-preference){
+  .galon{animation:fil-tord 1.4s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes fil-tord{from{background-position:0 0, -48px 0, 0 0}to{background-position:0 0, 0 0, 0 0}}
+}
+/* Le fil est posé sur la limite du menu (il remplace le trait fin) */
+header.site{border-bottom:0}
+.galon{margin:-5px 0 0;position:relative;z-index:2}
+
+/* ---------- Bannière cookies Complianz aux couleurs de Neotisse ---------- */
+.cmplz-cookiebanner{background:var(--creme)!important;color:var(--encre)!important;border:1px solid var(--trait)!important;border-top:4px solid var(--olive)!important;border-radius:0!important;box-shadow:0 12px 32px rgba(45,40,50,.18)!important;font-family:var(--f-texte)!important}
+.cmplz-cookiebanner .cmplz-title{font-family:var(--f-titre)!important;font-weight:400!important;font-size:22px!important;color:var(--encre)!important}
+.cmplz-cookiebanner .cmplz-message, .cmplz-cookiebanner .cmplz-description{color:var(--encre)!important;font-size:15px!important;line-height:1.5!important}
+.cmplz-cookiebanner a{color:var(--olive)!important;font-weight:600}
+/* « Accepter » et « Refuser » strictement identiques (exigence CNIL) */
+.cmplz-cookiebanner .cmplz-btn.cmplz-accept,
+.cmplz-cookiebanner .cmplz-btn.cmplz-deny{background:var(--olive)!important;border:2px solid var(--olive)!important;color:#fff!important;font-family:var(--f-texte)!important;font-weight:700!important;font-size:15px!important;border-radius:0!important}
+.cmplz-cookiebanner .cmplz-btn.cmplz-accept:hover,
+.cmplz-cookiebanner .cmplz-btn.cmplz-deny:hover{background:var(--encre)!important;border-color:var(--encre)!important}
+.cmplz-cookiebanner .cmplz-btn.cmplz-view-preferences,
+.cmplz-cookiebanner .cmplz-btn.cmplz-save-preferences{background:transparent!important;border:2px solid var(--olive)!important;color:var(--olive)!important;font-family:var(--f-texte)!important;font-weight:700!important;font-size:15px!important;border-radius:0!important}
+.cmplz-cookiebanner .cmplz-btn:focus-visible{outline:3px solid var(--guede)!important;outline-offset:2px}
+/* Interrupteurs olive */
+.cmplz-cookiebanner input.cmplz-consent-checkbox:checked + .cmplz-label:before, .cmplz-cookiebanner .cmplz-banner-checkbox input:checked + .cmplz-label:before{background:var(--olive)!important}
+/* Le site n'utilise ni cookies de « préférences » ni de « marketing » : catégories masquées */
+.cmplz-cookiebanner .cmplz-category.cmplz-preferences, .cmplz-cookiebanner .cmplz-category.cmplz-marketing{display:none!important}
+
+/* Accueil : cadrage de la grande photo sur la table et les laines (moins de mur) */
+.hero-cover .hero-fond img{object-position:68% 74%!important;transform:scale(1.12);transform-origin:78% 72%}
+@media (max-width: 820px){ .hero-cover .hero-fond img{object-position:66% 70%!important;transform:none} }
+
+/* Pas de mot isolé sur une ligne : titres équilibrés, paragraphes sans orphelin */
+h1,h2,h3,.hero-accroche,.hero-sous-titre,.lead,.citation{text-wrap:balance}
+p,li,figcaption,blockquote{text-wrap:pretty}
+.insecable{white-space:nowrap}
+
+/* ---------- Le fil se teint au fil de la lecture ----------
+   Fil de lin écru, teint de gauche à droite selon l'avancée dans la page.
+   Jamais entièrement écru : 15 % de teinture minimum, même tout en haut. */
+.galon{--teinte:.15;position:sticky;top:0;z-index:40;background:var(--fil-relief), var(--fil-torsade), #E2D5BB;background-size:100% 100%, 8px 100%, 100% 100%;transform-origin:50% 0;transition:transform .25s ease}
+.admin-bar .galon{top:32px}
+@media (max-width:782px){ .admin-bar .galon{top:46px} }
+@media (max-width:600px){ .admin-bar .galon{top:0} }
+.galon::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--fil-relief), var(--fil-torsade), var(--fil-couleurs);background-size:100% 100%, 8px 100%, 100% 100%;clip-path:inset(0 calc((1 - var(--teinte)) * 100%) 0 0 round 5px);transition:clip-path .12s linear}
+.galon.colle{transform:scaleY(.6)}
+@media (prefers-reduced-motion: no-preference){
+  .galon::before{animation:fil-tord 1.4s cubic-bezier(.2,.7,.2,1) both}
+}
+@media (prefers-reduced-motion: reduce){
+  .galon, .galon::before{transition:none}
+}
+
+/* ---------- Page Actualités mieux organisée ---------- */
+.actus-entete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;border-bottom:1px solid var(--trait);padding-bottom:16px}
+.actus-entete .h2{margin:0}
+.articles{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.articles:has(> .article:only-child){grid-template-columns:minmax(280px,560px)}
+.article .card-body{display:flex;flex-direction:column;gap:8px;flex:1}
+.article .meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.date-article{font-size:14px;color:var(--fusain);margin:0}
+.article[hidden], .une[hidden]{display:none!important}
+.articles > .article{max-width:560px;width:100%}
+
+/* Réglages typographiques ajoutés le 05/11/2026 */
+
+/* Neotisse : typo plus sobre (ajouté le 05/11/2026) */
+
+/* 1. Plus de petits textes en MAJUSCULES espacées */
+.eyebrow,.tag,.new,nav.main a,.hero .periode,.membre .role,.onglets a,.filtre,
+.date .d,.date .m,.partenaire .lg,.exemple,.exemple-chip,label,.legend,.copier,
+.retour-lien,.cookies-toujours,.btn,.wp-block-button__link,.prose .wp-block-button__link,
+.wpforms-container .wpforms-field-label,.fiche-titre,.fiche dt,.hero-sous-titre,.al-titre{
+  text-transform:none !important;
+  letter-spacing:normal !important;
+}
+
+/* 2. Deux graisses par police : Atkinson 400 / 700, Fraunces 300 / 400 */
+.eyebrow,.tag,nav.main a,.hero .periode,.membre .role,.onglets a,.filtre,label,.legend,
+.copier,.retour-lien,.btn,.wp-block-button__link,.prose .wp-block-button__link,
+.wpforms-container .wpforms-field-label,.fiche dt,.hero-sous-titre,.al-titre,.repart{
+  font-weight:700 !important;
+}
+.eyebrow,.membre .role,.hero .periode,.fiche-titre,.al-titre,.hero-sous-titre{font-size:16px !important}
+
+/* 3. Retrait des effets décoratifs génériques */
+.contenu-page .stack.center > .h2::after,
+.contenu-page .stack.center > .wp-block-group__inner-container > .h2::after,
+.contenu-page .page-hero h1::after{display:none !important}
+.principe .num{display:none !important}
+
