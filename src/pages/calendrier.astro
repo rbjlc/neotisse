@@ -1,0 +1,110 @@
+---
+import Base from '../layouts/Base.astro';
+import Groupe from '../components/Groupe.astro';
+import Image from '../components/Image.astro';
+import Boutons from '../components/Boutons.astro';
+import Faq from '../components/Faq.astro';
+import { page, reglages, evenements, categorie, typo, moisAnnee, moisCourt, jourCourt, dateEvenement, urlSite } from '../lib/site.js';
+
+const [p, r, evts] = await Promise.all([page('calendrier'), reglages(), evenements()]);
+// Regroupe par mois
+const mois = [];
+for (const e of evts) {
+	const cle = e.date_debut.slice(0, 7);
+	if (!mois.length || mois[mois.length - 1].cle !== cle) mois.push({ cle, nom: moisAnnee(e.date_debut), evts: [] });
+	mois[mois.length - 1].evts.push(e);
+}
+const typesPresents = r.categories.filter((c) => evts.some((e) => e.categorie === c.cle));
+const repere = (cle) => r.reperes.find((x) => x.cle === cle)?.nom;
+const site = urlSite();
+const ld = evts.filter((e) => !e.a_confirmer).length && {
+	'@context': 'https://schema.org',
+	'@graph': evts.filter((e) => !e.a_confirmer).map((e) => ({
+		'@type': 'Event', name: e.titre, startDate: e.date_debut, endDate: e.date_fin || e.date_debut,
+		eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+		location: { '@type': 'Place', name: e.lieu || 'Lieu à confirmer', address: { '@type': 'PostalAddress', addressCountry: 'FR', addressLocality: e.ville || undefined }, url: e.lien_lieu || undefined },
+		organizer: { '@type': 'Organization', name: r.nom, url: site + '/' },
+		url: site + '/calendrier/',
+	})),
+};
+---
+<Base titre={p.seo_titre} description={p.seo_description} image={p.accueillir.photo} ld={ld}>
+	<div class="contenu-page">
+		<Groupe classe="wrap page-hero stack center">
+			<h1 class="wp-block-heading">{typo(p.entete.titre)}</h1>
+			{p.entete.texte && <p class="lead wp-block-paragraph">{typo(p.entete.texte)}</p>}
+		</Groupe>
+
+		<Groupe classe="wrap sec-bas">
+			<div class="neo-liste neo-liste-calendrier">
+				<div class="stack">
+					{typesPresents.length > 1 && (
+						<div class="filtres" role="group" aria-label="Filtrer par type d'événement">
+							<button class="filtre" type="button" data-f="tous" aria-pressed="true">Tous</button>
+							{typesPresents.map((c) => (
+								<button class={`filtre t-${c.cle}`} type="button" data-f={c.cle} aria-pressed="false"><span class="dot" style="background:var(--c)"></span>{c.pluriel || c.nom}</button>
+							))}
+						</div>
+					)}
+					<div id="liste-evts">
+						{mois.length === 0 && <p class="vide">{typo(p.vide)}</p>}
+						{mois.map((m) => (
+							<Fragment>
+								<h2 class="mois" data-mois>{m.nom}</h2>
+								{m.evts.map((e) => {
+									const c = categorie(r, e.categorie);
+									const reperes = (e.reperes || []).map(repere).filter(Boolean);
+									return (
+										<div class="evt" data-type={c.cle}>
+											<div class="date">
+												{e.a_confirmer ? (
+													<Fragment><span class="m">{moisCourt(e.date_debut)}</span><span class="j">—</span><span class="d">À confirmer</span></Fragment>
+												) : (
+													<Fragment><span class="m" aria-hidden="true">{moisCourt(e.date_debut)}</span><span class="j" aria-hidden="true">{jourCourt(e)}</span><span class="screen-reader-text">{dateEvenement(e)}</span></Fragment>
+												)}
+											</div>
+											<div>
+												<span class={`tag t-${c.cle}`}>{c.nom}</span>
+												<h3>{typo(e.titre)}</h3>
+												<p class="lieu">
+													{e.lien_lieu
+														? <a class="lieu-lien" href={e.lien_lieu} target="_blank" rel="noopener">{typo(e.lieu)}<span class="screen-reader-text"> (site du lieu)</span></a>
+														: typo(e.lieu || 'Lieu à confirmer')}
+												</p>
+												{e.description && <p class="evt-desc">{typo(e.description)}</p>}
+												{reperes.length > 0 && <p class="reperes">{reperes.map((x) => <span>{x}</span>)}</p>}
+											</div>
+											<div class="btns" style="flex-direction:column;align-items:flex-start">
+												{!e.a_confirmer && <a class="btn btn-sec" href={`/agenda/${e.id}.ics`}>Ajouter à mon agenda<span class="screen-reader-text"> : {e.titre}</span></a>}
+											</div>
+										</div>
+									);
+								})}
+							</Fragment>
+						))}
+					</div>
+					<p class="vide" id="aucun-evt" hidden>Aucun événement de ce type pour le moment.</p>
+					{r.reperes.length > 0 && (
+						<div class="reperes-boite">
+							<p class="eyebrow">Repères d’accessibilité</p>
+							<div class="legende">{r.reperes.map((x) => <div><strong>{x.nom}</strong>{typo(x.texte)}</div>)}</div>
+						</div>
+					)}
+				</div>
+			</div>
+		</Groupe>
+
+		{p.accueillir.titre && (
+			<Groupe classe="band-olive photo-duo">
+				<Image image={p.accueillir.photo} classe="duo-photo" />
+				<Groupe classe="stack duo-texte">
+					<h2 class="wp-block-heading h2">{typo(p.accueillir.titre)}</h2>
+					{p.accueillir.texte && <p class="wp-block-paragraph">{typo(p.accueillir.texte)}</p>}
+					<Boutons surPhoto liste={[p.accueillir.bouton && { ...p.accueillir.bouton, contour: true }]} />
+				</Groupe>
+			</Groupe>
+		)}
+
+		<Faq faq={p.faq} />
+	</div>
+</Base>
