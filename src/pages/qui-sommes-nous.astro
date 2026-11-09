@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import Groupe from '../components/Groupe.astro';
+import Image from '../components/Image.astro';
+import CtaFinal from '../components/CtaFinal.astro';
+import { page, typo, insecables } from '../lib/site.js';
+import { affiche } from '../lib/html.js';
+
+const p = await page('qui-sommes-nous');
+const para = (h) => affiche(h, { savoirFaire: true }).replace(/<p>/g, '<p class="wp-block-paragraph">');
+const num = (i) => String(i + 1).padStart(2, '0');
+---
+<Base titre={p.seo_titre} description={p.seo_description} image={p.patrimoine.photo1}>
+	<div class="contenu-page">
+		<Groupe classe="wrap page-hero stack center">
+			<h1 class="wp-block-heading" set:html={insecables(typo(p.entete.titre))} />
+			{p.entete.texte && <p class="lead wp-block-paragraph">{typo(p.entete.texte)}</p>}
+		</Groupe>
+
+		<Groupe classe="sec">
+			<Groupe classe="wrap duo">
+				<Groupe classe="collage collage-2">
+					<Image image={p.patrimoine.photo1} classe="collage-photo" />
+					<Image image={p.patrimoine.photo2} classe="collage-photo" />
+				</Groupe>
+				<Groupe classe="stack">
+					<h2 class="wp-block-heading h2">{typo(p.patrimoine.titre)}</h2>
+					<Fragment set:html={para(p.patrimoine.texte)} />
+				</Groupe>
+			</Groupe>
+		</Groupe>
+
+		<Groupe classe="band-laine sec">
+			<Groupe classe="wrap etroit stack center">
+				{p.origine.surtitre && <p class="eyebrow wp-block-paragraph">{typo(p.origine.surtitre)}</p>}
+				{p.origine.texte && <p class="note wp-block-paragraph">{typo(p.origine.texte)}</p>}
+				{p.origine.citation && <p class="citation wp-block-paragraph">{typo(`« ${p.origine.citation.replace(/^«\s*|\s*»$/g, '')} »`)}</p>}
+			</Groupe>
+		</Groupe>
+
+		<Groupe classe="sec">
+			<Groupe classe="wrap stack">
+				<Groupe classe="stack center"><h2 class="wp-block-heading h2">{typo(p.principes.titre)}</h2></Groupe>
+				<Groupe classe="principes">
+					{p.principes.liste.map((x, i) => (
+						<Groupe classe="principe">
+							<p class="num wp-block-paragraph">{num(i)}</p>
+							<h3 class="wp-block-heading">{typo(x.titre)}</h3>
+							<p class="wp-block-paragraph">{typo(x.texte)}</p>
+						</Groupe>
+					))}
+				</Groupe>
+			</Groupe>
+		</Groupe>
+
+		<Groupe classe="band-olive sec">
+			<Groupe classe="wrap stack">
+				<Groupe classe="stack center"><h2 class="wp-block-heading h2">{typo(p.equipe.titre)}</h2></Groupe>
+				<Groupe classe="fondatrices">
+					{p.equipe.membres.map((m) => (
+						<Groupe classe="fondatrice stack">
+							{m.photo?.src
+								? <Image image={m.photo} classe="portrait-photo" />
+								: <Groupe classe="portrait-vide"><p class="wp-block-paragraph">Portrait à venir</p></Groupe>}
+							{m.role && <p class="eyebrow wp-block-paragraph">{typo(m.role)}</p>}
+							<h3 class="wp-block-heading">{typo(m.nom)}</h3>
+							{m.parcours && <Fragment set:html={para(m.parcours)} />}
+							{m.texte && <p class="wp-block-paragraph">{typo(m.texte)}</p>}
+						</Groupe>
+					))}
+				</Groupe>
+			</Groupe>
+		</Groupe>
+
+		<CtaFinal cta={p.cta} />
+	</div>
+</Base>
