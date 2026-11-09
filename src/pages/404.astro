@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+Astro.response.status = 404;
+---
+<Base titre="Page introuvable" noindex>
+	<div class="contenu-page">
+		<div class="wrap page-hero stack center">
+			<h1>Cette page n’existe pas (ou plus)</h1>
+			<p class="lead">Le lien est peut-être ancien. Vous pouvez repartir de l’accueil ou consulter nos ateliers.</p>
+			<div class="btns" style="justify-content:center"><a class="btn btn-main" href="/">Retour à l’accueil</a><a class="btn btn-sec" href="/ateliers/">Voir les ateliers</a></div>
+		</div>
+	</div>
+</Base>

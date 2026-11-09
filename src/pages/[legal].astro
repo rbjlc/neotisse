@@ -1,0 +1,25 @@
+---
+// Mentions légales, politique de confidentialité, politique de cookies.
+import Base from '../layouts/Base.astro';
+import Groupe from '../components/Groupe.astro';
+import { page, typo } from '../lib/site.js';
+import { affiche } from '../lib/html.js';
+
+const PAGES = ['mentions-legales', 'politique-de-confidentialite', 'politique-cookies'];
+const cle = Astro.params.legal;
+if (!PAGES.includes(cle)) return Astro.rewrite('/404');
+const p = await page(cle);
+const bouton = '<button type="button" class="btn btn-sec" data-neo-cookies="ouvrir">Gérer mes cookies</button>';
+const contenu = affiche(p.contenu).replace(/<p>\s*\[bouton-cookies\]\s*<\/p>|\[bouton-cookies\]/g, bouton).replace(/<p>/g, '<p class="wp-block-paragraph">');
+---
+<Base titre={p.seo_titre} description={p.seo_description} noindex={cle === 'politique-cookies'}>
+	<div class="contenu-page">
+		<Groupe classe="wrap page-hero stack center">
+			<h1 class="wp-block-heading">{typo(p.titre)}</h1>
+			{p.intro && <p class="lead wp-block-paragraph">{typo(p.intro)}</p>}
+		</Groupe>
+		<Groupe classe="wrap">
+			<Groupe classe="prose"><Fragment set:html={contenu} /></Groupe>
+		</Groupe>
+	</div>
+</Base>
