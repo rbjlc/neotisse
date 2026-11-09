@@ -1,0 +1,85 @@
+---
+import Base from '../layouts/Base.astro';
+import Groupe from '../components/Groupe.astro';
+import Image from '../components/Image.astro';
+import Reseaux from '../components/Reseaux.astro';
+import Faq from '../components/Faq.astro';
+import { page, reglages, typo } from '../lib/site.js';
+
+const [p, r] = await Promise.all([page('contact'), reglages()]);
+const etat = Astro.url.searchParams.get('devis');
+const manque = (Astro.url.searchParams.get('manque') || '').split(',').filter(Boolean);
+const err = (k) => (manque.includes(k) ? 'true' : undefined);
+const f = p.formulaire;
+---
+<Base titre={p.seo_titre} description={p.seo_description} image={p.aside.photo}>
+	<div class="contenu-page">
+		<Groupe classe="wrap page-hero stack center">
+			<h1 class="wp-block-heading">{typo(p.entete.titre)}</h1>
+			{p.entete.texte && <p class="lead wp-block-paragraph">{typo(p.entete.texte)}</p>}
+		</Groupe>
+
+		<Groupe classe="wrap sec-bas">
+			<Groupe classe="contact-grid">
+				<Groupe id="formulaire" classe="carte-blanche stack">
+					<h2 class="wp-block-heading h3-form">{typo(f.titre)}</h2>
+					{etat === 'merci' && <p class="retour" role="status" tabindex="-1">{typo(f.merci)}</p>}
+					{etat === 'erreur' && <p class="retour erreur" role="alert" tabindex="-1">Il manque {manque.length} information{manque.length > 1 ? 's' : ''} obligatoire{manque.length > 1 ? 's' : ''} (marquée{manque.length > 1 ? 's' : ''} en rouge). Complétez-la{manque.length > 1 ? 's' : ''} puis envoyez de nouveau.</p>}
+					{etat === 'probleme' && <p class="retour erreur" role="alert" tabindex="-1">Un problème technique a empêché l’envoi. Réessayez dans quelques minutes, ou écrivez-nous directement à {r.email}.</p>}
+					{f.note && <p class="note wp-block-paragraph">{typo(f.note)}</p>}
+					<form method="post" action="/api/contact" id="form-devis">
+						<div class="champs">
+							<div class="champ"><label for="d-nom">Nom et prénom *</label><input id="d-nom" name="nom" type="text" autocomplete="name" required maxlength="120" aria-invalid={err('nom')} /></div>
+							<div class="champ"><label for="d-inst">Institution *</label><input id="d-inst" name="institution" type="text" autocomplete="organization" placeholder="Musée, université, collectivité…" required maxlength="160" aria-invalid={err('institution')} /></div>
+							<div class="champ plein"><label for="d-mail">E-mail professionnel *</label><input id="d-mail" name="email" type="email" autocomplete="email" spellcheck="false" required maxlength="160" aria-invalid={err('email')} /></div>
+						</div>
+						{r.choix_projets.length > 0 && (
+							<fieldset>
+								<legend class="legend">Type de projet</legend>
+								<div class="choix">
+									{r.choix_projets.map((x, i) => <label for={`tp${i}`}><input id={`tp${i}`} type="checkbox" name="projets" value={x} />{x}</label>)}
+								</div>
+							</fieldset>
+						)}
+						<div class="champs">
+							{r.choix_publics.length > 0 && (
+								<div class="champ"><label for="d-public">Public visé</label>
+									<select id="d-public" name="public">{r.choix_publics.map((x) => <option>{x}</option>)}</select></div>
+							)}
+							<div class="champ"><label for="d-dates">Dates souhaitées <span class="opt">(facultatif)</span></label><input id="d-dates" name="dates" type="text" maxlength="160" placeholder="Ex. : Journées du Patrimoine 2027" /></div>
+							{r.choix_budgets.length > 0 && (
+								<div class="champ plein"><label for="d-budget">Budget envisagé</label>
+									<select id="d-budget" name="budget">{r.choix_budgets.map((x) => <option>{x}</option>)}</select></div>
+							)}
+							<div class="champ plein"><label for="d-projet">Votre projet *</label><textarea id="d-projet" name="message" required maxlength="5000" placeholder="Lieu, durée, nombre de participants, contraintes…" aria-invalid={err('message')}></textarea></div>
+						</div>
+						<input type="hidden" name="t" value={Date.now()} />
+						<p class="hp" aria-hidden="true"><label for="site_web">Ne pas remplir</label><input id="site_web" name="site_web" type="text" tabindex="-1" autocomplete="off" /></p>
+						<label class="consent" for="d-ok"><input id="d-ok" name="accord" type="checkbox" value="1" required /><span>J’accepte que mes données soient utilisées pour répondre à ma demande. Elles ne sont jamais transmises à des tiers. <a href="/politique-de-confidentialite/">Politique de confidentialité</a></span></label>
+						<div><button class="btn btn-main" type="submit">{f.bouton || 'Envoyer ma demande'}</button></div>
+					</form>
+				</Groupe>
+
+				<Groupe classe="aside">
+					<div class="neo-liste neo-liste-contact-mail">
+						<div class="boite">
+							<p class="eyebrow">{typo(p.aside.surtitre)}</p>
+							<div class="mail"><code id="mail">{r.email}</code><button class="copier" type="button" id="btn-copier">Copier</button></div>
+							{r.zone && <p class="note">{typo(r.zone)}</p>}
+							<Reseaux r={r} />
+						</div>
+					</div>
+					{p.aside.etapes.length > 0 && (
+						<Groupe classe="boite-simple">
+							<p class="eyebrow wp-block-paragraph">{typo(p.aside.etapes_titre)}</p>
+							<ol class="wp-block-list etapes">{p.aside.etapes.map((e) => <li>{typo(e.texte)}</li>)}</ol>
+						</Groupe>
+					)}
+					<Image image={p.aside.photo} classe="img-box contact-photo" />
+				</Groupe>
+			</Groupe>
+		</Groupe>
+
+		<Faq faq={p.faq} />
+	</div>
+</Base>
