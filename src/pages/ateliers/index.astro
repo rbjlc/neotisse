@@ -1,0 +1,53 @@
+---
+import Base from '../../layouts/Base.astro';
+import Groupe from '../../components/Groupe.astro';
+import FicheAtelier from '../../components/FicheAtelier.astro';
+import Faq from '../../components/Faq.astro';
+import CtaFinal from '../../components/CtaFinal.astro';
+import { page, ateliers, typo } from '../../lib/site.js';
+
+const [p, liste] = await Promise.all([page('ateliers'), ateliers()]);
+const num = (i) => String(i + 1).padStart(2, '0');
+---
+<Base titre={p.seo_titre} description={p.seo_description} image={liste[0]?.image}>
+	<div class="contenu-page">
+		<Groupe classe="wrap page-hero stack center">
+			<h1 class="wp-block-heading">{typo(p.entete.titre)}</h1>
+			{p.entete.texte && <p class="lead wp-block-paragraph">{typo(p.entete.texte)}</p>}
+		</Groupe>
+
+		<Groupe classe="wrap">
+			<div class="neo-liste neo-liste-ateliers">
+				{liste.length > 1 && (
+					<nav class="onglets" aria-label="Formats d'ateliers" style="padding-bottom:40px">
+						{liste.map((a) => <a href={`#atelier-${a.slug}`}>{typo(a.nom_court || a.titre)}</a>)}
+					</nav>
+				)}
+				{liste.map((a, i) => <FicheAtelier a={a} inverse={i % 2 === 1} />)}
+			</div>
+		</Groupe>
+
+		{p.deroulement.titre && (
+			<Groupe classe="band-olive sec">
+				<Groupe classe="wrap stack">
+					<Groupe classe="stack center">
+						<h2 class="wp-block-heading h2">{typo(p.deroulement.titre)}</h2>
+						{p.deroulement.texte && <p class="lead wp-block-paragraph">{typo(p.deroulement.texte)}</p>}
+					</Groupe>
+					<Groupe classe="principes">
+						{p.deroulement.liste.map((x, i) => (
+							<Groupe classe="principe">
+								<p class="num wp-block-paragraph">{num(i)}</p>
+								<h3 class="wp-block-heading">{typo(x.titre)}</h3>
+								<p class="wp-block-paragraph">{typo(x.texte)}</p>
+							</Groupe>
+						))}
+					</Groupe>
+				</Groupe>
+			</Groupe>
+		)}
+
+		<Faq faq={p.faq} />
+		<CtaFinal cta={p.cta} />
+	</div>
+</Base>

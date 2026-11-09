@@ -1,0 +1,24 @@
+---
+// Un atelier sur la page Ateliers (photo, description, infos pratiques).
+import { typo } from '../lib/site.js';
+import { affiche } from '../lib/html.js';
+import { attrsImage } from '../lib/images.js';
+const { a, inverse = false } = Astro.props;
+const infos = [['Format', a.format], ['Public', a.public], ['Durée', a.duree], ['Participants', a.participants], ['Matériel', a.materiel]].filter(([, v]) => v);
+---
+<article class:list={['atelier', { inv: inverse }]} id={`atelier-${a.slug}`}>
+	{a.image?.src && <div class="img-box"><img src={a.image.src} {...attrsImage(a.image.src)} class="photo" alt={a.image.alt || ''} loading="lazy" /></div>}
+	<div class="stack">
+		{a.surtitre && <p class="eyebrow">{typo(a.surtitre)}</p>}
+		<h2>{typo(a.titre)}</h2>
+		<div class="prose" style="padding:0;margin:0;gap:14px" set:html={affiche(a.description).replace(/<p>/g, '<p class="wp-block-paragraph">').replace(/<ul>/g, '<ul class="wp-block-list">')} />
+		{a.repart && <p class="repart">{typo(a.repart)}</p>}
+		{infos.length > 0 && (
+			<div class="fiche">
+				<p class="fiche-titre">Infos pratiques</p>
+				<dl>{infos.map(([k, v]) => <div><dt>{k}</dt><dd>{typo(v)}</dd></div>)}</dl>
+				<p class="fiche-note">Durée, contenu et nombre de participants s’adaptent à votre projet. <a href="/contact/">Demander un devis</a></p>
+			</div>
+		)}
+	</div>
+</article>

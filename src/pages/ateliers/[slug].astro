@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import SimpleFin from '../../components/SimpleFin.astro';
+import { ateliers, typo } from '../../lib/site.js';
+import { brut, affiche } from '../../lib/html.js';
+import { attrsImage } from '../../lib/images.js';
+
+const a = (await ateliers()).find((x) => x.slug === Astro.params.slug);
+if (!a) return Astro.rewrite('/404');
+const ld = {
+	'@context': 'https://schema.org', '@type': 'Service', name: a.titre, serviceType: 'Atelier de médiation textile',
+	description: a.seo_description || a.resume || brut(a.description).slice(0, 160),
+	provider: { '@type': 'Organization', name: 'Neotisse' }, areaServed: 'FR',
+};
+---
+<Base titre={`${a.titre} : atelier textile`} description={a.seo_description || a.resume} image={a.image} ld={ld}>
+	<article class="wrap">
+		<div class="single-wrap">
+			<a class="retour-lien" href="/ateliers/">← Tous les ateliers</a>
+			{a.surtitre && <p class="eyebrow">{typo(a.surtitre)}</p>}
+			<h1>{typo(a.titre)}</h1>
+			{a.image?.src && <div class="img-box"><img src={a.image.src} {...attrsImage(a.image.src, '(max-width: 900px) 100vw, 760px')} class="photo" alt={a.image.alt || ''} /></div>}
+			<div class="prose" style="padding:0;max-width:none" set:html={affiche(a.description)} />
+			{a.repart && <p class="repart">{typo(a.repart)}</p>}
+			<p><a class="btn btn-sec" href={`/ateliers/#atelier-${a.slug}`}>Voir les infos pratiques</a></p>
+		</div>
+	</article>
+	<SimpleFin />
+</Base>
