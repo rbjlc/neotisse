@@ -1,0 +1,15 @@
+---
+// Boutons au format d'origine. liste = [{ texte, lien, contour? }] ; les boutons sans texte sont ignorés.
+const { liste = [], surPhoto = false, centre = false } = Astro.props;
+const boutons = liste.filter((b) => b && b.texte && b.lien);
+const externe = (l) => /^https?:\/\//.test(l);
+---
+{boutons.length > 0 && (
+	<div class:list={['wp-block-buttons btns', { 'sur-photo': surPhoto }, 'is-layout-flex wp-block-buttons-is-layout-flex']} style={centre ? 'justify-content:center' : undefined}>
+		{boutons.map((b) => (
+			<div class:list={['wp-block-button', { 'is-style-outline': b.contour }]}>
+				<a class="wp-block-button__link wp-element-button" href={b.lien} target={externe(b.lien) ? '_blank' : undefined} rel={externe(b.lien) ? 'noopener' : undefined}>{b.texte}</a>
+			</div>
+		))}
+	</div>
+)}

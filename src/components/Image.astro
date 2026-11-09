@@ -1,0 +1,10 @@
+---
+// Photo dans un cadre WordPress (figure). Rien n'est affiché si aucune photo n'est choisie.
+import { attrsImage } from '../lib/images.js';
+const { image, classe = '', priorite = false, sizes } = Astro.props;
+---
+{image?.src && (
+	<figure class={`wp-block-image size-large ${classe}`}>
+		<img src={image.src} {...attrsImage(image.src, sizes)} alt={image.alt || ''} loading={priorite ? 'eager' : 'lazy'} fetchpriority={priorite ? 'high' : undefined} decoding="async" />
+	</figure>
+)}

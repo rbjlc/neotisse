@@ -1,0 +1,160 @@
+---
+// Gabarit commun à toutes les pages publiques : en-tête, menu, pied de page, cookies.
+import Reseaux from '../components/Reseaux.astro';
+import { reglages, urlSite, couleur } from '../lib/site.js';
+
+const { titre, description = '', image, ld, noindex = false, classeCorps = '' } = Astro.props;
+const r = await reglages();
+const site = urlSite();
+const chemin = Astro.url.pathname;
+const titreComplet = !titre || titre === r.nom ? r.nom : `${titre} | ${r.nom}`;
+const partage = image?.src ? image : r.image_partage;
+const absolu = (u) => (u && !/^https?:/.test(u) ? site + u : u);
+
+const menu = [
+	['/qui-sommes-nous/', 'Qui sommes-nous ?'],
+	['/ateliers/', 'Ateliers'],
+	['/calendrier/', 'Calendrier'],
+	['/actualites/', 'Actualités'],
+	['/livre-or/', 'Témoignages'],
+];
+const pied = [
+	['/contact/', 'Contact'],
+	['/mentions-legales/', 'Mentions légales'],
+	['/politique-de-confidentialite/', 'Politique de confidentialité'],
+	['/politique-cookies/', 'Politique de cookies'],
+];
+const actif = (url) => chemin === url || (url !== '/' && chemin.startsWith(url));
+
+const organisation = {
+	'@context': 'https://schema.org',
+	'@type': 'Organization',
+	'@id': site + '/#organization',
+	name: r.nom,
+	url: site + '/',
+	email: r.email,
+	logo: site + '/images/logo-neotisse.png',
+	address: { '@type': 'PostalAddress', streetAddress: r.adresse?.split(',')[0], postalCode: '34090', addressLocality: 'Montpellier', addressCountry: 'FR' },
+	sameAs: [r.facebook, r.instagram].filter(Boolean),
+};
+const annee = new Date().getFullYear();
+const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
+---
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>{titreComplet}</title>
+	{description && <meta name="description" content={description} />}
+	<meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
+	<link rel="canonical" href={site + chemin} />
+	<link rel="icon" href="/images/logo-neotisse.png" type="image/png" />
+	<meta property="og:locale" content="fr_FR" />
+	<meta property="og:type" content={chemin === '/' ? 'website' : 'article'} />
+	<meta property="og:site_name" content={r.nom} />
+	<meta property="og:title" content={titreComplet} />
+	{description && <meta property="og:description" content={description} />}
+	<meta property="og:url" content={site + chemin} />
+	{partage?.src && <meta property="og:image" content={absolu(partage.src)} />}
+	{partage?.alt && <meta property="og:image:alt" content={partage.alt} />}
+	<meta name="twitter:card" content="summary_large_image" />
+	<link rel="preload" href="/fonts/fraunces-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin />
+	<link rel="preload" href="/fonts/atkinson-hyperlegible-next-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+	<link rel="stylesheet" href="/css/base-avant.css" />
+	<link rel="stylesheet" href="/css/style.css" />
+	<link rel="stylesheet" href="/css/base-apres.css" />
+	<link rel="stylesheet" href="/css/ajouts.css" />
+	<style is:inline set:html={r.categories.map((c) => `.t-${c.cle}{--c:${couleur(c.couleur)}}`).join('')}></style>
+	<script type="application/ld+json" set:html={JSON.stringify(organisation)} />
+	{ld && <script type="application/ld+json" set:html={JSON.stringify(ld)} />}
+	<slot name="tete" />
+</head>
+<body class={`boutons-garance ${classeCorps}`}>
+	<a class="skip-link screen-reader-text" href="#contenu">Aller au contenu</a>
+	<header class="site">
+		<div class="wrap hdr">
+			<a class="logo" href="/" aria-label={`${r.nom}, retour à l'accueil`} aria-current={chemin === '/' ? 'page' : undefined}>
+				<img src="/images/logo-neotisse.png" alt="" width="56" height="48" />
+				<span>{r.nom.toUpperCase()}</span>
+			</a>
+			<nav class="main" aria-label="Navigation principale">
+				<ul class="menu">
+					{menu.map(([url, nom]) => (
+						<li class:list={['menu-item', { 'current-menu-item': actif(url) }]}>
+							<a href={url} aria-current={actif(url) ? 'page' : undefined}>{nom}</a>
+						</li>
+					))}
+				</ul>
+				<a href="/contact/" class="btn btn-main menu-cta" aria-current={actif('/contact/') ? 'page' : undefined}>Contact</a>
+			</nav>
+		</div>
+	</header>
+	<div class="galon" role="presentation"></div>
+
+	<main id="contenu">
+		<slot />
+	</main>
+
+	<footer class="site">
+		<div class="wrap ftr">
+			<div class="ftr-marque">
+				<p class="nom">{r.nom.toUpperCase()}</p>
+				<p>{r.description_pied}</p>
+				<p>{r.email}</p>
+				<Reseaux r={r} classe="reseaux reseaux-pied" />
+			</div>
+			<nav class="ftr-liens" aria-label="Pages du site">
+				<ul class="menu">
+					{menu.map(([url, nom]) => <li class="menu-item"><a href={url}>{nom}</a></li>)}
+				</ul>
+				<ul class="menu">
+					{pied.map(([url, nom]) => <li class="menu-item"><a href={url}>{nom}</a></li>)}
+					<li class="menu-item"><button type="button" class="lien-cookies" data-neo-cookies="ouvrir">Gérer mes cookies</button></li>
+				</ul>
+			</nav>
+			<p class="mention">© {annee} {r.nom} · Site conçu par BELLADONNA</p>
+		</div>
+	</footer>
+
+	<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+	{r.bandeau_cookies !== false && (
+		<Fragment>
+			<div class="cookies-fond" id="neo-cookies-fond" hidden></div>
+			<div class="cookies" id="neo-cookies" role="dialog" aria-modal="true" aria-labelledby="neo-cookies-titre" aria-describedby="neo-cookies-texte" data-auto={chemin.startsWith('/politique-cookies') ? '0' : '1'} hidden>
+				<p class="cookies-titre" id="neo-cookies-titre">Vos choix de cookies</p>
+				<p class="cookies-texte" id="neo-cookies-texte">
+					Nous aimerions mesurer la fréquentation du site{ga ? ' avec Google Analytics' : ''} pour l'améliorer. Ces cookies ne sont déposés que si vous les acceptez. Vous pouvez changer d'avis à tout moment.
+					<a href="/politique-cookies/">Politique de cookies</a>
+				</p>
+				<div class="cookies-details" id="neo-cookies-details" hidden>
+					<div class="cookies-ligne">
+						<div><p class="cookies-cat">Nécessaires</p><p>Mémoriser vos choix de cookies. Toujours actifs.</p></div>
+						<span class="cookies-toujours">Toujours actifs</span>
+					</div>
+					<div class="cookies-ligne">
+						<div><p class="cookies-cat"><label for="neo-c-audience">Mesure d'audience</label></p><p>Compter les visites, les pages consultées et d'où viennent les visiteurs (Google Analytics).</p></div>
+						<input type="checkbox" id="neo-c-audience" class="cookies-switch" />
+					</div>
+				</div>
+				<div class="cookies-btns">
+					<button type="button" class="btn cookies-btn" data-neo-cookies="refuser">Tout refuser</button>
+					<button type="button" class="btn cookies-btn" data-neo-cookies="accepter">Tout accepter</button>
+					<button type="button" class="cookies-lien" data-neo-cookies="personnaliser" aria-expanded="false" aria-controls="neo-cookies-details">Personnaliser</button>
+					<button type="button" class="btn cookies-btn" data-neo-cookies="enregistrer" hidden>Enregistrer mes choix</button>
+				</div>
+			</div>
+		</Fragment>
+	)}
+
+	{ga && (
+		<Fragment>
+			<script type="text/plain" data-neo-consent="audience" async src={`https://www.googletagmanager.com/gtag/js?id=${ga}`}></script>
+			<script type="text/plain" data-neo-consent="audience" set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config',${JSON.stringify(ga)},{anonymize_ip:true});`}></script>
+		</Fragment>
+	)}
+	<script is:inline src="/js/cookies.js" defer></script>
+	<script is:inline src="/js/site.js" defer></script>
+</body>
+</html>

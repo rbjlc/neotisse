@@ -1,0 +1,5 @@
+---
+// Bloc de mise en page (reprend la structure du site d'origine pour garder exactement le même rendu).
+const { classe = '', id } = Astro.props;
+---
+<div id={id} class={`wp-block-group ${classe}`}><div class="wp-block-group__inner-container is-layout-flow wp-block-group-is-layout-flow"><slot /></div></div>
