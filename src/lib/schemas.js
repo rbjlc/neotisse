@@ -39,36 +39,66 @@ export const PAGES = {
 		nom: 'Accueil', url: '/',
 		sections: [
 			{
-				cle: 'hero', titre: 'Grande photo du haut',
+				cle: 'entree', titre: 'Grande photo du haut',
 				aide: 'La première chose que voient les visiteurs. Choisissez une photo horizontale, lumineuse, où l’on voit bien les laines.',
 				champs: [
 					image('image', 'Photo de fond'),
-					t('titre', 'Nom en grand'),
-					t('accroche', 'Phrase d’accroche'),
-					t('sous_titre', 'Petite ligne en dessous'),
-					bouton('bouton1', 'Bouton principal (plein)'),
-					bouton('bouton2', 'Second bouton (contour)'),
+					t('sur_titre', 'Petite ligne au-dessus du titre', 'Ex. : Archéologie textile · Montpellier'),
+					long('titre', 'Grand titre', 'Allez à la ligne pour choisir où le titre se coupe (3 lignes conseillées).'),
+					t('mot_couleur', 'Mot en couleur', 'Recopiez exactement un mot ou un groupe de mots du titre : il s’affichera en jaune et en italique.'),
+					long('texte', 'Texte à droite'),
+					bouton('bouton', 'Bouton'),
 				],
 			},
 			{
-				cle: 'presentation', titre: 'Présentation (collage de photos)',
+				cle: 'manifeste', titre: 'Grande phrase « L’association »',
+				aide: 'La phrase se colore mot à mot quand on fait défiler la page.',
+				champs: [t('libelle', 'Petit titre'), long('texte', 'Phrase'), t('suite', 'Fin de phrase en italique', 'Facultatif.')],
+			},
+			{
+				cle: 'principes', titre: 'Nos principes (trois colonnes)',
+				champs: [liste('liste', 'Principes', [t('titre', 'Titre'), long('texte', 'Texte')], { ajout: 'Ajouter un principe', resume: 'titre', aide: 'Les numéros 01, 02, 03 s’ajoutent tout seuls. Trois principes conseillés.' })],
+			},
+			{
+				cle: 'mots', titre: 'Mots qui défilent',
+				aide: 'Deux lignes de mots qui glissent quand on fait défiler la page, dans un sens puis dans l’autre.',
 				champs: [
-					liste('photos', 'Photos du collage', [image('image', 'Photo')], { ajout: 'Ajouter une photo', max: 5, aide: '5 photos maximum. Les photos en hauteur rendent mieux.', simple: 'image' }),
-					t('titre', 'Titre'), riche('texte', 'Texte'), bouton('bouton', 'Bouton'),
+					{ cle: 'ligne1', type: 'lignes', label: 'Première ligne (un mot par ligne)' },
+					{ cle: 'ligne2', type: 'lignes', label: 'Seconde ligne, en contour (un mot par ligne)' },
 				],
 			},
 			{
-				cle: 'ateliers', titre: 'Bloc bleu « Nos ateliers »',
-				aide: 'La liste des ateliers se remplit toute seule à partir du menu Ateliers.',
-				champs: [t('titre', 'Titre'), bouton('bouton', 'Bouton'), image('photo', 'Photo à droite')],
+				cle: 'ateliers_bloc', titre: 'Bloc « Nos ateliers » (cartes à faire glisser)',
+				aide: 'Les cartes se remplissent toutes seules à partir du menu Ateliers (photo, étiquette, phrase courte).',
+				champs: [t('libelle', 'Petit titre'), t('titre', 'Titre')],
 			},
-			{ cle: 'equipe', titre: 'Bloc vert « L’équipe »', champs: [t('titre', 'Titre'), riche('texte', 'Texte'), bouton('bouton', 'Bouton'), image('photo', 'Photo')] },
 			{
-				cle: 'confiance', titre: 'Bloc jaune « Ils nous ont fait confiance »',
-				aide: 'Les noms ou logos viennent du menu Partenaires. L’actualité « À la une » se choisit dans le menu Actualités.',
-				champs: [t('titre', 'Titre'), long('texte', 'Texte'), bouton('bouton', 'Bouton')],
+				cle: 'citation', titre: 'Grande photo avec citation',
+				champs: [image('image', 'Photo'), long('texte', 'Citation', 'Les guillemets « » sont ajoutés automatiquement.'), t('source', 'Petite ligne sous la citation')],
 			},
-			CTA,
+			{
+				cle: 'fondatrices', titre: 'L’équipe',
+				champs: [
+					t('libelle', 'Petit titre'), t('titre', 'Titre'), long('texte', 'Texte'),
+					image('photo1', 'Grande photo'), image('photo2', 'Petite photo'),
+					liste('membres', 'Fondatrices', [t('nom', 'Nom'), t('role', 'Rôle')], { ajout: 'Ajouter une personne', resume: 'nom' }),
+					bouton('bouton', 'Lien'),
+				],
+			},
+			{
+				cle: 'agenda', titre: 'Prochaines dates',
+				aide: 'Les trois prochaines dates viennent toutes seules du menu Calendrier.',
+				champs: [t('libelle', 'Petit titre'), t('titre', 'Titre'), bouton('lien', 'Lien vers le calendrier'), t('vide', 'Message s’il n’y a aucune date')],
+			},
+			{
+				cle: 'appel', titre: 'Bandeau de fin « Un atelier sur mesure ? »',
+				aide: 'Les noms des partenaires qui défilent juste au-dessus viennent du menu Partenaires.',
+				champs: [
+					t('libelle', 'Petit titre'), t('titre', 'Titre'),
+					t('mot_couleur', 'Mot en couleur', 'Recopiez exactement un mot du titre : il s’affichera en jaune et en italique.'),
+					long('texte', 'Texte'), bouton('bouton', 'Bouton'),
+				],
+			},
 		],
 	},
 	'qui-sommes-nous': {
@@ -165,7 +195,7 @@ const PUBLIE = { cle: 'publie', type: 'case', label: 'Visible sur le site', aide
 export const COLLECTIONS = {
 	ateliers: {
 		nom: 'Ateliers', unNom: 'un atelier', nouveau: 'Nouvel atelier', icone: '🧶',
-		aide: 'Chaque atelier apparaît sur la page Ateliers et dans le bloc bleu de l’accueil. Utilisez « Ordre » pour choisir la position.',
+		aide: 'Chaque atelier apparaît sur la page Ateliers et dans les cartes de l’accueil. Utilisez « Ordre » pour choisir la position.',
 		colonnes: ['titre', 'nom_court'], ordre: 'ordre', url: (f) => `/ateliers/${f.slug}/`,
 		champs: [
 			t('titre', 'Nom de l’atelier', '', { requis: true }),
@@ -176,8 +206,9 @@ export const COLLECTIONS = {
 			{ groupe: 'Infos pratiques', aide: 'Les lignes laissées vides ne s’affichent pas.' },
 			t('format', 'Format'), t('public', 'Public'), t('duree', 'Durée'), t('participants', 'Participants'), t('materiel', 'Matériel'),
 			{ groupe: 'Sur l’accueil' },
-			t('nom_court', 'Nom court', 'Dans le bloc bleu de l’accueil. Ex. : Jeune public'),
-			t('resume', 'Phrase courte', 'Une ligne sous le nom court.'),
+			t('etiquette', 'Étiquette sur la photo', 'Ex. : Tous publics, Jeune public, Chercheurs'),
+			t('nom_court', 'Nom court', 'Ex. : Jeune public (utilisé dans les listes).'),
+			t('resume', 'Phrase courte', 'Une ligne sous le titre de la carte.'),
 			{ groupe: 'Réglages' },
 			{ cle: 'ordre', type: 'nombre', label: 'Ordre', aide: '1 = en premier.' },
 			t('slug', 'Adresse de la page', 'Se remplit toute seule à partir du nom. À ne changer que si nécessaire.'),
