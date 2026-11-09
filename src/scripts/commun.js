@@ -21,6 +21,17 @@ function surDefilement() {
 window.addEventListener('scroll', surDefilement, { passive: true });
 surDefilement();
 
+/* ---------- Fil d'avancement en haut de l'écran ---------- */
+const avancee = document.getElementById('avancee');
+if (avancee && !calme) {
+	const majAvancee = () => {
+		const max = document.documentElement.scrollHeight - window.innerHeight;
+		gsap.to(avancee, { scaleX: max > 0 ? window.scrollY / max : 0, duration: 0.3, ease: 'power2.out', overwrite: true });
+	};
+	window.addEventListener('scroll', majAvancee, { passive: true });
+	majAvancee();
+}
+
 /* ---------- Menu plein écran ---------- */
 const menu = document.getElementById('menu-plein');
 const ouvrir = document.getElementById('ouvrir-menu');

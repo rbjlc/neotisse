@@ -70,7 +70,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @media (max-width:700px){.tete .bouton .long{display:none}.marque{letter-spacing:.2em;font-size:18px}.menu-btn .mot{display:none}}
 
 /* Pages intérieures : en-tête toujours plein, contenu décalé sous l'en-tête */
-.interieur #contenu{padding-top:var(--haut-tete)}
+.interieur #contenu{padding-top:var(--haut-tete);overflow-x:clip}
 
 /* ---------- Menu plein écran ---------- */
 .menu-plein{position:fixed;inset:0;z-index:60;background:var(--foret);color:var(--lin);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);visibility:hidden;clip-path:inset(0 0 100% 0)}
@@ -147,3 +147,11 @@ html.cookies-ouvert{overflow:hidden}
 .cookies-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;padding:12px 18px;font:600 14px/1.1 var(--texte);cursor:pointer}
 .cookies-texte{margin:0}.cookies-titre{margin:0}
 .menu-plein[hidden]{display:none}
+
+/* ---------- Défilement ---------- */
+/* fil d'avancement : se teint en garance, gaude puis guède à mesure qu'on descend */
+.avancee{position:fixed;left:0;right:0;top:0;height:3px;z-index:60;pointer-events:none;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--garance),var(--gaude) 55%,var(--guede))}
+/* titres découpés en mots qui sortent d'un cache */
+.cache-mot{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em;margin-bottom:-.08em}
+.cache-mot>span{display:inline-block;will-change:transform}
+@media (prefers-reduced-motion:reduce){.avancee{display:none}}

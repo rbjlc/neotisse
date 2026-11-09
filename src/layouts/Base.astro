@@ -85,6 +85,7 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 </head>
 <body class={accueil ? 'accueil' : `boutons-garance interieur ${classeCorps}`}>
 	<a class="saut" href="#contenu">Aller au contenu</a>
+	<div class="avancee" id="avancee" aria-hidden="true"></div>
 	{accueil && (
 		<div class="chargement" id="chargement" aria-hidden="true">
 			<svg viewBox="0 0 420 120"><path id="ch-fil" d="M10 96 C 90 20, 160 120, 210 64 S 330 10, 410 80" fill="none" stroke="#E8B42F" stroke-width="2.5" stroke-linecap="round"></path><text x="210" y="74" text-anchor="middle" id="ch-nom">{r.nom.toUpperCase()}</text></svg>
@@ -185,5 +186,6 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 	<script is:inline src="/js/cookies.js" defer></script>
 	<script is:inline src="/js/site.js" defer></script>
 	<script>import '../scripts/commun.js';</script>
+	{!accueil && <script>import '../scripts/defilement.js';</script>}
 </body>
 </html>
