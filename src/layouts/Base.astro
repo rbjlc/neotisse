@@ -1,9 +1,8 @@
 ---
 // Gabarit commun à toutes les pages publiques : en-tête, menu, pied de page, cookies.
-import Reseaux from '../components/Reseaux.astro';
-import { reglages, urlSite, couleur } from '../lib/site.js';
+import { reglages, urlSite, couleur, typo } from '../lib/site.js';
 
-const { titre, description = '', image, ld, noindex = false, classeCorps = '' } = Astro.props;
+const { titre, description = '', image, ld, noindex = false, classeCorps = '', accueil = false } = Astro.props;
 const r = await reglages();
 const site = urlSite();
 const chemin = Astro.url.pathname;
@@ -18,6 +17,9 @@ const menu = [
 	['/actualites/', 'Actualités'],
 	['/livre-or/', 'Témoignages'],
 ];
+// Photo montrée à droite du menu plein écran quand on survole chaque page
+const apercusMenu = ['/images/conference-800.webp', '/images/echeveaux-teints-800.webp', '/images/atelier-plein-air-800.webp', '/images/panier-echeveaux-800.webp', '/images/enfant-tissage-carton-800.webp', '/images/metier-a-tisser-vertical-800.webp'];
+const menuComplet = [...menu, ['/contact/', 'Contact']];
 const pied = [
 	['/contact/', 'Contact'],
 	['/mentions-legales/', 'Mentions légales'],
@@ -61,61 +63,87 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 	<meta name="twitter:card" content="summary_large_image" />
 	<link rel="preload" href="/fonts/fraunces-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin />
 	<link rel="preload" href="/fonts/atkinson-hyperlegible-next-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
-	<link rel="stylesheet" href="/css/base-avant.css" />
-	<link rel="stylesheet" href="/css/style.css" />
-	<link rel="stylesheet" href="/css/base-apres.css" />
-	<link rel="stylesheet" href="/css/ajouts.css" />
+	{accueil ? (
+		<Fragment>
+			<link rel="stylesheet" href="/css/v2-commun.css" />
+			<link rel="stylesheet" href="/css/v2-accueil.css" />
+		</Fragment>
+	) : (
+		<Fragment>
+			<link rel="stylesheet" href="/css/base-avant.css" />
+			<link rel="stylesheet" href="/css/style.css" />
+			<link rel="stylesheet" href="/css/base-apres.css" />
+			<link rel="stylesheet" href="/css/ajouts.css" />
+			<link rel="stylesheet" href="/css/v2-commun.css" />
+		</Fragment>
+	)}
+	<script is:inline set:html={`(function(){var h=document.documentElement;try{if(sessionStorage.getItem('neo-transition'))h.classList.add('arrivee');${accueil ? "if(!sessionStorage.getItem('neo-vu')){h.classList.add('premiere-visite');sessionStorage.setItem('neo-vu','1');}" : ''}}catch(e){}if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){h.classList.remove('arrivee','premiere-visite');}})();`} />
 	<style is:inline set:html={r.categories.map((c) => `.t-${c.cle}{--c:${couleur(c.couleur)}}`).join('')}></style>
 	<script type="application/ld+json" set:html={JSON.stringify(organisation)} />
 	{ld && <script type="application/ld+json" set:html={JSON.stringify(ld)} />}
 	<slot name="tete" />
 </head>
-<body class={`boutons-garance ${classeCorps}`}>
-	<a class="skip-link screen-reader-text" href="#contenu">Aller au contenu</a>
-	<header class="site">
-		<div class="wrap hdr">
-			<a class="logo" href="/" aria-label={`${r.nom}, retour à l'accueil`} aria-current={chemin === '/' ? 'page' : undefined}>
-				<img src="/images/logo-neotisse.png" alt="" width="56" height="48" />
-				<span>{r.nom.toUpperCase()}</span>
-			</a>
-			<nav class="main" aria-label="Navigation principale">
-				<ul class="menu">
-					{menu.map(([url, nom]) => (
-						<li class:list={['menu-item', { 'current-menu-item': actif(url) }]}>
-							<a href={url} aria-current={actif(url) ? 'page' : undefined}>{nom}</a>
-						</li>
-					))}
-				</ul>
-				<a href="/contact/" class="btn btn-main menu-cta" aria-current={actif('/contact/') ? 'page' : undefined}>Contact</a>
-			</nav>
+<body class={accueil ? 'accueil' : `boutons-garance interieur ${classeCorps}`}>
+	<a class="saut" href="#contenu">Aller au contenu</a>
+	{accueil && (
+		<div class="chargement" id="chargement" aria-hidden="true">
+			<svg viewBox="0 0 420 120"><path id="ch-fil" d="M10 96 C 90 20, 160 120, 210 64 S 330 10, 410 80" fill="none" stroke="#E8B42F" stroke-width="2.5" stroke-linecap="round"></path><text x="210" y="74" text-anchor="middle" id="ch-nom">{r.nom.toUpperCase()}</text></svg>
+			<div class="fils"><span style="background:#4F5233"></span><span style="background:#A8321F"></span><span style="background:#E8B42F"></span><span style="background:#2E5A8A"></span></div>
+		</div>
+	)}
+	<header class:list={['tete env', { plein: !accueil }]} id="tete">
+		<div class="l">
+			<button class="menu-btn" type="button" id="ouvrir-menu" aria-expanded="false" aria-controls="menu-plein"><span class="barres" aria-hidden="true"><i></i><i></i></span><span class="mot" aria-hidden="true">Menu</span><span class="sr">Ouvrir le menu</span></button>
+			<a class="marque" href="/" aria-label={`${r.nom}, accueil`} aria-current={chemin === '/' ? 'page' : undefined}><img src="/images/logo-neotisse.png" alt="" width="34" height="29" />{r.nom.toUpperCase()}</a>
+			<div class="tete-droite"><a class="bouton" href="/contact/" data-page="Contact"><span class="long">Demander un&nbsp;</span>devis</a></div>
 		</div>
 	</header>
-	<div class="galon" role="presentation"></div>
+	<div class="menu-plein" id="menu-plein" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+		<button class="fermer" type="button" id="fermer-menu"><span aria-hidden="true">✕</span> Fermer</button>
+		<nav aria-label="Pages du site">
+			<ul>
+				{menuComplet.map(([url, nom], i) => (
+					<li><a href={url} data-page={nom} data-img={i} aria-current={actif(url) ? 'page' : undefined}><small aria-hidden="true">{String(i + 1).padStart(2, '0')}</small><span class="mot">{typo(nom)}</span></a></li>
+				))}
+			</ul>
+			<div class="bas">
+				<span>{r.email}</span>
+				{r.facebook && <a href={r.facebook} target="_blank" rel="noopener">Facebook<span class="sr"> (nouvel onglet)</span></a>}
+				{r.instagram && <a href={r.instagram} target="_blank" rel="noopener">Instagram<span class="sr"> (nouvel onglet)</span></a>}
+				<span>Montpellier</span>
+			</div>
+		</nav>
+		<div class="apercu" aria-hidden="true">
+			{apercusMenu.map((src, i) => <img src={src} alt="" class={i === 0 ? 'vu' : undefined} loading="lazy" />)}
+		</div>
+	</div>
 
 	<main id="contenu">
 		<slot />
 	</main>
 
-	<footer class="site">
-		<div class="wrap ftr">
-			<div class="ftr-marque">
-				<p class="nom">{r.nom.toUpperCase()}</p>
-				<p>{r.description_pied}</p>
-				<p>{r.email}</p>
-				<Reseaux r={r} classe="reseaux reseaux-pied" />
+	<footer class="pied env">
+		<div class="l">
+			<div>
+				<p class="grand">Faire vivre les savoir-faire textiles du passé.</p>
+				<p class="presentation">{r.description_pied}</p>
+				<div class="reseaux">
+					{r.facebook && <a href={r.facebook} target="_blank" rel="noopener">Facebook<span class="sr"> (nouvel onglet)</span></a>}
+					{r.instagram && <a href={r.instagram} target="_blank" rel="noopener">Instagram<span class="sr"> (nouvel onglet)</span></a>}
+				</div>
 			</div>
-			<nav class="ftr-liens" aria-label="Pages du site">
-				<ul class="menu">
-					{menu.map(([url, nom]) => <li class="menu-item"><a href={url}>{nom}</a></li>)}
-				</ul>
-				<ul class="menu">
-					{pied.map(([url, nom]) => <li class="menu-item"><a href={url}>{nom}</a></li>)}
-					<li class="menu-item"><button type="button" class="lien-cookies" data-neo-cookies="ouvrir">Gérer mes cookies</button></li>
-				</ul>
-			</nav>
-			<p class="mention">© {annee} {r.nom} · Site conçu par BELLADONNA</p>
+			<nav aria-label="Pages du site"><ul>{menu.map(([url, nom]) => <li><a href={url}>{nom}</a></li>)}</ul></nav>
+			<nav aria-label="Informations"><ul>
+				<li>{r.email}</li>
+				{pied.map(([url, nom]) => <li><a href={url}>{nom}</a></li>)}
+				<li><button type="button" class="lien-cookies" data-neo-cookies="ouvrir">Gérer mes cookies</button></li>
+			</ul></nav>
+			<p class="mention"><span>© {annee} {r.nom} · Association loi 1901 · Montpellier</span><span>Site conçu par BELLADONNA</span></p>
 		</div>
 	</footer>
+
+	<div class="flottant" id="flottant"><a class="bouton" href="/contact/" data-page="Contact">Demander un devis <span class="f" aria-hidden="true">→</span></a></div>
+	<div class="rideau" id="rideau" aria-hidden="true"><span style="background:#4F5233"></span><span style="background:#A8321F"></span><span style="background:#E8B42F"></span><span style="background:#2E5A8A"></span><div class="nom" id="rideau-nom"></div></div>
 
 	<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
@@ -156,5 +184,6 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 	)}
 	<script is:inline src="/js/cookies.js" defer></script>
 	<script is:inline src="/js/site.js" defer></script>
+	<script>import '../scripts/commun.js';</script>
 </body>
 </html>
