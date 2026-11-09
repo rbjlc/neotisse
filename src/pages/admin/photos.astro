@@ -1,0 +1,65 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { lister, lire, ecrire, supprimer, supprimerFichier, TABLES } from '../../lib/donnees.js';
+import { dateLongue } from '../../lib/site.js';
+import { PAGES, COLLECTIONS } from '../../lib/schemas.js';
+
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	const id = String(f.get('id') || ''), action = f.get('action');
+	const m = id && (await lire('medias', id));
+	if (m && action === 'alt') {
+		await ecrire('medias', id, { ...m, alt: String(f.get('alt') || '').trim() });
+		return Astro.redirect('/admin/photos/?ok=' + encodeURIComponent('Description enregistrée.') + '#p-' + id, 303);
+	}
+	if (m && action === 'supprimer') {
+		await supprimer('medias', id);
+		await supprimerFichier(m.url).catch(() => {});
+		return Astro.redirect('/admin/photos/?ok=' + encodeURIComponent('Photo supprimée de la bibliothèque.'), 303);
+	}
+}
+
+const medias = (await lister('medias')).sort((a, b) => (b.cree_le || '').localeCompare(a.cree_le || ''));
+// Où chaque photo est utilisée
+const contenus = [];
+for (const t of ['pages', 'ateliers', 'actualites', 'partenaires', 'reglages']) {
+	for (const x of await lister(t)) {
+		const nom = t === 'pages' ? PAGES[x.id]?.nom : t === 'reglages' ? 'Réglages' : `${COLLECTIONS[t].nom} : ${x.titre || x.nom}`;
+		contenus.push({ nom, texte: JSON.stringify(x) });
+	}
+}
+const usages = (url) => contenus.filter((c) => c.texte.includes(JSON.stringify(url).slice(1, -1))).map((c) => c.nom);
+---
+<Admin titre="Photos" actif="photos" large>
+	<div class="adm-titre"><div><h1>Photos</h1><p>Toutes les photos du site. Ajoutez-en ici, puis choisissez-les depuis n’importe quelle page avec le bouton « Choisir une photo ».</p></div></div>
+
+	<div class="depot" data-depot>
+		<p style="font-size:19px;font-weight:700">Glissez vos photos ici</p>
+		<p class="carte-aide" style="margin:6px 0 14px">ou</p>
+		<label class="b b-principal">Choisir sur l’ordinateur<input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
+		<p class="carte-aide" style="margin:14px 0 0" data-etat>Les photos trop grandes sont réduites automatiquement. JPG, PNG ou WebP.</p>
+	</div>
+
+	{medias.length === 0 ? <p class="adm-info">Aucune photo pour l’instant.</p> : (
+		<div class="mediatheque">
+			{medias.map((m) => {
+				const u = usages(m.url);
+				return (
+					<div class:list={['media', { 'sans-alt': !m.alt }]} id={`p-${m.id}`}>
+						<img src={m.url} alt="" loading="lazy" />
+						<form method="post">
+							<input type="hidden" name="id" value={m.id} />
+							<label class="sous" for={`alt-${m.id}`}>{m.alt ? 'Description' : '⚠ Description manquante'}</label>
+							<textarea id={`alt-${m.id}`} name="alt" rows="2" style="min-height:0;font-size:15px" placeholder="Ce qu’on voit sur la photo">{m.alt || ''}</textarea>
+							<p class="sous">{u.length ? `Utilisée : ${u.join(', ')}` : 'Pas utilisée pour l’instant'} · {dateLongue(m.cree_le)}</p>
+							<div class="b-groupe">
+								<button class="b b-second b-petit" name="action" value="alt">Enregistrer</button>
+								<button class="b b-danger b-petit" name="action" value="supprimer" data-confirmer={u.length ? `Cette photo est utilisée (${u.join(', ')}). La supprimer quand même ? Elle disparaîtra de ces pages.` : 'Supprimer cette photo ?'}>Supprimer</button>
+							</div>
+						</form>
+					</div>
+				);
+			})}
+		</div>
+	)}
+</Admin>
