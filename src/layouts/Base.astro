@@ -26,6 +26,7 @@ const pied = [
 	['/politique-de-confidentialite/', 'Politique de confidentialité'],
 	['/politique-cookies/', 'Politique de cookies'],
 ];
+const surContact = chemin.startsWith('/contact');
 const actif = (url) => chemin === url || (url !== '/' && chemin.startsWith(url));
 
 const organisation = {
@@ -113,7 +114,7 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 		<div class="l">
 			<button class="menu-btn" type="button" id="ouvrir-menu" aria-expanded="false" aria-controls="menu-plein"><span class="barres" aria-hidden="true"><i></i><i></i></span><span class="mot" aria-hidden="true">Menu</span><span class="sr">Ouvrir le menu</span></button>
 			<a class="marque" href="/" aria-label={`${r.nom}, accueil`} aria-current={chemin === '/' ? 'page' : undefined}><img src="/images/logo-neotisse.png" alt="" width="34" height="29" />{r.nom.toUpperCase()}</a>
-			<div class="tete-droite"><a class="bouton" href="/contact/" data-page="Contact"><span class="long">Contactez-nous</span><span class="court">Contact</span></a></div>
+			<div class="tete-droite"><a class="bouton" href="/contact/" data-page="Contact" aria-current={surContact ? 'page' : undefined}><span class="long">Contactez-nous</span><span class="court">Contact</span></a></div>
 		</div>
 	</header>
 	<div class="menu-plein" id="menu-plein" role="dialog" aria-modal="true" aria-label="Menu" hidden>
@@ -160,7 +161,7 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 		</div>
 	</footer>
 
-	<div class="flottant" id="flottant"><a class="bouton" href="/contact/" data-page="Contact">Demander un devis <span class="f" aria-hidden="true">→</span></a></div>
+	{!surContact && <div class="flottant" id="flottant"><a class="bouton" href="/contact/" data-page="Contact">Demander un devis <span class="f" aria-hidden="true">→</span></a></div>}
 	<div class="rideau" id="rideau" aria-hidden="true"><span style="background:#4F5233"></span><span style="background:#A8321F"></span><span style="background:#E8B42F"></span><span style="background:#2E5A8A"></span><div class="nom" id="rideau-nom"></div></div>
 
 	<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>

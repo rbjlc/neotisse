@@ -184,3 +184,7 @@ html.cookies-ouvert{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.lien:hover::after{animation:none}.interieur .zoom{transition:none}}
 /* pages légales : la date de mise à jour reste en droit, en olive */
 .contenu-page .prose p:first-of-type > em:only-child{font-style:normal;color:var(--olive)}
+
+/* En-tête : sur la page Contact, le bouton « Contactez-nous » passe en vert olive (on y est déjà) */
+.tete .bouton[aria-current="page"],.tete.plein .bouton[aria-current="page"]{background:var(--olive);border-color:var(--olive);color:var(--blanc)}
+.tete .bouton[aria-current="page"]:hover{background:var(--encre);border-color:var(--encre)}
