@@ -25,7 +25,7 @@ const CTA = {
 	champs: [t('titre', 'Titre'), riche('texte', 'Texte'), bouton('bouton', 'Bouton')],
 };
 const FAQ = (photo = false) => ({
-	cle: 'faq', titre: 'Questions fréquentes', aide: 'Chaque question se déplie au clic. Google peut aussi les afficher dans ses résultats.',
+	cle: 'faq', ancre: 'faq', titre: 'Questions fréquentes', aide: 'Chaque question se déplie au clic. Google peut aussi les afficher dans ses résultats.',
 	champs: [
 		...(photo ? [image('photo', 'Photo à côté des questions')] : []),
 		t('titre', 'Titre de la section'),

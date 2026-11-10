@@ -15,7 +15,7 @@ const ld = questions.length && {
 	<Groupe classe="sec faq-zone">
 		<Groupe classe="wrap stack faq">
 			<Image image={faq.photo} classe="faq-photo" />
-			<h2 class="wp-block-heading h2">{typo(faq.titre)}</h2>
+			<h2 class="wp-block-heading h2" id="faq">{typo(faq.titre)}</h2>
 			{questions.map((q) => (
 				<details class="wp-block-details faq-q is-layout-flow wp-block-details-is-layout-flow">
 					<summary>{typo(q.question)}</summary>

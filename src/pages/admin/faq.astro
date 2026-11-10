@@ -1,0 +1,28 @@
+---
+// Questions fréquentes : toutes les FAQ du site au même endroit, avec un lien direct vers chacune.
+import Admin from '../../layouts/Admin.astro';
+import { PAGES } from '../../lib/schemas.js';
+import { page } from '../../lib/site.js';
+
+const avecFaq = Object.entries(PAGES).filter(([, p]) => p.sections?.some((s) => s.cle === 'faq'));
+const lignes = await Promise.all(avecFaq.map(async ([cle, p]) => {
+	const contenu = await page(cle);
+	const questions = contenu?.faq?.questions || [];
+	return { cle, nom: p.nom, url: p.url, questions };
+}));
+---
+<Admin titre="Questions fréquentes" actif="faq">
+	<div class="adm-titre"><div><h1>Questions fréquentes</h1><p>Chaque page ci-dessous a sa propre liste de questions, affichée en bas de la page. Cliquez sur « Modifier les questions » pour en ajouter, en corriger ou en retirer.</p></div></div>
+	<ul class="liste">
+		{lignes.map((l) => (
+			<li>
+				<div class="principal">
+					<a href={`/admin/pages/${l.cle}/#faq`}>Page {l.nom}</a>
+					<p class="sous">{l.questions.length === 0 ? 'Aucune question pour l’instant' : `${l.questions.length} question${l.questions.length > 1 ? 's' : ''} : ${l.questions.slice(0, 2).map((q) => q.question).join(' · ')}${l.questions.length > 2 ? '…' : ''}`}</p>
+				</div>
+				<a class="b b-second b-petit" href={`${l.url}#faq`} target="_blank" rel="noopener">Voir ↗</a>
+				<a class="b b-principal b-petit" href={`/admin/pages/${l.cle}/#faq`}>Modifier les questions</a>
+			</li>
+		))}
+	</ul>
+</Admin>

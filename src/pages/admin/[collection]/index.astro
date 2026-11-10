@@ -47,7 +47,10 @@ const sous = (x) => {
 <Admin titre={def.nom} actif={col}>
 	<div class="adm-titre">
 		<div><h1>{def.nom}</h1><p>{def.aide}</p></div>
-		<a class="b b-principal" href={`/admin/${col}/nouveau/`}>+ {def.nouveau}</a>
+		<div class="adm-titre-actions">
+			{col === 'evenements' && <a class="b b-second" href="/admin/reglages/#reperes">Repères d’accessibilité</a>}
+			<a class="b b-principal" href={`/admin/${col}/nouveau/`}>+ {def.nouveau}</a>
+		</div>
 	</div>
 
 	{[['', items], ...(passes.length ? [['Dates passées (plus affichées sur le site)', [...passes].reverse()]] : [])].map(([titre, liste]) => (

@@ -65,6 +65,7 @@ p{margin:0}
 /* Titres de page */
 .adm-titre{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
 .adm-titre p{color:var(--fusain);margin-top:6px;max-width:44em}
+.adm-titre-actions{display:flex;flex-wrap:wrap;gap:10px}
 .adm-fil{font-size:15px;font-weight:600;text-decoration:none;display:inline-block;margin-bottom:8px}
 
 /* Boutons */

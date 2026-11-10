@@ -268,3 +268,15 @@
 		if (!jeton.value) { var a = document.getElementById('sans-jeton'); if (a) a.hidden = false; }
 	}
 })();
+
+/* ---------- Lien direct vers un bloc (#faq, #reperes…) : le bloc s'ouvre et s'affiche ---------- */
+(function () {
+	function ouvrirAncre() {
+		var id = decodeURIComponent(location.hash.slice(1));
+		if (!id || id.indexOf('=') !== -1) return;
+		var d = document.getElementById(id);
+		if (d && d.tagName === 'DETAILS') { d.open = true; d.scrollIntoView({ block: 'start' }); var s = d.querySelector('summary'); if (s) s.focus({ preventScroll: true }); }
+	}
+	ouvrirAncre();
+	window.addEventListener('hashchange', ouvrirAncre);
+})();
