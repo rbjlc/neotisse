@@ -87,10 +87,25 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 	<a class="saut" href="#contenu">Aller au contenu</a>
 	<div class="avancee" id="avancee" aria-hidden="true"></div>
 	{accueil && (
-		<div class="chargement" id="chargement" aria-hidden="true">
-			<svg viewBox="0 0 420 120"><path id="ch-fil" d="M10 96 C 90 20, 160 120, 210 64 S 330 10, 410 80" fill="none" stroke="#E8B42F" stroke-width="2.5" stroke-linecap="round"></path><text x="210" y="74" text-anchor="middle" id="ch-nom">{r.nom.toUpperCase()}</text></svg>
-			<div class="fils"><span style="background:#4F5233"></span><span style="background:#A8321F"></span><span style="background:#E8B42F"></span><span style="background:#2E5A8A"></span></div>
-		</div>
+		<Fragment>
+			<div class="chargement" id="chargement" aria-hidden="true">
+				<div class="ch-moitie ch-haut" id="ch-haut"><div class="ch-nom" id="ch-nom">{r.nom.toUpperCase().split('').map((c) => <span class="l"><span>{c}</span></span>)}</div></div>
+				<div class="ch-moitie ch-bas" id="ch-bas"><p class="ch-petit" id="ch-petit">Ateliers textiles anciens · Montpellier</p></div>
+				<svg class="ch-trace" id="ch-trace">
+					<defs><clipPath id="ch-boule"><circle r="64"></circle></clipPath></defs>
+					<path id="ch-fil" fill="none" stroke="#E8B42F" stroke-linecap="round"></path>
+					<g id="ch-pelote" opacity="0"><g id="ch-ecrase"><g id="ch-taille"><g id="ch-roule">
+						<circle r="64" fill="#E8B42F"></circle>
+						<g clip-path="url(#ch-boule)" fill="none" stroke-linecap="round">
+							<g stroke="#B3841A" stroke-width="5"><ellipse rx="62" ry="22" transform="rotate(-35)"></ellipse><ellipse rx="62" ry="38" transform="rotate(-35)"></ellipse><ellipse rx="62" ry="54" transform="rotate(-35)"></ellipse><ellipse rx="20" ry="62" transform="rotate(30)"></ellipse><ellipse rx="40" ry="62" transform="rotate(30)"></ellipse></g>
+							<g stroke="#F3CF6E" stroke-width="4" opacity=".9"><ellipse rx="62" ry="30" transform="rotate(-35)"></ellipse><ellipse rx="62" ry="46" transform="rotate(-35)"></ellipse><ellipse rx="30" ry="62" transform="rotate(30)"></ellipse><ellipse rx="52" ry="62" transform="rotate(30)"></ellipse></g>
+							<circle r="64" fill="none" stroke="#B3841A" stroke-width="10" opacity=".35"></circle>
+						</g>
+					</g></g></g></g>
+				</svg>
+			</div>
+			<button class="ch-passer" id="ch-passer" type="button">Passer l'introduction</button>
+		</Fragment>
 	)}
 	<header class:list={['tete env', { plein: !accueil }]} id="tete">
 		<div class="l">

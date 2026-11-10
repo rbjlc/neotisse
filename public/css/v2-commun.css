@@ -43,12 +43,22 @@
 .saut:focus{left:12px;top:12px}
 
 /* ---------- Chargement (première visite de l'accueil) ---------- */
-.chargement{position:fixed;inset:0;z-index:100;display:none;place-items:center;background:var(--foret);color:var(--lin)}
-.premiere-visite .chargement{display:grid}
-.chargement svg{width:min(320px,70vw);overflow:visible}
-.chargement text{font:300 64px var(--titre);letter-spacing:.18em;fill:var(--lin)}
-.chargement .fils{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr)}
-.chargement .fils span{transform-origin:top}
+/* Écran d'attente (première visite de l'accueil) : une pelote tombe, rebondit, puis roule en déroulant un fil
+   qui fait se lever les lettres du nom. L'écran s'ouvre ensuite le long du fil. */
+.chargement{position:fixed;inset:0;z-index:100;display:none;cursor:pointer;--ch-ligne:60%}
+.premiere-visite .chargement{display:block;animation:ch-secours .01s 7s forwards}
+@keyframes ch-secours{to{visibility:hidden}} /* si le script ne se charge pas, l'écran ne reste jamais bloqué */
+.ch-moitie{position:absolute;left:0;right:0;background:var(--foret)}
+.ch-haut{top:0;height:var(--ch-ligne);z-index:2}
+.ch-bas{top:var(--ch-ligne);bottom:0;z-index:1}
+.ch-nom{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:0 var(--g,16px) .16em;color:var(--lin);font:300 clamp(34px,10.4vw,168px)/1 var(--titre);letter-spacing:.14em;text-indent:.14em;white-space:nowrap}
+.ch-nom .l{display:inline-block;overflow:hidden;padding-top:.08em}
+.ch-nom .l>span{display:inline-block;transform:translateY(110%)}
+.ch-petit{position:absolute;left:0;right:0;top:clamp(22px,4vh,40px);text-align:center;font:700 11px var(--texte);letter-spacing:.32em;text-transform:uppercase;color:var(--sable);padding:0 16px;opacity:0}
+.ch-trace{position:absolute;inset:0;z-index:3;width:100%;height:100%;overflow:visible;pointer-events:none}
+.ch-passer{position:fixed;z-index:101;top:16px;right:max(16px,env(safe-area-inset-right,0px));display:none;font:700 12px var(--texte);letter-spacing:.2em;text-transform:uppercase;background:none;border:0;border-bottom:1px solid currentColor;color:var(--sable);cursor:pointer;padding:10px 4px}
+.premiere-visite .ch-passer{display:block;animation:ch-secours .01s 7s forwards}
+.ch-passer:focus-visible{outline:2px solid var(--gaude);outline-offset:3px}
 
 /* ---------- En-tête ---------- */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:41;background:var(--foret)}

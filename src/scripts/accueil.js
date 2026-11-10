@@ -3,6 +3,7 @@
 // Tout est désactivé si l'appareil demande moins d'animations.
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { jouerChargement } from './chargement.js';
 
 gsap.registerPlugin(ScrollTrigger);
 var g = gsap, ST = ScrollTrigger;
@@ -212,25 +213,16 @@ placerAiguille();
 
 
 function animations() {
-if (calme) { if (chargement) chargement.remove(); dessinerFil(); return; }
+if (calme) { if (chargement) chargement.remove(); var bp = document.getElementById('ch-passer'); if (bp) bp.remove(); dessinerFil(); return; }
 document.documentElement.classList.add('js-anim');
 // le fil est tracé d'après la mise en page, avant que les animations ne déplacent les éléments
 dessinerFil();
 var tl = g.timeline();
-if (chargement && document.documentElement.classList.contains('premiere-visite')) {
-  // Première visite : « NEOTISSE » s'écrit pendant qu'un fil se dessine, puis quatre fils se lèvent
-  var chFil = document.getElementById('ch-fil'), L = chFil.getTotalLength();
-  g.set(chFil, { strokeDasharray: L, strokeDashoffset: L });
-  tl.from('#ch-nom', { opacity: 0, y: 10, duration: 0.6, ease: 'power2.out' })
-    .to(chFil, { strokeDashoffset: 0, duration: 1.1, ease: 'power2.inOut' }, 0.1)
-    .to('.chargement svg', { opacity: 0, duration: 0.3 })
-    .set(chargement, { background: 'transparent' })
-    .fromTo('.chargement .fils span', { scaleY: 1 }, { scaleY: 0, transformOrigin: 'bottom', duration: 0.8, ease: 'power3.inOut', stagger: 0.08 })
-    .add(function () { chargement.remove(); document.documentElement.classList.remove('premiere-visite'); });
-} else if (chargement) {
-  chargement.remove();
-}
-tl.from('.hero h1 .ligne > span', { yPercent: 110, duration: 1.2, ease: 'power4.out', stagger: 0.1 }, chargement && tl.duration() ? '-=0.55' : 0.05)
+// Première visite : la pelote déroule le fil et écrit le nom, puis l'écran s'ouvre sur l'accueil
+var intro = jouerChargement();
+if (intro) tl.add(intro);
+else if (chargement) chargement.remove();
+tl.from('.hero h1 .ligne > span', { yPercent: 110, duration: 1.2, ease: 'power4.out', stagger: 0.1 }, intro ? intro.labels.ouvrir + 0.55 : 0.05)
   .from('.hero .apparait', { y: 24, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.15 }, '-=0.9')
   .from('#hero-img', { scale: 1.15, duration: 2.4, ease: 'power2.out' }, '-=1.6');
 // Hero en parallaxe
