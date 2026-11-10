@@ -3,7 +3,8 @@
 // Tout est désactivé si l'appareil demande moins d'animations.
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { jouerChargement } from './chargement.js';
+import { surOuverture } from './chargement.js';
+import { decouperEnMots, cacheMot } from './mots.js';
 
 gsap.registerPlugin(ScrollTrigger);
 var g = gsap, ST = ScrollTrigger;
@@ -41,7 +42,7 @@ function decouperTitre(h) {
 if (h.dataset.decoupe) return;
 h.dataset.decoupe = '1';
 h.setAttribute('aria-label', h.textContent.replace(/\s+/g, ' ').trim());
-h.innerHTML = h.innerHTML.replace(/(<em>.*?<\/em>)|([^ \t\n\r<]+)/g, function (t) { return '<span class="cache-mot" aria-hidden="true"><span>' + t + '</span></span>'; });
+decouperEnMots(h, cacheMot);
 }
 
 /* Fil aux quatre couleurs, de haut en bas de la page */
@@ -213,16 +214,14 @@ placerAiguille();
 
 
 function animations() {
-if (calme) { if (chargement) chargement.remove(); var bp = document.getElementById('ch-passer'); if (bp) bp.remove(); dessinerFil(); return; }
+if (calme) { dessinerFil(); return; }
 document.documentElement.classList.add('js-anim');
 // le fil est tracé d'après la mise en page, avant que les animations ne déplacent les éléments
 dessinerFil();
-var tl = g.timeline();
-// Première visite : la pelote déroule le fil et écrit le nom, puis l'écran s'ouvre sur l'accueil
-var intro = jouerChargement();
-if (intro) tl.add(intro);
-else if (chargement) chargement.remove();
-tl.from('.hero h1 .ligne > span', { yPercent: 110, duration: 1.2, ease: 'power4.out', stagger: 0.1 }, intro ? intro.labels.ouvrir + 0.55 : 0.05)
+// Entrée du titre : tout de suite, ou au moment où l'écran d'attente s'ouvre (première visite)
+var tl = g.timeline({ paused: true });
+surOuverture(function () { tl.play(); });
+tl.from('.hero h1 .ligne > span', { yPercent: 110, duration: 1.2, ease: 'power4.out', stagger: 0.1 }, 0.05)
   .from('.hero .apparait', { y: 24, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.15 }, '-=0.9')
   .from('#hero-img', { scale: 1.15, duration: 2.4, ease: 'power2.out' }, '-=1.6');
 // Hero en parallaxe
@@ -240,7 +239,7 @@ g.utils.toArray('main .libelle').forEach(function (l) {
 });
 // Manifeste mot à mot
 var m = document.getElementById('manifeste');
-if (m) m.innerHTML = m.innerHTML.replace(/(<em>.*?<\/em>)|([^\s<]+)/g, function (t) { return '<span class="mot">' + t + '</span>'; });
+if (m) decouperEnMots(m, function (c) { var s = document.createElement('span'); s.className = 'mot'; s.appendChild(c); return s; });
 if (m) g.to('#manifeste .mot', { opacity: 1, stagger: 0.06, ease: 'none', scrollTrigger: { trigger: m, start: 'top 82%', end: 'bottom 45%', scrub: true } });
 // Principes : chiffres qui défilent
 // Principes : chaque colonne monte à sa propre vitesse

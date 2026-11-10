@@ -3,6 +3,7 @@
 // textes et cartes qui apparaissent au fil de la lecture. Rien ne bouge si l'appareil demande moins d'animations.
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { decouperEnMots, cacheMot, texteSimple } from './mots.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const calme = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -10,10 +11,10 @@ const contenu = document.getElementById('contenu');
 
 function decouper(h) {
 	// seulement les titres simples (texte, italique, gras) : on ne touche pas aux liens ni aux balises particulières
-	if (h.dataset.decoupe || /<(?!\/?(em|strong|br)\b)/.test(h.innerHTML)) return false;
+	if (h.dataset.decoupe || !texteSimple(h)) return false;
 	h.dataset.decoupe = '1';
 	h.setAttribute('aria-label', h.textContent.replace(/\s+/g, ' ').trim());
-	h.innerHTML = h.innerHTML.replace(/(<(em|strong)>.*?<\/\2>)|([^ \t\n\r<]+)/g, (t) => `<span class="cache-mot" aria-hidden="true"><span>${t}</span></span>`);
+	decouperEnMots(h, cacheMot);
 	return true;
 }
 

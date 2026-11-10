@@ -4,18 +4,32 @@
 // Un clic ou la touche Échap vont directement à l'ouverture.
 import { gsap as g } from 'gsap';
 
-export function jouerChargement() {
+// L'accueil s'inscrit ici pour lancer l'entrée du titre au moment où l'écran s'ouvre.
+let ouvert = false;
+const enAttente = [];
+export function surOuverture(fn) { if (ouvert) fn(); else enAttente.push(fn); }
+function ouvrir() { if (ouvert) return; ouvert = true; enAttente.splice(0).forEach((fn) => fn()); }
+
+function retirer(ecran) {
+	ecran.remove();
+	document.documentElement.classList.remove('premiere-visite');
+	ouvrir();
+}
+
+// L'intro démarre dès que les polices sont prêtes, sans attendre toutes les photos de la page.
+function demarrer() {
 	const ecran = document.getElementById('chargement');
-	if (!ecran || !document.documentElement.classList.contains('premiere-visite')) return null;
-	const passerBtn = document.getElementById('ch-passer');
-	// connexion très lente : la page a mis trop longtemps à se charger, on ne fait pas attendre davantage
-	if (performance.now() > 4500) {
-		ecran.remove(); if (passerBtn) passerBtn.remove();
-		document.documentElement.classList.remove('premiere-visite');
-		return null;
-	}
+	if (!ecran) { ouvrir(); return; }
+	const calme = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	// pas de première visite, moins d'animations demandées, ou garde-fou CSS déjà déclenché (script très lent)
+	if (calme || !document.documentElement.classList.contains('premiere-visite') || getComputedStyle(ecran).visibility === 'hidden') { retirer(ecran); return; }
 	ecran.style.animation = 'none'; // le script est là : plus besoin du garde-fou CSS
-	if (passerBtn) passerBtn.style.animation = 'none';
+	jouer(ecran);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => (document.fonts ? document.fonts.ready : Promise.resolve()).then(demarrer));
+else (document.fonts ? document.fonts.ready : Promise.resolve()).then(demarrer);
+
+function jouer(ecran) {
 
 	const pelote = document.getElementById('ch-pelote'), ecrase = document.getElementById('ch-ecrase');
 	const taille = document.getElementById('ch-taille'), roule = document.getElementById('ch-roule');
@@ -70,24 +84,18 @@ export function jouerChargement() {
 		.to('#ch-haut', { yPercent: -100, duration: 0.8, ease: 'power4.inOut' }, 'ouvrir+=0.15')
 		.to('#ch-bas', { yPercent: 100, duration: 0.8, ease: 'power4.inOut' }, 'ouvrir+=0.15')
 		.to('#ch-trace', { opacity: 0, duration: 0.2 }, 'ouvrir+=0.15')
-		.add(() => {
-			ecran.remove(); if (passerBtn) passerBtn.remove();
-			document.documentElement.classList.remove('premiere-visite');
-		}, 'ouvrir+=0.95');
+		.add(ouvrir, 'ouvrir+=0.55')
+		.add(() => retirer(ecran), 'ouvrir+=0.95');
 
 	// passer l'introduction
 	const passer = () => {
 		if (tl.time() >= tl.labels.ouvrir) return;
 		lettres.forEach((l) => g.set(l.firstChild, { y: 0, yPercent: 0 }));
 		pelote.setAttribute('opacity', '0');
-		// l'intro est rangée dans la chronologie de la page : c'est elle qu'on avance
-		const parent = tl.parent && tl.parent !== g.globalTimeline ? tl.parent : null;
-		if (parent) parent.seek(tl.startTime() + tl.labels.ouvrir); else tl.seek('ouvrir');
+		tl.seek('ouvrir');
 	};
 	ecran.addEventListener('click', passer);
-	passerBtn?.addEventListener('click', passer);
 	const echap = (e) => { if (e.key === 'Escape') passer(); };
 	document.addEventListener('keydown', echap);
 	tl.eventCallback('onComplete', () => document.removeEventListener('keydown', echap));
-	return tl;
 }

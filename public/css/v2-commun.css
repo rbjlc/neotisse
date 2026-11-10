@@ -75,7 +75,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .tete .bouton{padding:13px 20px}
 .tete:not(.plein) .bouton{background:transparent;border-color:rgba(244,239,230,.6)}
 .tete:not(.plein) .bouton:hover{background:var(--lin);color:var(--encre);border-color:var(--lin)}
-@media (max-width:700px){.tete .bouton .long{display:none}.marque{letter-spacing:.2em;font-size:18px}.menu-btn .mot{display:none}}
+.tete .bouton .court{display:none}
+@media (max-width:700px){.tete .bouton .long{display:none}.tete .bouton .court{display:inline}.marque{letter-spacing:.2em;font-size:18px}.menu-btn .mot{display:none}}
 
 /* Pages intérieures : en-tête toujours plein, contenu décalé sous l'en-tête */
 .interieur #contenu{padding-top:var(--haut-tete);overflow-x:clip}
