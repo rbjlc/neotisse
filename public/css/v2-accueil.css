@@ -29,14 +29,13 @@ body.accueil{margin:0;background:var(--lin);color:var(--encre);font:400 17px/1.6
 .trame{position:relative}
 .fil{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:1}
 .trame .l{position:relative;z-index:2}
-.trame .carrousel{position:relative;z-index:2}
+.trame .cartes{position:relative;z-index:2}
 .trame .respiration{z-index:2}
 .trame .partenaires{position:relative;z-index:2}
 .fil path{fill:none;stroke-linecap:round}
 
 /* ---------- Manifeste ---------- */
 .manifeste{padding-block:clamp(90px,14vw,190px);text-align:center}
-.manifeste .libelle{color:var(--garance)}
 .manifeste p.grand{font:300 clamp(30px,4.4vw,60px)/1.18 var(--titre);max-width:22ch;margin:26px auto 0;color:var(--encre)}
 .js-anim .manifeste p.grand .mot{opacity:.14}
 .manifeste p.grand em{font-style:italic;color:var(--olive)}
@@ -44,30 +43,20 @@ body.accueil{margin:0;background:var(--lin);color:var(--encre);font:400 17px/1.6
 /* ---------- Trois principes ---------- */
 .principes{padding-block:0 clamp(80px,12vw,160px)}
 .principes .grille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3vw,40px);border-top:1px solid var(--trait);padding-top:36px}
-.principes .n{font:300 clamp(56px,6vw,88px)/1 var(--titre);color:var(--olive);font-variant-numeric:tabular-nums}
 .principes h2,.principes h3{font-size:clamp(24px,2.4vw,32px);margin:18px 0 12px}
 .principes p{color:var(--fusain);max-width:34ch}
 @media (max-width:800px){.principes .grille{grid-template-columns:1fr}}
 
 /* ---------- Mots qui défilent au scroll ---------- */
-.mots{position:relative;z-index:2;overflow:hidden;padding-block:clamp(10px,2vw,24px) clamp(70px,9vw,120px)}
-.mots .rang{display:flex;width:max-content;white-space:nowrap;font:300 clamp(54px,9.5vw,150px)/1.05 var(--titre);letter-spacing:-.02em;will-change:transform}
-.mots .rang span{display:inline-flex;align-items:center;gap:.32em;padding-right:.32em}
-.mots .rang span::after{content:"";width:.16em;height:.16em;border-radius:50%;background:var(--c,var(--garance));flex:none}
-.mots .rang .it{font-style:italic;color:var(--olive)}
-.mots .rang.creux{color:transparent;-webkit-text-stroke:1.2px var(--encre);margin-top:.04em}
-.mots .rang.creux .it{-webkit-text-stroke:0;color:var(--garance)}
-@media (max-width:700px){.mots .rang.creux{-webkit-text-stroke:1px var(--encre)}}
 
 /* ---------- Ateliers (vert forêt) ---------- */
 .ateliers{background:var(--foret);color:var(--lin);padding-block:clamp(80px,11vw,150px);overflow:hidden}
 .ateliers .entete{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:clamp(36px,5vw,60px)}
 .ateliers h2{font-size:clamp(40px,6vw,88px);max-width:12ch}
-.ateliers .libelle{color:var(--gaude)}
-.ateliers .glisser{font:700 12px var(--texte);letter-spacing:.2em;text-transform:uppercase;color:var(--sable);display:flex;gap:12px;align-items:center}
-.carrousel{display:flex;gap:clamp(16px,2vw,28px);width:max-content;cursor:grab;padding-left:var(--g);padding-right:var(--gd);touch-action:pan-y}
-.carrousel.prise{cursor:grabbing}
-.carte{width:clamp(270px,30vw,420px);flex:none;user-select:none}
+.grille-cartes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(20px,2.4vw,32px)}
+@media (max-width:1000px){.grille-cartes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.grille-cartes{grid-template-columns:1fr}}
+.carte{min-width:0}
 .carte .img{position:relative;overflow:hidden;aspect-ratio:3/4;border-radius:2px}
 .carte img{width:100%;height:100%;object-fit:cover;transition:transform 1.4s var(--doux);pointer-events:none}
 .carte:hover img{transform:scale(1.07)}
@@ -75,8 +64,6 @@ body.accueil{margin:0;background:var(--lin);color:var(--encre);font:400 17px/1.6
 .carte h3{font-size:clamp(26px,2.4vw,34px);margin-top:20px}
 .carte p{color:var(--sable);margin-top:8px;font-size:16px}
 .carte .lien{margin-top:16px;font-size:15px;color:var(--lin)}
-.progression{margin-top:44px;height:2px;background:rgba(244,239,230,.15);position:relative;overflow:hidden}
-.progression span{position:absolute;inset:0;background:linear-gradient(90deg,var(--olive-clair),var(--gaude),var(--garance),var(--guede));transform-origin:left;transform:scaleX(.25)}
 
 /* ---------- Grande photo ---------- */
 .respiration{position:relative;height:clamp(420px,80vh,820px);overflow:hidden;color:var(--lin)}
@@ -94,7 +81,6 @@ body.accueil{margin:0;background:var(--lin);color:var(--encre);font:400 17px/1.6
 .equipe .photos .b{position:absolute;right:0;bottom:0;width:52%;aspect-ratio:4/5;overflow:hidden;border-radius:2px;border:8px solid var(--lin)}
 .equipe .photos img{width:100%;height:100%;object-fit:cover}
 .equipe h2{font-size:clamp(36px,4.6vw,64px);margin:18px 0 22px}
-.equipe .libelle{color:var(--garance)}
 .equipe p{color:var(--fusain);max-width:44ch}
 .equipe p + p{margin-top:14px}
 .equipe .noms{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:30px 0;border-top:1px solid var(--trait);padding-top:22px}
@@ -106,7 +92,6 @@ body.accueil{margin:0;background:var(--lin);color:var(--encre);font:400 17px/1.6
 .agenda{padding-block:0 clamp(90px,12vw,170px)}
 .agenda .entete{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:30px}
 .agenda h2{font-size:clamp(36px,4.6vw,64px)}
-.agenda .libelle{color:var(--garance)}
 .dates{list-style:none;margin:0;padding:0;border-top:1px solid var(--encre)}
 .dates li{position:relative;display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:20px;align-items:center;padding-block:26px;border-bottom:1px solid var(--trait);overflow:hidden}
 .dates li::before{content:"";position:absolute;inset:0;background:var(--c);transform:scaleY(0);transform-origin:bottom;transition:transform .55s var(--doux);z-index:0}

@@ -14,7 +14,6 @@ const colorer = (texte, mot, balise = 'em') => {
 	return m && t.includes(m) ? t.replace(m, `<${balise}>${m.replace(/-/g, '&#8209;')}</${balise}>`) : t;
 };
 const lignesTitre = String(e.titre || '').split(/\r?\n/).filter(Boolean);
-const num = (i) => String(i + 1).padStart(2, '0');
 const prochaines = dates.slice(0, 3);
 const jours = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const infoDate = (ev) => {
@@ -26,8 +25,6 @@ const infoDate = (ev) => {
 const COULEURS = { gaude: ['var(--gaude)', 'var(--encre)'], garance: ['var(--garance)', 'var(--lin)'], guede: ['var(--guede)', 'var(--lin)'], olive: ['var(--olive)', 'var(--lin)'] };
 const teinte = (cle) => COULEURS[categorie(r, cle).couleur] || COULEURS.olive;
 const pastilles = [['var(--gaude)', 'var(--encre)'], ['var(--garance)', 'var(--blanc)'], ['var(--guede)', 'var(--blanc)'], ['var(--olive-clair)', 'var(--encre)']];
-const pointsMots = ['var(--garance)', 'var(--gaude)', 'var(--guede)', 'var(--olive)'];
-const motsRepetes = (liste) => [...liste, ...liste, ...liste.slice(0, 3)];
 ---
 <Base titre={p.seo_titre} description={p.seo_description} image={e.image} accueil>
 	<div id="haut" class="trame">
@@ -49,9 +46,8 @@ const motsRepetes = (liste) => [...liste, ...liste, ...liste.slice(0, 3)];
 			<div class="defiler" aria-hidden="true">Défiler<i></i></div>
 		</section>
 
-		<section class="manifeste env" aria-labelledby="t-manifeste">
+		<section class="manifeste env" aria-label="L’association">
 			<div class="l">
-				<p class="libelle" id="t-manifeste">{p.manifeste.libelle}</p>
 				<p class="grand" id="manifeste">{typo(p.manifeste.texte)} {p.manifeste.suite && <em>{typo(p.manifeste.suite)}</em>}</p>
 			</div>
 		</section>
@@ -60,38 +56,30 @@ const motsRepetes = (liste) => [...liste, ...liste, ...liste.slice(0, 3)];
 			<section class="principes env" aria-label="Nos principes">
 				<div class="l grille">
 					{p.principes.liste.map((x, i) => (
-						<div class="principe"><p class="n" aria-hidden="true">{num(i)}</p><h2 style="font-size:clamp(24px,2.4vw,32px);margin:18px 0 12px">{typo(x.titre)}</h2><p>{typo(x.texte)}</p></div>
+						<div class="principe"><h2 style="font-size:clamp(24px,2.4vw,32px);margin:0 0 12px">{typo(x.titre)}</h2><p>{typo(x.texte)}</p></div>
 					))}
 				</div>
 			</section>
 		)}
 
-		{(p.mots.ligne1.length > 0 || p.mots.ligne2.length > 0) && (
-			<section class="mots" aria-label={[...p.mots.ligne1, ...p.mots.ligne2].join(', ')}>
-				{p.mots.ligne1.length > 0 && <div class="rang" id="rang-1" aria-hidden="true">{motsRepetes(p.mots.ligne1).map((m, i) => <span class:list={{ it: i % 2 === 1 }} style={`--c:${pointsMots[i % 4]}`}>{m}</span>)}</div>}
-				{p.mots.ligne2.length > 0 && <div class="rang creux" id="rang-2" aria-hidden="true">{motsRepetes(p.mots.ligne2).map((m, i) => <span class:list={{ it: i % 2 === 1 }} style={`--c:${pointsMots[(i + 2) % 4]}`}>{m}</span>)}</div>}
-			</section>
-		)}
 
 		<section class="ateliers" aria-labelledby="t-ateliers">
 			<div class="env"><div class="l entete">
-				<div><p class="libelle trait">{p.ateliers_bloc.libelle}</p><h2 id="t-ateliers" style="margin-top:18px">{typo(p.ateliers_bloc.titre)}</h2></div>
-				<p class="glisser" aria-hidden="true">Glisser <span>⟷</span></p>
+				<h2 id="t-ateliers">{typo(p.ateliers_bloc.titre)}</h2>
 			</div></div>
-			<div class="carrousel" id="carrousel" tabindex="0" aria-label="Ateliers : faire glisser, ou utiliser les flèches gauche et droite du clavier">
+			<div class="env cartes"><div class="l grille-cartes">
 				{listeAteliers.map((a, i) => (
 					<article class="carte" style={`--c:${pastilles[i % 4][0]};--cf:${pastilles[i % 4][1]}`}>
 						<div class="img">
-							{a.image?.src && <img src={a.image.src} {...attrsImage(a.image.src, '420px')} alt={a.image.alt || ''} loading="lazy" draggable="false" />}
+							{a.image?.src && <img src={a.image.src} {...attrsImage(a.image.src, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw')} alt={a.image.alt || ''} loading="lazy" />}
 							{a.etiquette && <span class="pastille">{a.etiquette}</span>}
 						</div>
 						<h3>{typo(a.titre)}</h3>
 						{a.resume && <p>{typo(a.resume)}</p>}
-						<a class="lien" href={`/ateliers/#atelier-${a.slug}`} data-page="Ateliers" draggable="false">En savoir plus<span class="sr"> : {a.titre}</span> →</a>
+						<a class="lien" href={`/ateliers/#atelier-${a.slug}`} data-page="Ateliers">En savoir plus<span class="sr"> : {a.titre}</span> →</a>
 					</article>
 				))}
-			</div>
-			<div class="env"><div class="l"><div class="progression" aria-hidden="true"><span id="progression"></span></div></div></div>
+			</div></div>
 		</section>
 
 		{p.citation.texte && (
@@ -111,7 +99,6 @@ const motsRepetes = (liste) => [...liste, ...liste, ...liste.slice(0, 3)];
 					{p.fondatrices.photo2?.src && <div class="b"><img data-vitesse="8" src={p.fondatrices.photo2.src} {...attrsImage(p.fondatrices.photo2.src, '30vw')} alt={p.fondatrices.photo2.alt || ''} loading="lazy" /></div>}
 				</div>
 				<div>
-					<p class="libelle trait">{p.fondatrices.libelle}</p>
 					<h2 id="t-equipe">{typo(p.fondatrices.titre)}</h2>
 					{p.fondatrices.texte && <p>{typo(p.fondatrices.texte)}</p>}
 					{p.fondatrices.membres.length > 0 && (
@@ -125,7 +112,7 @@ const motsRepetes = (liste) => [...liste, ...liste, ...liste.slice(0, 3)];
 		<section class="agenda env" aria-labelledby="t-agenda">
 			<div class="l">
 				<div class="entete">
-					<div><p class="libelle trait">{p.agenda.libelle}</p><h2 id="t-agenda" style="margin-top:16px">{typo(p.agenda.titre)}</h2></div>
+					<h2 id="t-agenda">{typo(p.agenda.titre)}</h2>
 					{p.agenda.lien?.texte && <a class="lien" href={p.agenda.lien.lien} data-page="Calendrier">{p.agenda.lien.texte} →</a>}
 				</div>
 				{prochaines.length === 0 ? <p style="color:var(--fusain)">{typo(p.agenda.vide)}</p> : (
@@ -159,8 +146,7 @@ const motsRepetes = (liste) => [...liste, ...liste, ...liste.slice(0, 3)];
 				<path d="M0 108 C 200 0, 400 210, 600 108 S 1000 0, 1200 108" stroke="#2E5A8A" stroke-width="2" fill="none"></path>
 			</svg>
 			<div class="l" style="position:relative">
-				{p.appel.libelle && <p class="libelle" style="color:var(--gaude)">{p.appel.libelle}</p>}
-				<h2 id="t-final" style="margin-top:20px" set:html={colorer(p.appel.titre, p.appel.mot_couleur)} />
+				<h2 id="t-final" set:html={colorer(p.appel.titre, p.appel.mot_couleur)} />
 				{p.appel.texte && <p>{typo(p.appel.texte)}</p>}
 				{p.appel.bouton?.texte && <a class="bouton" href={p.appel.bouton.lien} data-page="Contact">{p.appel.bouton.texte} <span class="f" aria-hidden="true">→</span></a>}
 			</div>

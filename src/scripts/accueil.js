@@ -250,7 +250,7 @@ g.utils.toArray('.principe').forEach(function (c, i) {
 if (document.getElementById('rang-1')) g.fromTo('#rang-1', { x: function () { return window.innerWidth * 0.05; } }, { x: function () { return -(document.getElementById('rang-1').scrollWidth - window.innerWidth * 0.95); }, ease: 'none', scrollTrigger: { trigger: '.mots', start: 'top bottom', end: 'bottom top', scrub: 0.6, invalidateOnRefresh: true } });
 if (document.getElementById('rang-2')) g.fromTo('#rang-2', { x: function () { return -(document.getElementById('rang-2').scrollWidth - window.innerWidth * 0.95); } }, { x: function () { return window.innerWidth * 0.05; }, ease: 'none', scrollTrigger: { trigger: '.mots', start: 'top bottom', end: 'bottom top', scrub: 0.6, invalidateOnRefresh: true } });
 // Ateliers
-g.from('.carte', { x: 160, opacity: 0, ease: 'none', stagger: 0.15, scrollTrigger: { trigger: '.ateliers', start: 'top 85%', end: 'top 30%', scrub: 0.8 } });
+g.from('.carte', { y: 80, opacity: 0, ease: 'none', stagger: 0.12, scrollTrigger: { trigger: '.grille-cartes', start: 'top 95%', end: 'top 45%', scrub: 0.8 } });
 // le carrousel avance à mesure qu'on descend dans la page
 if (placerCarrousel) ST.create({ trigger: '.ateliers', start: 'top 60%', end: 'bottom 20%', scrub: true, invalidateOnRefresh: true,
   onUpdate: function (st) { carrouselDefil = st.progress * Math.min(0, window.innerWidth - car.scrollWidth); placerCarrousel(false); } });

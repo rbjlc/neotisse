@@ -70,10 +70,6 @@ export const pages = {
 				{ titre: 'La flexibilité', texte: 'Chaque intervention est pensée pour son lieu, son public et ses contraintes.' },
 			],
 		},
-		mots: {
-			ligne1: ['Filage', 'tissage', 'teinture végétale', 'fuseau', 'écheveau', 'métier à tisser'],
-			ligne2: ['Garance', 'gaude', 'Guède', 'Néolithique', 'Âge du Bronze', 'Moyen Âge'],
-		},
 		ateliers_bloc: {
 			libelle: 'Nos ateliers',
 			titre: 'Des gestes à vivre, du fil à l’étoffe',

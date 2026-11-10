@@ -118,7 +118,7 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 		<nav aria-label="Pages du site">
 			<ul>
 				{menuComplet.map(([url, nom], i) => (
-					<li><a href={url} data-page={nom} data-img={i} aria-current={actif(url) ? 'page' : undefined}><small aria-hidden="true">{String(i + 1).padStart(2, '0')}</small><span class="mot">{typo(nom)}</span></a></li>
+					<li><a href={url} data-page={nom} data-img={i} aria-current={actif(url) ? 'page' : undefined}><span class="mot">{typo(nom)}</span></a></li>
 				))}
 			</ul>
 			<div class="bas">

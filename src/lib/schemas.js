@@ -50,26 +50,19 @@ export const PAGES = {
 				],
 			},
 			{
-				cle: 'manifeste', titre: 'Grande phrase « L’association »',
+				cle: 'manifeste', titre: 'Grande phrase de présentation',
 				aide: 'La phrase se colore mot à mot quand on fait défiler la page.',
-				champs: [t('libelle', 'Petit titre'), long('texte', 'Phrase'), t('suite', 'Fin de phrase en italique', 'Facultatif.')],
+				champs: [long('texte', 'Phrase'), t('suite', 'Fin de phrase en italique', 'Facultatif.')],
 			},
 			{
 				cle: 'principes', titre: 'Nos principes (trois colonnes)',
-				champs: [liste('liste', 'Principes', [t('titre', 'Titre'), long('texte', 'Texte')], { ajout: 'Ajouter un principe', resume: 'titre', aide: 'Les numéros 01, 02, 03 s’ajoutent tout seuls. Trois principes conseillés.' })],
+				champs: [liste('liste', 'Principes', [t('titre', 'Titre'), long('texte', 'Texte')], { ajout: 'Ajouter un principe', resume: 'titre', aide: 'Trois principes conseillés.' })],
 			},
+
 			{
-				cle: 'mots', titre: 'Mots qui défilent',
-				aide: 'Deux lignes de mots qui glissent quand on fait défiler la page, dans un sens puis dans l’autre.',
-				champs: [
-					{ cle: 'ligne1', type: 'lignes', label: 'Première ligne (un mot par ligne)' },
-					{ cle: 'ligne2', type: 'lignes', label: 'Seconde ligne, en contour (un mot par ligne)' },
-				],
-			},
-			{
-				cle: 'ateliers_bloc', titre: 'Bloc « Nos ateliers » (cartes à faire glisser)',
+				cle: 'ateliers_bloc', titre: 'Bloc « Nos ateliers »',
 				aide: 'Les cartes se remplissent toutes seules à partir du menu Ateliers (photo, étiquette, phrase courte).',
-				champs: [t('libelle', 'Petit titre'), t('titre', 'Titre')],
+				champs: [t('titre', 'Titre')],
 			},
 			{
 				cle: 'citation', titre: 'Grande photo avec citation',
@@ -78,7 +71,7 @@ export const PAGES = {
 			{
 				cle: 'fondatrices', titre: 'L’équipe',
 				champs: [
-					t('libelle', 'Petit titre'), t('titre', 'Titre'), long('texte', 'Texte'),
+					t('titre', 'Titre'), long('texte', 'Texte'),
 					image('photo1', 'Grande photo'), image('photo2', 'Petite photo'),
 					liste('membres', 'Fondatrices', [t('nom', 'Nom'), t('role', 'Rôle')], { ajout: 'Ajouter une personne', resume: 'nom' }),
 					bouton('bouton', 'Lien'),
@@ -87,13 +80,13 @@ export const PAGES = {
 			{
 				cle: 'agenda', titre: 'Prochaines dates',
 				aide: 'Les trois prochaines dates viennent toutes seules du menu Calendrier.',
-				champs: [t('libelle', 'Petit titre'), t('titre', 'Titre'), bouton('lien', 'Lien vers le calendrier'), t('vide', 'Message s’il n’y a aucune date')],
+				champs: [t('titre', 'Titre'), bouton('lien', 'Lien vers le calendrier'), t('vide', 'Message s’il n’y a aucune date')],
 			},
 			{
 				cle: 'appel', titre: 'Bandeau de fin « Un atelier sur mesure ? »',
 				aide: 'Les noms des partenaires qui défilent juste au-dessus viennent du menu Partenaires.',
 				champs: [
-					t('libelle', 'Petit titre'), t('titre', 'Titre'),
+					t('titre', 'Titre'),
 					t('mot_couleur', 'Mot en couleur', 'Recopiez exactement un mot du titre : il s’affichera en jaune.'),
 					long('texte', 'Texte'), bouton('bouton', 'Bouton'),
 				],
