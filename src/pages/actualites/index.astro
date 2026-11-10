@@ -5,6 +5,7 @@ import Une from '../../components/Une.astro';
 import CarteActu from '../../components/CarteActu.astro';
 import Reseaux from '../../components/Reseaux.astro';
 import CtaFinal from '../../components/CtaFinal.astro';
+import EnteteInterieur from '../../components/EnteteInterieur.astro';
 import { page, reglages, actualites, typo } from '../../lib/site.js';
 
 const [p, r, actus] = await Promise.all([page('actualites'), reglages(), actualites()]);
@@ -14,10 +15,7 @@ const types = r.categories.filter((c) => actus.some((a) => a.categorie === c.cle
 ---
 <Base titre={p.seo_titre} description={p.seo_description} image={une?.image}>
 	<div class="contenu-page">
-		<Groupe classe="wrap page-hero stack center">
-			<h1 class="wp-block-heading">{typo(p.entete.titre)}</h1>
-			{p.entete.texte && <p class="lead wp-block-paragraph">{typo(p.entete.texte)}</p>}
-		</Groupe>
+		<EnteteInterieur entete={p.entete} />
 		<Groupe classe="wrap sec-bas">
 			<div class="neo-liste neo-liste-actus">
 				<div class="stack" style="gap:40px">

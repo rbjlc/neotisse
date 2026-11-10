@@ -1,0 +1,18 @@
+---
+// Haut des pages intérieures : grand titre et introduction à gauche, photo à droite qui se dévoile.
+// Sans photo, le titre reste centré comme avant.
+import { typo } from '../lib/site.js';
+import { attrsImage } from '../lib/images.js';
+const { entete = {}, titreHtml } = Astro.props;
+const photo = entete.photo?.src ? entete.photo : null;
+---
+<section class:list={['entete-int', { 'avec-photo': photo }]} aria-labelledby="titre-page">
+	<div class="entete-int-texte">
+		{titreHtml ? <h1 id="titre-page" set:html={titreHtml} /> : <h1 id="titre-page">{typo(entete.titre)}</h1>}
+		{entete.texte && <p class="lead">{typo(entete.texte)}</p>}
+		<slot />
+	</div>
+	{photo && (
+		<div class="entete-int-photo"><img src={photo.src} {...attrsImage(photo.src, '(max-width: 900px) 100vw, 45vw')} alt={photo.alt || ''} fetchpriority="high" /></div>
+	)}
+</section>

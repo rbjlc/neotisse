@@ -4,6 +4,7 @@ import Groupe from '../../components/Groupe.astro';
 import FicheAtelier from '../../components/FicheAtelier.astro';
 import Faq from '../../components/Faq.astro';
 import CtaFinal from '../../components/CtaFinal.astro';
+import EnteteInterieur from '../../components/EnteteInterieur.astro';
 import { page, ateliers, typo } from '../../lib/site.js';
 
 const [p, liste] = await Promise.all([page('ateliers'), ateliers()]);
@@ -11,10 +12,7 @@ const num = (i) => String(i + 1).padStart(2, '0');
 ---
 <Base titre={p.seo_titre} description={p.seo_description} image={liste[0]?.image}>
 	<div class="contenu-page">
-		<Groupe classe="wrap page-hero stack center">
-			<h1 class="wp-block-heading">{typo(p.entete.titre)}</h1>
-			{p.entete.texte && <p class="lead wp-block-paragraph">{typo(p.entete.texte)}</p>}
-		</Groupe>
+		<EnteteInterieur entete={p.entete} />
 
 		<Groupe classe="wrap">
 			<div class="neo-liste neo-liste-ateliers">

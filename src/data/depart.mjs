@@ -110,6 +110,7 @@ export const pages = {
 		seo_description: 'Savoir-faire textiles anciens : association loi 1901 fondée à Montpellier en 2024 par deux archéologues, entre recherche, expérimentation et médiation.',
 		entete: {
 			titre: 'Une équipe d’archéologues au service des savoir-faire textiles anciens',
+			photo: img('/images/atelier-groupe.webp', 'Atelier textile Neotisse avec un groupe de participants'),
 			texte: 'Fondée en mai 2024 et basée à Montpellier, Neotisse est une association loi 1901 dédiée à la médiation scientifique autour des savoir-faire textiles anciens, du Néolithique au Moyen Âge.',
 		},
 		patrimoine: {
@@ -158,6 +159,7 @@ export const pages = {
 		seo_description: 'Ateliers textiles et activités culturelles pour tous : démonstrations, tissage aux tablettes, jeune public et conférences, pour musées et écoles.',
 		entete: {
 			titre: 'Les gestes, les matières et les techniques du textile',
+			photo: img('/images/echeveaux-teints.webp', 'Écheveaux de laine teints aux plantes'),
 			texte: 'Démonstration, expérimentation et pratique : des ateliers textiles et des activités culturelles pour les musées, les sites archéologiques et les structures culturelles, adaptés à vos publics et à vos contraintes.',
 		},
 		deroulement: {
@@ -186,7 +188,7 @@ export const pages = {
 	calendrier: {
 		seo_titre: 'Démonstrations textiles : calendrier des ateliers',
 		seo_description: 'Démonstrations textiles et activités culturelles ouvertes au public : où retrouver Neotisse dans les musées, festivals et sites archéologiques.',
-		entete: { titre: 'Où nous retrouver', texte: '' },
+		entete: { titre: 'Où nous retrouver', texte: '', photo: img('/images/atelier-plein-air.webp', 'Atelier de tissage en plein air avec le public') },
 		vide: 'Aucune date n’est annoncée pour le moment. Revenez bientôt ou suivez-nous sur les réseaux sociaux.',
 		accueillir: {
 			photo: img('/images/atelier-plein-air.webp', 'Démonstrations textiles : atelier de tissage en plein air avec le public'),
@@ -210,6 +212,7 @@ export const pages = {
 		seo_description: 'Festivals, nouveaux ateliers, projets de recherche : suivez les actualités de Neotisse et de l’archéologie expérimentale autour du textile.',
 		entete: {
 			titre: 'Les nouvelles de Neotisse',
+			photo: img('/images/conference.webp', 'Conférence de Neotisse sur les textiles anciens'),
 			texte: 'Festivals d’archéologie expérimentale, nouveaux ateliers textiles, colloques et projets de recherche : les temps forts de Neotisse, au fil des saisons.',
 		},
 		liste_titre: 'Toutes les actualités',
@@ -252,6 +255,7 @@ export const pages = {
 		seo_description: 'Demande de devis : musée, site, médiathèque ou école, recevez une proposition d’atelier sur les textiles anciens adaptée à votre public et à vos dates.',
 		entete: {
 			titre: 'Parlons de votre projet',
+			photo: img('/images/metier-a-tisser-vertical.webp', 'Métier à tisser vertical à poids'),
 			texte: 'Vous souhaitez proposer un atelier autour des techniques textiles anciennes ? Faites votre demande de devis : nous concevons avec vous une intervention adaptée à votre projet, à vos publics et à vos besoins.',
 		},
 		formulaire: {

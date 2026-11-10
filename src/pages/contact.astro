@@ -4,6 +4,7 @@ import Groupe from '../components/Groupe.astro';
 import Image from '../components/Image.astro';
 import Reseaux from '../components/Reseaux.astro';
 import Faq from '../components/Faq.astro';
+import EnteteInterieur from '../components/EnteteInterieur.astro';
 import { page, reglages, typo } from '../lib/site.js';
 
 const [p, r] = await Promise.all([page('contact'), reglages()]);
@@ -14,10 +15,7 @@ const f = p.formulaire;
 ---
 <Base titre={p.seo_titre} description={p.seo_description} image={p.aside.photo}>
 	<div class="contenu-page">
-		<Groupe classe="wrap page-hero stack center">
-			<h1 class="wp-block-heading">{typo(p.entete.titre)}</h1>
-			{p.entete.texte && <p class="lead wp-block-paragraph">{typo(p.entete.texte)}</p>}
-		</Groupe>
+		<EnteteInterieur entete={p.entete} />
 
 		<Groupe classe="wrap sec-bas">
 			<Groupe classe="contact-grid">

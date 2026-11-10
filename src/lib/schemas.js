@@ -32,7 +32,7 @@ const FAQ = (photo = false) => ({
 		liste('questions', 'Questions', [t('question', 'Question'), riche('reponse', 'Réponse')], { ajout: 'Ajouter une question', resume: 'question' }),
 	],
 });
-const ENTETE = { cle: 'entete', titre: 'Haut de page', champs: [t('titre', 'Grand titre'), long('texte', 'Texte d’introduction')] };
+const ENTETE = { cle: 'entete', titre: 'Haut de page', aide: 'Le grand titre, sa phrase d’introduction et la photo à côté. Sans photo, le titre s’affiche seul, centré.', champs: [t('titre', 'Grand titre'), long('texte', 'Texte d’introduction'), image('photo', 'Photo à côté du titre (facultative)')] };
 
 export const PAGES = {
 	accueil: {

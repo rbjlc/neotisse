@@ -53,7 +53,7 @@ function lancer() {
 
 	// Photos : elles se dévoilent de bas en haut puis glissent doucement pendant qu'on lit
 	contenu.querySelectorAll('img').forEach((im) => {
-		if (im.closest('.logos, .reseaux, form') || im.width < 160) return;
+		if (im.closest('.logos, .reseaux, form, .entete-int-photo') || im.width < 160) return;
 		gsap.fromTo(im, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none', scrollTrigger: { trigger: im, start: 'top 98%', end: 'top 55%', scrub: 0.6 } });
 		// dans un cadre qui coupe l'image, elle glisse légèrement agrandie pour ne jamais laisser de vide
 		const cadre = im.parentElement && getComputedStyle(im.parentElement).overflow === 'hidden';
@@ -65,7 +65,7 @@ function lancer() {
 
 	// Textes, cartes, questions : ils montent par petits groupes
 	const blocs = [...contenu.querySelectorAll('p, li, article, details, .wp-block-buttons, .btn, label, input, select, textarea, blockquote')]
-		.filter((el) => !el.closest('h1, h2, article li, article p, details p, details li, .cookies') && el.getBoundingClientRect().top > window.innerHeight * 0.9);
+		.filter((el) => !el.closest('h1, h2, article li, article p, details p, details li, .cookies, .evt, .entete-int, .citation') && el.getBoundingClientRect().top > window.innerHeight * 0.9);
 	gsap.set(blocs, { y: 40, opacity: 0 });
 	ScrollTrigger.batch(blocs, {
 		start: 'top 92%',
@@ -73,6 +73,38 @@ function lancer() {
 	});
 	// Garde-fou : tout ce qui est encore caché s'affiche si l'on arrive en bas de page
 	ScrollTrigger.create({ trigger: document.body, start: 'bottom bottom+=2', onEnter: () => gsap.to(blocs, { y: 0, opacity: 1, duration: 0.4, overwrite: true }) });
+
+	// Haut de page : la photo se dévoile de bas en haut, puis glisse doucement quand on descend
+	const photoHaut = contenu.querySelector('.entete-int-photo img');
+	if (photoHaut) {
+		gsap.fromTo(photoHaut.parentElement, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.4, ease: 'power4.inOut', delay: 0.15 });
+		gsap.fromTo(photoHaut, { scale: 1.3 }, { scale: 1.12, duration: 1.8, ease: 'power3.out', delay: 0.15 });
+		gsap.fromTo(photoHaut, { yPercent: -4 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: photoHaut.parentElement, start: 'top top', end: 'bottom top', scrub: true } });
+	}
+	const intro = contenu.querySelector('.entete-int .lead');
+	if (intro) gsap.from(intro, { y: 24, opacity: 0, duration: 1, ease: 'power3.out', delay: 0.55 });
+
+	// Bandeaux de couleur : ils s'ouvrent comme un rideau quand ils arrivent à l'écran
+	contenu.querySelectorAll('.band-olive, .band-laine').forEach((band) => {
+		gsap.fromTo(band, { clipPath: 'inset(7% 5% 7% 5% round 28px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none', scrollTrigger: { trigger: band, start: 'top 95%', end: 'top 35%', scrub: 0.6 } });
+	});
+
+	// Citation : elle se colore mot à mot au fil de la lecture, comme sur l'accueil
+	contenu.querySelectorAll('.citation').forEach((q) => {
+		if (!texteSimple(q)) return;
+		decouperEnMots(q, (c) => { const sp = document.createElement('span'); sp.className = 'mot-citation'; sp.appendChild(c); return sp; });
+		gsap.fromTo(q.querySelectorAll('.mot-citation'), { opacity: 0.15 }, { opacity: 1, ease: 'none', stagger: 0.1, scrollTrigger: { trigger: q, start: 'top 85%', end: 'bottom 45%', scrub: 0.5 } });
+	});
+
+	// Calendrier : les dates arrivent l'une après l'autre
+	const dates = [...contenu.querySelectorAll('.evt')];
+	if (dates.length) {
+		gsap.set(dates, { x: -40, opacity: 0 });
+		ScrollTrigger.batch(dates, { start: 'top 92%', onEnter: (lot) => gsap.to(lot, { x: 0, opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.1, overwrite: true }) });
+		ScrollTrigger.create({ trigger: document.body, start: 'bottom bottom+=2', onEnter: () => gsap.to(dates, { x: 0, opacity: 1, duration: 0.4, overwrite: true }) });
+		// quand on filtre par type, les dates visibles réapparaissent tout de suite
+		contenu.querySelectorAll('[data-filtre], .filtres button, .onglets button').forEach((b) => b.addEventListener('click', () => setTimeout(() => { gsap.to(dates, { x: 0, opacity: 1, duration: 0.4, overwrite: true }); ScrollTrigger.refresh(); }, 30)));
+	}
 
 	// Ateliers et articles : la photo et le texte se croisent légèrement au défilement
 	contenu.querySelectorAll('.atelier, .article').forEach((carte, i) => {

@@ -4,6 +4,7 @@ import Groupe from '../components/Groupe.astro';
 import Image from '../components/Image.astro';
 import Boutons from '../components/Boutons.astro';
 import Faq from '../components/Faq.astro';
+import EnteteInterieur from '../components/EnteteInterieur.astro';
 import { page, reglages, evenements, categorie, typo, moisAnnee, moisCourt, jourCourt, dateEvenement, urlSite } from '../lib/site.js';
 
 const [p, r, evts] = await Promise.all([page('calendrier'), reglages(), evenements()]);
@@ -30,10 +31,7 @@ const ld = evts.filter((e) => !e.a_confirmer).length && {
 ---
 <Base titre={p.seo_titre} description={p.seo_description} image={p.accueillir.photo} ld={ld}>
 	<div class="contenu-page">
-		<Groupe classe="wrap page-hero stack center">
-			<h1 class="wp-block-heading">{typo(p.entete.titre)}</h1>
-			{p.entete.texte && <p class="lead wp-block-paragraph">{typo(p.entete.texte)}</p>}
-		</Groupe>
+		<EnteteInterieur entete={p.entete} />
 
 		<Groupe classe="wrap sec-bas">
 			<div class="neo-liste neo-liste-calendrier">
