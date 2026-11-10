@@ -39,7 +39,7 @@ body.accueil{margin:0;background:var(--lin);color:var(--encre);font:400 17px/1.6
 .manifeste{padding-block:clamp(90px,14vw,190px);text-align:center}
 .manifeste p.grand{font:300 clamp(30px,4.4vw,60px)/1.18 var(--titre);max-width:22ch;margin:26px auto 0;color:var(--encre)}
 .js-anim .manifeste p.grand .mot{opacity:.14}
-.manifeste p.grand em{font-style:italic;color:var(--olive)}
+.manifeste p.grand em{font-style:normal;color:var(--olive)}
 
 /* ---------- Trois principes ---------- */
 .principes{padding-block:0 clamp(80px,12vw,160px)}
@@ -120,7 +120,7 @@ body.accueil{margin:0;background:var(--lin);color:var(--encre);font:400 17px/1.6
 /* ---------- Appel final ---------- */
 .final{position:relative;background:var(--foret);color:var(--lin);padding-block:clamp(100px,14vw,200px);text-align:center;overflow:hidden}
 .final h2{font-size:clamp(46px,8vw,124px)}
-.final h2 em{font-style:italic;color:var(--gaude)}
+.final h2 em{font-style:normal;color:var(--gaude)}
 .final p{color:var(--sable);max-width:44ch;margin:24px auto 34px}
 .final .fils-deco{position:absolute;left:0;right:0;top:50%;height:240px;transform:translateY(-50%);width:100%;opacity:.35;pointer-events:none}
 
