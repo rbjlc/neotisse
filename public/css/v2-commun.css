@@ -203,3 +203,9 @@ html.cookies-ouvert{overflow:hidden}
   .entete-int.avec-photo{grid-template-columns:1fr}
   .entete-int-photo{aspect-ratio:4/3}
 }
+/* La photo du haut tient toujours dans l'écran, en-tête compris : titre et photo se voient en entier */
+.entete-int.avec-photo{padding-top:clamp(28px,4vw,56px);padding-bottom:clamp(36px,4vw,64px)}
+.entete-int-photo{max-height:min(560px,calc(100svh - 190px))}
+/* Page sans texte d'introduction (ex. Calendrier) : photo à l'horizontale, plus basse */
+.entete-int.avec-photo:not(:has(.lead)) .entete-int-photo{aspect-ratio:3/2;max-height:min(420px,calc(100svh - 230px))}
+@media (max-width:900px){.entete-int-photo,.entete-int.avec-photo:not(:has(.lead)) .entete-int-photo{max-height:none;aspect-ratio:4/3}}
