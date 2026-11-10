@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Groupe from '../components/Groupe.astro';
 import Logos from '../components/Logos.astro';
 import Faq from '../components/Faq.astro';
+import EnteteInterieur from '../components/EnteteInterieur.astro';
 import { page, partenaires, temoignages, ateliers, typo } from '../lib/site.js';
 
 const [p, parts, avis, listeAteliers] = await Promise.all([page('livre-or'), partenaires(), temoignages(), ateliers()]);
@@ -12,13 +13,16 @@ const manque = (Astro.url.searchParams.get('manque') || '').split(',');
 ---
 <Base titre={p.seo_titre} description={p.seo_description}>
 	<div class="contenu-page">
-		<Groupe id="partenaires" classe="band-olive sec partenaires-haut">
-			<Groupe classe="wrap stack center">
-				<h1 class="wp-block-heading h2">{typo(p.entete.titre)}</h1>
-				{p.entete.texte && <p class="wp-block-paragraph">{typo(p.entete.texte)}</p>}
-				<div class="neo-liste neo-liste-logos-partenaires"><Logos partenaires={parts} classe="logos logos-haut" /></div>
+		<EnteteInterieur entete={p.entete} />
+
+		{parts.length > 0 && (
+			<Groupe id="partenaires" classe="band-olive sec partenaires-haut">
+				<Groupe classe="wrap stack center">
+					{p.partenaires?.titre && <h2 class="wp-block-heading h2">{typo(p.partenaires.titre)}</h2>}
+					<div class="neo-liste neo-liste-logos-partenaires"><Logos partenaires={parts} classe="logos logos-haut" /></div>
+				</Groupe>
 			</Groupe>
-		</Groupe>
+		)}
 
 		<Groupe classe="sec avis-partenaires-zone">
 			<Groupe classe="wrap stack">

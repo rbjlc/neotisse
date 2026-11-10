@@ -230,8 +230,10 @@ export const pages = {
 		seo_description: 'Témoignages de musées, sites, familles et visiteurs : ils racontent leur atelier Neotisse de filage, tissage et teinture végétale.',
 		entete: {
 			titre: 'Partenaires et témoignages',
+			photo: img('/images/panier-echeveaux.webp', 'Panier d’écheveaux de laine teints aux plantes'),
 			texte: 'Partenaires, familles, visiteurs : leurs témoignages racontent leur rencontre avec les savoir-faire textiles anciens.',
 		},
+		partenaires: { titre: 'Ils nous ont accueillies' },
 		avis_partenaires: { titre: 'Témoignages de nos partenaires', vide: 'Les avis de nos partenaires arrivent bientôt.' },
 		temoignages: { titre: 'Ce qu’ils ont vécu', vide: 'Les premiers témoignages arrivent bientôt. Vous avez participé à un atelier ? Racontez-nous !' },
 		formulaire: {

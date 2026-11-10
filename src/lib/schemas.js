@@ -146,7 +146,8 @@ export const PAGES = {
 		nom: 'Témoignages', url: '/livre-or/',
 		note: 'Les témoignages reçus se valident dans le menu « Témoignages ». Les avis des partenaires se saisissent dans le menu « Partenaires ».',
 		sections: [
-			{ ...ENTETE, titre: 'Haut de page (bandeau vert avec les partenaires)' },
+			ENTETE,
+			{ cle: 'partenaires', titre: 'Bandeau vert des partenaires', aide: 'Les noms des partenaires viennent du menu « Partenaires ».', champs: [t('titre', 'Titre du bandeau')] },
 			{ cle: 'avis_partenaires', titre: 'Avis des partenaires', champs: [t('titre', 'Titre'), t('vide', 'Message s’il n’y a encore aucun avis')] },
 			{ cle: 'temoignages', titre: 'Témoignages des visiteurs', champs: [t('titre', 'Titre'), t('vide', 'Message s’il n’y a encore aucun témoignage')] },
 			{ cle: 'formulaire', titre: 'Formulaire « Laisser un témoignage »', champs: [t('titre', 'Titre'), long('note', 'Texte au-dessus'), long('merci', 'Message après l’envoi')] },
