@@ -8,7 +8,9 @@ for (const [k, v] of Object.entries(loadEnv(process.env.NODE_ENV || 'development
 
 export default defineConfig({
 	output: 'server',
-	adapter: netlify(),
+	// En local, on n'émule pas les Edge Functions de Netlify : le site n'en utilise pas,
+	// et leur serveur de développement (Deno) ne démarre pas sur tous les ordinateurs Windows.
+	adapter: netlify({ devFeatures: { edgeFunctions: false } }),
 	trailingSlash: 'ignore',
 	security: { checkOrigin: true },
 	devToolbar: { enabled: false },
