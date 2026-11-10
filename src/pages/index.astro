@@ -38,7 +38,6 @@ const motsRepetes = (liste) => [...liste, ...liste, ...liste.slice(0, 3)];
 			<div class="contenu env">
 				<div class="l">
 					<div>
-						{e.sur_titre && <p class="libelle trait apparait" style="color:var(--gaude);margin-bottom:22px">{e.sur_titre}</p>}
 						<h1>{lignesTitre.map((ligne) => <span class="ligne"><span set:html={colorer(ligne, e.mot_couleur)} /></span>)}</h1>
 					</div>
 					<div class="cote apparait">

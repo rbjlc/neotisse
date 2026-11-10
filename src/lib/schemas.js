@@ -43,9 +43,8 @@ export const PAGES = {
 				aide: 'La première chose que voient les visiteurs. Choisissez une photo horizontale, lumineuse, où l’on voit bien les laines.',
 				champs: [
 					image('image', 'Photo de fond'),
-					t('sur_titre', 'Petite ligne au-dessus du titre', 'Ex. : Archéologie textile · Montpellier'),
 					long('titre', 'Grand titre', 'Allez à la ligne pour choisir où le titre se coupe (3 lignes conseillées).'),
-					t('mot_couleur', 'Mot en couleur', 'Recopiez exactement un mot ou un groupe de mots du titre : il s’affichera en jaune et en italique.'),
+					t('mot_couleur', 'Mot en couleur', 'Recopiez exactement un mot ou un groupe de mots du titre : il s’affichera en jaune.'),
 					long('texte', 'Texte à droite'),
 					bouton('bouton', 'Bouton'),
 				],
@@ -95,7 +94,7 @@ export const PAGES = {
 				aide: 'Les noms des partenaires qui défilent juste au-dessus viennent du menu Partenaires.',
 				champs: [
 					t('libelle', 'Petit titre'), t('titre', 'Titre'),
-					t('mot_couleur', 'Mot en couleur', 'Recopiez exactement un mot du titre : il s’affichera en jaune et en italique.'),
+					t('mot_couleur', 'Mot en couleur', 'Recopiez exactement un mot du titre : il s’affichera en jaune.'),
 					long('texte', 'Texte'), bouton('bouton', 'Bouton'),
 				],
 			},

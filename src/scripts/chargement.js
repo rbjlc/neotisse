@@ -1,7 +1,7 @@
 // Neotisse v2 : écran d'attente de la première visite.
 // Une pelote de laine tombe, rebondit, puis roule en déroulant un fil : les lettres du nom se lèvent
 // à son passage. Le fil se tend, puis l'écran s'ouvre le long du fil sur l'accueil.
-// Un clic, la touche Échap ou le bouton « Passer l'introduction » vont directement à l'ouverture.
+// Un clic ou la touche Échap vont directement à l'ouverture.
 import { gsap as g } from 'gsap';
 
 export function jouerChargement() {

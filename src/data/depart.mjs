@@ -53,7 +53,6 @@ export const pages = {
 		seo_description: 'Ateliers textiles anciens et activités culturelles : filage, tissage et teinture végétale par des archéologues de Montpellier, pour musées et écoles.',
 		entree: {
 			image: img('/images/table-demonstration-outils.webp', 'Ateliers textiles anciens : table de démonstration avec fuseaux, écheveaux teints et outils de tissage'),
-			sur_titre: 'Archéologie textile · Montpellier',
 			titre: 'Faire vivre\nles savoir-faire\ndu passé',
 			mot_couleur: 'savoir-faire',
 			texte: 'Filage, tissage et teinture végétale, du Néolithique au Moyen Âge : des ateliers d’archéologues pour les musées, les sites et les écoles.',
