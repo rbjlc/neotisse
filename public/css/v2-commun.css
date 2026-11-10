@@ -168,3 +168,17 @@ html.cookies-ouvert{overflow:hidden}
 /* Ligne sous un titre (rôle d'une fondatrice, public d'un atelier) : jamais au-dessus du titre */
 .interieur .sous-titre{margin-top:-.35em;font:400 17px/1.4 var(--texte);color:var(--olive);letter-spacing:0;text-transform:none}
 .interieur .fondatrice .sous-titre{color:#F3CF6E} /* gaude claire : contraste 5,4 sur l’olive */
+
+/* ---------- Petits détails au survol ---------- */
+/* lien : le trait part vers la droite puis revient depuis la gauche, comme un fil qu'on tire */
+.lien:hover::after{transform:none;animation:fil-lien .7s var(--doux)}
+@keyframes fil-lien{0%{transform:scaleX(1);transform-origin:right}49.9%{transform:scaleX(0);transform-origin:right}50%{transform:scaleX(0);transform-origin:left}100%{transform:scaleX(1);transform-origin:left}}
+/* cartes des pages intérieures : la photo s'approche à peine */
+.interieur .zoom{width:100%;height:100%;transition:transform 1.2s var(--doux)}
+.interieur .zoom>img{width:100%;height:100%;object-fit:cover}
+.interieur .article:hover .zoom,.interieur .card:hover .zoom,.interieur a:hover .zoom{transform:scale(1.05)}
+/* fil sous le grand titre des pages intérieures */
+.fil-titre{display:block;width:clamp(120px,14vw,190px);height:auto;margin-top:18px;overflow:visible}
+.fil-titre.centre{margin-inline:auto}
+.fil-titre path{fill:none;stroke:var(--garance);stroke-width:2.5;stroke-linecap:round}
+@media (prefers-reduced-motion:reduce){.lien:hover::after{animation:none}.interieur .zoom{transition:none}}

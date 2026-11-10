@@ -71,7 +71,7 @@ const pastilles = [['var(--gaude)', 'var(--encre)'], ['var(--garance)', 'var(--b
 				{listeAteliers.map((a, i) => (
 					<article class="carte" style={`--c:${pastilles[i % 4][0]};--cf:${pastilles[i % 4][1]}`}>
 						<div class="img">
-							{a.image?.src && <img src={a.image.src} {...attrsImage(a.image.src, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw')} alt={a.image.alt || ''} loading="lazy" />}
+							{a.image?.src && <div class="zoom"><img src={a.image.src} {...attrsImage(a.image.src, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw')} alt={a.image.alt || ''} loading="lazy" /></div>}
 							{a.etiquette && <span class="pastille">{a.etiquette}</span>}
 						</div>
 						<h3>{typo(a.titre)}</h3>
@@ -134,8 +134,8 @@ const pastilles = [['var(--gaude)', 'var(--encre)'], ['var(--garance)', 'var(--b
 		</section>
 
 		{parts.length > 0 && (
-			<section class="partenaires" aria-label={`Ils nous ont accueillies : ${parts.map((x) => x.nom).join(', ')}`}>
-				<div class="piste" id="piste-partenaires" aria-hidden="true">{[...parts, ...parts, ...parts, ...parts].map((x) => <span>{x.nom}</span>)}</div>
+			<section class="partenaires" aria-label="Ils nous ont accueillies">
+				<ul class="liste-partenaires env">{parts.map((x) => <li>{x.nom}</li>)}</ul>
 			</section>
 		)}
 

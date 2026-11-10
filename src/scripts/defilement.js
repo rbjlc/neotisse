@@ -18,8 +18,28 @@ function decouper(h) {
 	return true;
 }
 
+// Un fil fin se dessine sous le grand titre de chaque page, comme la signature de l'accueil
+function filSousTitre() {
+	const h1 = contenu && contenu.querySelector('h1');
+	if (!h1 || h1.nextElementSibling?.classList.contains('fil-titre')) return null;
+	const ns = 'http://www.w3.org/2000/svg';
+	const svg = document.createElementNS(ns, 'svg');
+	svg.setAttribute('class', 'fil-titre'); svg.setAttribute('viewBox', '0 0 240 14'); svg.setAttribute('aria-hidden', 'true');
+	const path = document.createElementNS(ns, 'path');
+	path.setAttribute('d', 'M2 8 C 30 2, 50 13, 80 7 S 130 1, 160 7 S 210 12, 238 6');
+	svg.appendChild(path);
+	if (getComputedStyle(h1).textAlign === 'center') svg.classList.add('centre');
+	h1.after(svg);
+	return path;
+}
+
 function lancer() {
+	const fil = filSousTitre();
 	if (calme || !contenu) return;
+	if (fil) {
+		const L = fil.getTotalLength();
+		gsap.fromTo(fil, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut', delay: 0.5 });
+	}
 
 	// Le grand titre de la page monte à l'arrivée
 	const h1 = contenu.querySelector('h1');
@@ -35,7 +55,12 @@ function lancer() {
 	contenu.querySelectorAll('img').forEach((im) => {
 		if (im.closest('.logos, .reseaux, form') || im.width < 160) return;
 		gsap.fromTo(im, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none', scrollTrigger: { trigger: im, start: 'top 98%', end: 'top 55%', scrub: 0.6 } });
-		gsap.fromTo(im, { y: 50 }, { y: -30, ease: 'none', scrollTrigger: { trigger: im, start: 'top bottom', end: 'bottom top', scrub: true } });
+		// dans un cadre qui coupe l'image, elle glisse légèrement agrandie pour ne jamais laisser de vide
+		const cadre = im.parentElement && getComputedStyle(im.parentElement).overflow === 'hidden';
+		// un petit cadre autour de la photo porte le zoom au survol, sans gêner l'animation au défilement
+		if (cadre && !im.parentElement.classList.contains('zoom')) { const z = document.createElement('div'); z.className = 'zoom'; im.before(z); z.appendChild(im); }
+		if (cadre) gsap.fromTo(im, { yPercent: -5, scale: 1.12 }, { yPercent: 5, scale: 1.12, ease: 'none', scrollTrigger: { trigger: im, start: 'top bottom', end: 'bottom top', scrub: true } });
+		else gsap.fromTo(im, { y: 30 }, { y: -20, ease: 'none', scrollTrigger: { trigger: im, start: 'top bottom', end: 'bottom top', scrub: true } });
 	});
 
 	// Textes, cartes, questions : ils montent par petits groupes

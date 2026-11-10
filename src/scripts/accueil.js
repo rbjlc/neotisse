@@ -269,16 +269,10 @@ document.querySelectorAll('[data-vitesse]').forEach(function (im) {
 g.fromTo('.equipe .photos .a', { clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)', duration: 1.3, ease: 'power4.inOut', scrollTrigger: { trigger: '.equipe', start: 'top 70%' } });
 g.fromTo('.equipe .photos .b', { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.3, ease: 'power4.inOut', delay: 0.25, scrollTrigger: { trigger: '.equipe', start: 'top 70%' } });
 // Agenda
-g.utils.toArray('.dates li').forEach(function (li, i) {
-  g.fromTo(li, { x: i % 2 ? 80 : -80, opacity: 0 }, { x: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger: li, start: 'top 98%', end: 'top 70%', scrub: 0.8 } });
-});
+// Prochaines dates : elles apparaissent simplement, l'une après l'autre
+g.from('.dates li', { y: 24, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: '.dates', start: 'top 85%' } });
 g.from('.equipe .noms > div', { y: 40, opacity: 0, ease: 'none', stagger: 0.2, scrollTrigger: { trigger: '.equipe .noms', start: 'top 95%', end: 'top 70%', scrub: 0.8 } });
 // Partenaires : défilement continu, accéléré par le scroll
-var piste = document.getElementById('piste-partenaires');
-if (piste) {
-var tw = g.fromTo(piste, { xPercent: 0 }, { xPercent: -50, duration: 30, ease: 'none', repeat: -1 });
-ST.create({ trigger: piste, start: 'top bottom', end: 'bottom top', onUpdate: function (s) { tw.timeScale(1 + Math.min(5, Math.abs(s.getVelocity()) / 300)); g.to(tw, { timeScale: 1, duration: 1, overwrite: true }); } });
-}
 // Final
 document.querySelectorAll('.fils-deco path').forEach(function (p, i) {
   var l = p.getTotalLength(); g.set(p, { strokeDasharray: l, strokeDashoffset: l });
