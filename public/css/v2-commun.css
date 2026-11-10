@@ -164,3 +164,7 @@ html.cookies-ouvert{overflow:hidden}
 .cache-mot{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em;margin-bottom:-.08em}
 .cache-mot>span{display:inline-block;will-change:transform}
 @media (prefers-reduced-motion:reduce){.avancee{display:none}}
+
+/* Ligne sous un titre (rôle d'une fondatrice, public d'un atelier) : jamais au-dessus du titre */
+.interieur .sous-titre{margin-top:-.35em;font:400 17px/1.4 var(--texte);color:var(--olive);letter-spacing:0;text-transform:none}
+.interieur .fondatrice .sous-titre{color:#F3CF6E} /* gaude claire : contraste 5,4 sur l’olive */

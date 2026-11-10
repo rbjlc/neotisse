@@ -191,7 +191,7 @@ export const COLLECTIONS = {
 		colonnes: ['titre', 'nom_court'], ordre: 'ordre', url: (f) => `/ateliers/${f.slug}/`,
 		champs: [
 			t('titre', 'Nom de l’atelier', '', { requis: true }),
-			t('surtitre', 'Petit titre au-dessus', 'Ex. : Atelier participatif · Tous publics'),
+			t('surtitre', 'Ligne sous le titre', 'Ex. : Atelier participatif · Tous publics'),
 			image('image', 'Photo'),
 			riche('description', 'Description'),
 			t('repart', 'Ce que l’on emporte', 'Ex. : Chaque participant repart avec son galon. (facultatif)'),

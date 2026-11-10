@@ -37,7 +37,6 @@ const num = (i) => String(i + 1).padStart(2, '0');
 					<Groupe classe="principes">
 						{p.deroulement.liste.map((x, i) => (
 							<Groupe classe="principe">
-								<p class="num wp-block-paragraph">{num(i)}</p>
 								<h3 class="wp-block-heading">{typo(x.titre)}</h3>
 								<p class="wp-block-paragraph">{typo(x.texte)}</p>
 							</Groupe>

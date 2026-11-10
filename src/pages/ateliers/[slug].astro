@@ -17,8 +17,8 @@ const ld = {
 	<article class="wrap">
 		<div class="single-wrap">
 			<a class="retour-lien" href="/ateliers/">← Tous les ateliers</a>
-			{a.surtitre && <p class="eyebrow">{typo(a.surtitre)}</p>}
 			<h1>{typo(a.titre)}</h1>
+			{a.surtitre && <p class="sous-titre">{typo(a.surtitre)}</p>}
 			{a.image?.src && <div class="img-box"><img src={a.image.src} {...attrsImage(a.image.src, '(max-width: 900px) 100vw, 760px')} class="photo" alt={a.image.alt || ''} /></div>}
 			<div class="prose" style="padding:0;max-width:none" set:html={affiche(a.description)} />
 			{a.repart && <p class="repart">{typo(a.repart)}</p>}
