@@ -17,7 +17,7 @@ const num = (i) => String(i + 1).padStart(2, '0');
 		<Groupe classe="wrap">
 			<div class="neo-liste neo-liste-ateliers">
 				{liste.length > 1 && (
-					<nav class="onglets" aria-label="Formats d'ateliers" style="padding-bottom:40px">
+					<nav class="onglets onglets-ateliers" aria-label="Formats d'ateliers">
 						{liste.map((a) => <a href={`#atelier-${a.slug}`}>{typo(a.nom_court || a.titre)}</a>)}
 					</nav>
 				)}

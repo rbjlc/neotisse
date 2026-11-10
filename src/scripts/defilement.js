@@ -9,6 +9,19 @@ gsap.registerPlugin(ScrollTrigger);
 const calme = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const contenu = document.getElementById('contenu');
 
+// Fait apparaître des éléments quand ils entrent à l'écran, y compris après un saut direct (lien, ancre),
+// grâce à la détection de visibilité du navigateur. Les éléments qui arrivent ensemble se suivent de peu.
+function apparaitre(elements, vers, decalage) {
+	if (!elements.length) return;
+	const io = new IntersectionObserver((entrees) => {
+		entrees.filter((e) => e.isIntersecting).forEach((e, i) => {
+			gsap.to(e.target, { ...vers, delay: Math.min(i, 4) * decalage, overwrite: true }); // jamais plus d'un tiers de seconde d'attente
+			io.unobserve(e.target);
+		});
+	}, { rootMargin: '0px 0px -8% 0px' });
+	elements.forEach((el) => io.observe(el));
+}
+
 function decouper(h) {
 	// seulement les titres simples (texte, italique, gras) : on ne touche pas aux liens ni aux balises particulières
 	if (h.dataset.decoupe || !texteSimple(h)) return false;
@@ -33,7 +46,60 @@ function filSousTitre() {
 	return path;
 }
 
+// Ateliers : le petit menu reste visible en haut, souligne l'atelier en cours de lecture
+function menuAteliers() {
+	const nav = contenu && contenu.querySelector('.onglets-ateliers');
+	if (!nav) return;
+	const liens = [...nav.querySelectorAll('a[href^="#"]')];
+	// collé juste sous la barre du haut, quelle que soit sa hauteur
+	const tete = document.getElementById('tete');
+	const caler = () => { if (tete) nav.style.top = Math.round(tete.getBoundingClientRect().height) + 'px'; };
+	caler(); window.addEventListener('resize', caler);
+	const fil = document.createElement('span');
+	fil.className = 'onglets-fil'; fil.setAttribute('aria-hidden', 'true');
+	nav.appendChild(fil);
+	const placer = (a, anime) => {
+		liens.forEach((x) => (x === a ? x.setAttribute('aria-current', 'true') : x.removeAttribute('aria-current')));
+		if (!a) { gsap.to(fil, { width: 0, duration: anime ? 0.4 : 0 }); return; }
+		const x = a.offsetLeft - nav.scrollLeft, w = a.offsetWidth;
+		gsap.to(fil, { x, width: w, duration: anime && !calme ? 0.6 : 0, ease: 'power3.inOut' });
+		if (nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: a.offsetLeft - 16, behavior: calme ? 'auto' : 'smooth' });
+	};
+	liens.forEach((a) => {
+		const cible = document.querySelector(a.getAttribute('href'));
+		if (!cible) return;
+		ScrollTrigger.create({ trigger: cible, start: 'top 55%', end: 'bottom 55%', onToggle: (st) => { if (st.isActive) placer(a, true); } });
+	});
+	window.addEventListener('resize', () => placer(liens.find((x) => x.getAttribute('aria-current') === 'true'), false));
+}
+
+// Contact : les étapes « Après votre demande » reliées par un fil qui se dessine
+function filEtapes() {
+	const ol = contenu && contenu.querySelector('.etapes');
+	if (!ol || ol.children.length < 2) return;
+	ol.classList.add('avec-fil');
+	const ns = 'http://www.w3.org/2000/svg';
+	const svg = document.createElementNS(ns, 'svg'); svg.setAttribute('class', 'fil-etapes'); svg.setAttribute('aria-hidden', 'true');
+	const path = document.createElementNS(ns, 'path'); svg.appendChild(path); ol.prepend(svg);
+	let L = 0;
+	const tracer = () => {
+		const items = [...ol.querySelectorAll('li')];
+		const haut = items[0].offsetTop + 15, bas = items[items.length - 1].offsetTop + 15, h = Math.max(1, bas - haut);
+		svg.style.top = haut + 'px'; svg.style.height = h + 'px'; svg.setAttribute('viewBox', `0 0 12 ${h}`);
+		// une légère ondulation, comme un fil qui descend d'une étape à l'autre
+		let d = 'M1 0'; const n = Math.max(2, Math.round(h / 60));
+		for (let i = 1; i <= n; i++) d += ` Q ${i % 2 ? 11 : -9} ${(h * (i - 0.5)) / n}, 1 ${(h * i) / n}`;
+		path.setAttribute('d', d); L = path.getTotalLength();
+	};
+	tracer();
+	window.addEventListener('resize', tracer);
+	if (calme) return;
+	gsap.fromTo(path, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, ease: 'none', scrollTrigger: { trigger: ol, start: 'top 80%', end: 'bottom 55%', scrub: 0.6 } });
+}
+
 function lancer() {
+	menuAteliers();
+	filEtapes();
 	const fil = filSousTitre();
 	if (calme || !contenu) return;
 	if (fil) {
@@ -67,10 +133,7 @@ function lancer() {
 	const blocs = [...contenu.querySelectorAll('p, li, article, details, .wp-block-buttons, .btn, label, input, select, textarea, blockquote')]
 		.filter((el) => !el.closest('h1, h2, article li, article p, details p, details li, .cookies, .evt, .entete-int, .citation') && el.getBoundingClientRect().top > window.innerHeight * 0.9);
 	gsap.set(blocs, { y: 40, opacity: 0 });
-	ScrollTrigger.batch(blocs, {
-		start: 'top 92%',
-		onEnter: (lot) => gsap.to(lot, { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out', stagger: 0.08, overwrite: true }),
-	});
+	apparaitre(blocs, { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' }, 0.08);
 	// Garde-fou : tout ce qui est encore caché s'affiche si l'on arrive en bas de page
 	ScrollTrigger.create({ trigger: document.body, start: 'bottom bottom+=2', onEnter: () => gsap.to(blocs, { y: 0, opacity: 1, duration: 0.4, overwrite: true }) });
 
@@ -100,10 +163,18 @@ function lancer() {
 	const dates = [...contenu.querySelectorAll('.evt')];
 	if (dates.length) {
 		gsap.set(dates, { x: -40, opacity: 0 });
-		ScrollTrigger.batch(dates, { start: 'top 92%', onEnter: (lot) => gsap.to(lot, { x: 0, opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.1, overwrite: true }) });
+		apparaitre(dates, { x: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, 0.1);
 		ScrollTrigger.create({ trigger: document.body, start: 'bottom bottom+=2', onEnter: () => gsap.to(dates, { x: 0, opacity: 1, duration: 0.4, overwrite: true }) });
 		// quand on filtre par type, les dates visibles réapparaissent tout de suite
 		contenu.querySelectorAll('[data-filtre], .filtres button, .onglets button').forEach((b) => b.addEventListener('click', () => setTimeout(() => { gsap.to(dates, { x: 0, opacity: 1, duration: 0.4, overwrite: true }); ScrollTrigger.refresh(); }, 30)));
+	}
+
+	// Calendrier : le trait jaune sous chaque mois se dessine de gauche à droite
+	const mois = [...contenu.querySelectorAll('.mois')];
+	if (mois.length) {
+		document.documentElement.classList.add('trait-anime');
+		mois.forEach((m) => ScrollTrigger.create({ trigger: m, start: 'top 88%', once: true, onEnter: () => m.classList.add('trace') }));
+		contenu.querySelectorAll('.filtres button').forEach((b) => b.addEventListener('click', () => setTimeout(() => mois.forEach((m) => m.classList.add('trace')), 30)));
 	}
 
 	// Ateliers et articles : la photo et le texte se croisent légèrement au défilement
@@ -113,5 +184,12 @@ function lancer() {
 	});
 }
 
-if (document.readyState === 'complete') lancer();
-else window.addEventListener('load', lancer);
+// Une fois tout en place (polices, photos, menus ajoutés), on recalcule les positions de déclenchement
+function demarrer() {
+	lancer();
+	ScrollTrigger.refresh();
+	(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => ScrollTrigger.refresh());
+	setTimeout(() => ScrollTrigger.refresh(), 800);
+}
+if (document.readyState === 'complete') demarrer();
+else window.addEventListener('load', demarrer);
