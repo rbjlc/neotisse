@@ -261,7 +261,7 @@ export const pages = {
 			texte: 'Vous souhaitez proposer un atelier autour des techniques textiles anciennes ? Faites votre demande de devis : nous concevons avec vous une intervention adaptée à votre projet, à vos publics et à vos besoins.',
 		},
 		formulaire: {
-			titre: 'Demande de devis',
+			titre: 'Votre demande',
 			note: 'Les champs marqués d’un * sont obligatoires.',
 			bouton: 'Envoyer ma demande',
 			merci: 'Merci ! Votre demande a bien été envoyée. Nous vous recontactons rapidement pour préciser votre projet.',

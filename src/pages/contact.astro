@@ -12,6 +12,7 @@ const etat = Astro.url.searchParams.get('devis');
 const manque = (Astro.url.searchParams.get('manque') || '').split(',').filter(Boolean);
 const err = (k) => (manque.includes(k) ? 'true' : undefined);
 const f = p.formulaire;
+const categorieChoisie = r.categories_messages.some((c) => c.cle === 'devis') ? 'devis' : r.categories_messages[0]?.cle;
 ---
 <Base titre={p.seo_titre} description={p.seo_description} image={p.aside.photo}>
 	<div class="contenu-page">
@@ -26,11 +27,20 @@ const f = p.formulaire;
 					{etat === 'probleme' && <p class="retour erreur" role="alert" tabindex="-1">Un problème technique a empêché l’envoi. Réessayez dans quelques minutes, ou écrivez-nous directement à {r.email}.</p>}
 					{f.note && <p class="note wp-block-paragraph">{typo(f.note)}</p>}
 					<form method="post" action="/api/contact" id="form-devis">
+						{r.categories_messages.length > 1 && (
+							<fieldset class="type-demande">
+								<legend class="legend">Type de demande *</legend>
+								<div class="choix">
+									{r.categories_messages.map((c, i) => <label for={`cat${i}`}><input id={`cat${i}`} type="radio" name="categorie" value={c.cle} checked={c.cle === categorieChoisie} required />{c.nom}</label>)}
+								</div>
+							</fieldset>
+						)}
 						<div class="champs">
 							<div class="champ"><label for="d-nom">Nom et prénom *</label><input id="d-nom" name="nom" type="text" autocomplete="name" required maxlength="120" aria-invalid={err('nom')} /></div>
-							<div class="champ"><label for="d-inst">Institution *</label><input id="d-inst" name="institution" type="text" autocomplete="organization" placeholder="Musée, université, collectivité…" required maxlength="160" aria-invalid={err('institution')} /></div>
-							<div class="champ plein"><label for="d-mail">E-mail professionnel *</label><input id="d-mail" name="email" type="email" autocomplete="email" spellcheck="false" required maxlength="160" aria-invalid={err('email')} /></div>
+							<div class="champ"><label for="d-inst">Institution<span data-devis-seul> *</span><span class="opt" data-info-seul hidden> (facultatif)</span></label><input id="d-inst" name="institution" type="text" autocomplete="organization" placeholder="Musée, université, collectivité…" required maxlength="160" aria-invalid={err('institution')} /></div>
+							<div class="champ plein"><label for="d-mail">E-mail<span data-devis-seul> professionnel</span> *</label><input id="d-mail" name="email" type="email" autocomplete="email" spellcheck="false" required maxlength="160" aria-invalid={err('email')} /></div>
 						</div>
+						<div class="devis-seul" data-devis-bloc>
 						{r.choix_projets.length > 0 && (
 							<fieldset>
 								<legend class="legend">Type de projet</legend>
@@ -49,7 +59,10 @@ const f = p.formulaire;
 								<div class="champ plein"><label for="d-budget">Budget envisagé</label>
 									<select id="d-budget" name="budget">{r.choix_budgets.map((x) => <option>{x}</option>)}</select></div>
 							)}
-							<div class="champ plein"><label for="d-projet">Votre projet *</label><textarea id="d-projet" name="message" required maxlength="5000" placeholder="Lieu, durée, nombre de participants, contraintes…" aria-invalid={err('message')}></textarea></div>
+						</div>
+						</div>
+						<div class="champs">
+							<div class="champ plein"><label for="d-projet"><span data-devis-seul>Votre projet *</span><span data-info-seul hidden>Votre message *</span></label><textarea id="d-projet" name="message" required maxlength="5000" placeholder="Lieu, durée, nombre de participants, contraintes…" aria-invalid={err('message')}></textarea></div>
 						</div>
 						<input type="hidden" name="t" value={Date.now()} />
 						<p class="hp" aria-hidden="true"><label for="site_web">Ne pas remplir</label><input id="site_web" name="site_web" type="text" tabindex="-1" autocomplete="off" /></p>
@@ -80,4 +93,27 @@ const f = p.formulaire;
 
 		<Faq faq={p.faq} />
 	</div>
+	<script is:inline>
+		// Demande de devis ou autre demande : on n'affiche que les questions utiles.
+		(function () {
+			var form = document.getElementById('form-devis');
+			if (!form) return;
+			var radios = form.querySelectorAll('input[name="categorie"]');
+			if (!radios.length) return;
+			var inst = document.getElementById('d-inst');
+			var projet = document.getElementById('d-projet');
+			var phDevis = projet.getAttribute('placeholder');
+			function maj() {
+				var choisi = form.querySelector('input[name="categorie"]:checked');
+				var devis = !choisi || choisi.value === 'devis';
+				form.querySelector('[data-devis-bloc]').hidden = !devis;
+				form.querySelectorAll('[data-devis-seul]').forEach(function (e) { e.hidden = !devis; });
+				form.querySelectorAll('[data-info-seul]').forEach(function (e) { e.hidden = devis; });
+				inst.required = devis;
+				projet.setAttribute('placeholder', devis ? phDevis : 'Votre question, en quelques lignes…');
+			}
+			radios.forEach(function (r) { r.addEventListener('change', maj); });
+			maj();
+		})();
+	</script>
 </Base>

@@ -240,3 +240,7 @@ html.cookies-ouvert{overflow:hidden}
 .interieur .fondatrice .portrait-photo img{transition:transform 1.2s var(--doux)}
 .interieur .fondatrice:hover .portrait-photo img,.interieur .fondatrice:focus-within .portrait-photo img{transform:scale(1.05)}
 @media (prefers-reduced-motion:reduce){.interieur .fondatrice .portrait-photo img{transition:none}.interieur .fondatrice:hover .portrait-photo img,.interieur .fondatrice:focus-within .portrait-photo img{transform:none}}
+
+/* Contact : choix du type de demande ; les questions propres au devis se masquent pour une simple question */
+.type-demande{margin-bottom:6px}
+.devis-seul:not([hidden]){display:contents}

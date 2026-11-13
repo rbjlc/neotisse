@@ -13,12 +13,15 @@ export function estUnRobot(f) {
 }
 
 export async function enregistrerDemande(f) {
+	const r = await reglages();
+	const choix = nettoie(f.get('categorie'), 40);
+	const categorie = r.categories_messages.some((c) => c.cle === choix) ? choix : 'devis';
 	const d = {
-		categorie: 'devis',
+		categorie,
 		nom: nettoie(f.get('nom'), 120),
 		institution: nettoie(f.get('institution'), 160),
 		email: nettoie(f.get('email'), 160),
-		projets: f.getAll('projets').map((x) => nettoie(x, 80)).slice(0, 12),
+		projets: categorie !== 'devis' ? [] : f.getAll('projets').map((x) => nettoie(x, 80)).slice(0, 12),
 		public: nettoie(f.get('public'), 120),
 		dates: nettoie(f.get('dates'), 160),
 		budget: nettoie(f.get('budget'), 80),
@@ -27,7 +30,8 @@ export async function enregistrerDemande(f) {
 	};
 	const manque = [];
 	if (!d.nom) manque.push('nom');
-	if (!d.institution) manque.push('institution');
+	if (categorie === 'devis' && !d.institution) manque.push('institution');
+	if (categorie !== 'devis') { d.public = ''; d.dates = ''; d.budget = ''; }
 	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) manque.push('email');
 	if (!d.message) manque.push('message');
 	if (f.get('accord') !== '1') manque.push('accord');
@@ -62,13 +66,14 @@ export async function enregistrerTemoignage(f) {
 /** Copie de la demande de devis dans la boîte mail de l'association. */
 async function prevenir(d) {
 	const r = await reglages();
+	const type = r.categories_messages.find((c) => c.cle === d.categorie)?.nom || 'Demande';
 	const lignes = [
-		`Nouvelle demande de devis sur le site ${r.nom}.`, '',
-		`Nom : ${d.nom}`, `Institution : ${d.institution}`, `E-mail : ${d.email}`,
+		`Nouvelle demande sur le site ${r.nom} : ${type.toLowerCase()}.`, '',
+		`Nom : ${d.nom}`, d.institution ? `Institution : ${d.institution}` : '', `E-mail : ${d.email}`,
 		d.projets.length ? `Type de projet : ${d.projets.join(', ')}` : '', d.public ? `Public : ${d.public}` : '',
-		d.dates ? `Dates : ${d.dates}` : '', d.budget ? `Budget : ${d.budget}` : '', '', 'Projet :', d.message, '',
+		d.dates ? `Dates : ${d.dates}` : '', d.budget ? `Budget : ${d.budget}` : '', '', d.categorie === 'devis' ? 'Projet :' : 'Message :', d.message, '',
 		'Pour répondre, utilisez simplement « Répondre » : la réponse part vers l’adresse de la personne.',
 		`Toutes les demandes : ${urlSite()}/admin/messages/`,
 	].filter((l) => l !== null);
-	await prevenirAssociation({ sujet: `Demande de devis : ${d.institution}`, texte: lignes.join('\n'), repondreA: d.email });
+	await prevenirAssociation({ sujet: `${type} : ${d.institution || d.nom}`, texte: lignes.join('\n'), repondreA: d.email });
 }
