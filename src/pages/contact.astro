@@ -5,6 +5,7 @@ import Image from '../components/Image.astro';
 import Reseaux from '../components/Reseaux.astro';
 import Faq from '../components/Faq.astro';
 import EnteteInterieur from '../components/EnteteInterieur.astro';
+import Captcha from '../components/Captcha.astro';
 import { page, reglages, typo } from '../lib/site.js';
 
 const [p, r] = await Promise.all([page('contact'), reglages()]);
@@ -24,6 +25,7 @@ const categorieChoisie = r.categories_messages.some((c) => c.cle === 'devis') ? 
 					<h2 class="wp-block-heading h3-form">{typo(f.titre)}</h2>
 					{etat === 'merci' && <p class="retour" role="status" tabindex="-1">{typo(f.merci)}</p>}
 					{etat === 'erreur' && <p class="retour erreur" role="alert" tabindex="-1">Il manque {manque.length} information{manque.length > 1 ? 's' : ''} obligatoire{manque.length > 1 ? 's' : ''} (marquée{manque.length > 1 ? 's' : ''} en rouge). Complétez-la{manque.length > 1 ? 's' : ''} puis envoyez de nouveau.</p>}
+					{etat === 'robot' && <p class="retour erreur" role="alert" tabindex="-1">La vérification anti-robots n’a pas abouti. Cochez la case « Je ne suis pas un robot » sous le formulaire, attendez la coche verte, puis envoyez de nouveau.</p>}
 					{etat === 'probleme' && <p class="retour erreur" role="alert" tabindex="-1">Un problème technique a empêché l’envoi. Réessayez dans quelques minutes, ou écrivez-nous directement à {r.email}.</p>}
 					{f.note && <p class="note wp-block-paragraph">{typo(f.note)}</p>}
 					<form method="post" action="/api/contact" id="form-devis">
@@ -67,6 +69,7 @@ const categorieChoisie = r.categories_messages.some((c) => c.cle === 'devis') ? 
 						<input type="hidden" name="t" value={Date.now()} />
 						<p class="hp" aria-hidden="true"><label for="site_web">Ne pas remplir</label><input id="site_web" name="site_web" type="text" tabindex="-1" autocomplete="off" /></p>
 						<label class="consent" for="d-ok"><input id="d-ok" name="accord" type="checkbox" value="1" required /><span>J’accepte que mes données soient utilisées pour répondre à ma demande. Elles ne sont jamais transmises à des tiers. <a href="/politique-de-confidentialite/">Politique de confidentialité</a></span></label>
+						<Captcha />
 						<div><button class="btn btn-main" type="submit">{f.bouton || 'Envoyer ma demande'}</button></div>
 					</form>
 				</Groupe>

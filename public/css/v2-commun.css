@@ -244,3 +244,7 @@ html.cookies-ouvert{overflow:hidden}
 /* Contact : choix du type de demande ; les questions propres au devis se masquent pour une simple question */
 .type-demande{margin-bottom:6px}
 .devis-seul:not([hidden]){display:contents}
+
+/* Anti-robots ALTCHA, aux couleurs du site */
+.captcha{margin:4px 0 8px}
+.captcha altcha-widget{--altcha-max-width:100%;--altcha-border-radius:2px;--altcha-color-base:var(--creme,#FAF6EE);--altcha-color-border:var(--trait,#d9d2c3);--altcha-color-text:var(--encre,#2b2a26);--altcha-color-border-focus:var(--olive,#4F5233);font-family:inherit;font-size:16px}

@@ -10,6 +10,7 @@ const [p, parts, avis, listeAteliers] = await Promise.all([page('livre-or'), par
 const avisPartenaires = parts.filter((x) => x.avis);
 const etat = Astro.url.searchParams.get('temoignage');
 const manque = (Astro.url.searchParams.get('manque') || '').split(',');
+import Captcha from '../components/Captcha.astro';
 ---
 <Base titre={p.seo_titre} description={p.seo_description}>
 	<div class="contenu-page">
@@ -65,6 +66,7 @@ const manque = (Astro.url.searchParams.get('manque') || '').split(',');
 					{p.formulaire.note && <p class="note wp-block-paragraph">{typo(p.formulaire.note)}</p>}
 					<div class="neo-liste neo-liste-form-temoignage">
 						{etat === 'merci' && <p class="retour" role="status" tabindex="-1">{typo(p.formulaire.merci)}</p>}
+						{etat === 'robot' && <p class="retour erreur" role="alert" tabindex="-1">La vérification anti-robots n’a pas abouti. Cochez la case « Je ne suis pas un robot » sous le formulaire, attendez la coche verte, puis envoyez de nouveau.</p>}
 						{etat === 'erreur' && <p class="retour erreur" role="alert" tabindex="-1">Il manque une information obligatoire (votre nom, votre témoignage ou votre accord). Complétez-la puis envoyez de nouveau.</p>}
 						<form action="/api/temoignage" method="post" id="form-avis">
 							<div class="champs">
@@ -99,6 +101,7 @@ const manque = (Astro.url.searchParams.get('manque') || '').split(',');
 								<input id="neo_ok" name="accord" type="checkbox" value="1" required />
 								<span>J’accepte que mon nom, le lieu indiqué et mon témoignage soient conservés et publiés sur ce site après relecture par l’équipe, pendant 3 ans maximum. Je peux demander leur retrait à tout moment en écrivant à l’association. <a href="/politique-de-confidentialite/">Politique de confidentialité</a></span>
 							</label>
+							<Captcha />
 							<div><button class="btn btn-main" type="submit">Envoyer mon témoignage</button></div>
 						</form>
 					</div>

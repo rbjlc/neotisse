@@ -1,0 +1,11 @@
+---
+// Anti-robots ALTCHA (sans service extérieur ni cookie) : se résout tout seul pendant que la personne remplit le formulaire.
+---
+<div class="captcha">
+	<altcha-widget challenge="/api/altcha" name="altcha" language="fr-fr" auto="onfocus" configuration='{"hideLogo":true,"hideFooter":true}'></altcha-widget>
+	<noscript><p class="note">Ce formulaire a besoin de JavaScript pour vérifier que vous n’êtes pas un robot. Vous pouvez aussi nous écrire directement par e-mail.</p></noscript>
+</div>
+<script>
+	import 'altcha';
+	import 'altcha/i18n/fr-fr';
+</script>
