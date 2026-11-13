@@ -1,5 +1,5 @@
 // Outils du back-office : lecture des formulaires, conversion selon les schémas.
-import { propre } from './html.js';
+import { propre, lienSur } from './html.js';
 import { ancre } from './site.js';
 
 /** Transforme les champs « a.b.0.c » d'un formulaire en objet { a: { b: [ { c } ] } }. */
@@ -40,7 +40,7 @@ export function convertir(champs, brut = {}) {
 			case 'nombre': val = v === '' || v == null ? null : Number(String(v).replace(',', '.')); break;
 			case 'riche': val = propre(v); break;
 			case 'image': val = { src: String(v?.src || '').trim(), alt: String(v?.alt || '').trim() }; break;
-			case 'bouton': val = { texte: String(v?.texte || '').trim(), lien: String(v?.lien || '').trim() }; break;
+			case 'bouton': val = { texte: String(v?.texte || '').trim(), lien: lienSur(v?.lien) }; break;
 			case 'multiple': val = Array.isArray(v) ? v.filter(Boolean) : v ? [v] : []; break;
 			case 'lignes': val = String(v || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean); break;
 			case 'liste': {
@@ -59,7 +59,7 @@ export function convertir(champs, brut = {}) {
 				}
 				break;
 			}
-			default: val = String(v ?? '').trim();
+			default: val = c.lien ? lienSur(v) : String(v ?? '').trim();
 		}
 		// réécrit au bon endroit (clés « objectif.nombre »)
 		let o = r;

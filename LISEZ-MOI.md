@@ -44,7 +44,7 @@ En mode démo, tout ce que tu modifies est enregistré dans le dossier `.donnees
 7. **Authentication → URL Configuration** :
    - Site URL : l'adresse du site (ex. `https://neotisse.netlify.app`)
    - Redirect URLs : ajoute `https://neotisse.netlify.app/admin/nouveau-mot-de-passe/`
-8. **Authentication → Users → Invite user** : invite chaque fondatrice. Elle reçoit un e-mail, clique sur le lien et choisit son mot de passe. Les comptes invités ici ont le niveau **Fondatrice** (accès complet). Ensuite, les fondatrices ajoutent elles-mêmes les autres personnes depuis le back-office (**Comptes et accès**), avec le niveau **Fondatrice** ou **Équipe** (contenus seulement, sans les messages, les réglages ni les comptes).
+8. **Authentication → Users → Invite user** : invite chaque fondatrice. Elle reçoit un e-mail, clique sur le lien et choisit son mot de passe. Le **premier** compte qui se connecte devient **Fondatrice** (accès complet). Les comptes invités ensuite depuis Supabase arrivent avec le niveau **Équipe** : une fondatrice peut les passer en Fondatrice dans **Comptes et accès** (par sécurité, aucun compte inconnu ne reçoit tous les droits). Ensuite, les fondatrices ajoutent elles-mêmes les autres personnes depuis le back-office (**Comptes et accès**), avec le niveau **Fondatrice** ou **Équipe** (contenus seulement, sans les messages, les réglages ni les comptes).
 
 > ⚠️ La clé `service_role` donne accès à toute la base : ne la mets jamais sur GitHub (le fichier `.env` est déjà exclu par `.gitignore`).
 

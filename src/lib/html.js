@@ -24,5 +24,11 @@ export function affiche(html, { savoirFaire = false } = {}) {
 /** Texte brut sans balises (pour les descriptions et les aperçus). */
 export const brut = (html) => sanitizeHtml(String(html || ''), { allowedTags: [], allowedAttributes: {} }).replace(/\s+/g, ' ').trim();
 
+/** Lien sûr : http(s), mailto, tel, ou adresse du site (/…, #…). Tout le reste (javascript:, data:…) est refusé. */
+export const lienSur = (u) => {
+	const v = String(u ?? '').trim();
+	return /^(https?:\/\/|mailto:|tel:|\/(?!\/)|#)/i.test(v) ? v : '';
+};
+
 /** Échappe un texte simple pour l'insérer dans du HTML. */
 export const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

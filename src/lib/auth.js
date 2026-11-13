@@ -7,6 +7,8 @@ import { modeSupabase, supabase } from './donnees.js';
 
 const env = (k, d = '') => process.env[k] || import.meta.env[k] || d;
 const SECURE = () => env('NODE_ENV') === 'production' || !!env('NETLIFY');
+/** Le mode démo (identifiants du fichier .env) ne fonctionne jamais sur le site en ligne. */
+const demoInterdit = () => !!(env('NETLIFY') || env('CONTEXT') || env('URL')) && !modeSupabase();
 const opts = (maxAge) => ({ path: '/', httpOnly: true, sameSite: 'lax', secure: SECURE(), maxAge });
 
 export const DEMO = { email: () => env('ADMIN_EMAIL', 'demo@neotisse.fr'), mdp: () => env('ADMIN_MOT_DE_PASSE', 'neotisse-demo') };
@@ -28,6 +30,7 @@ export async function connecter(cookies, email, mdp) {
 		poserSession(cookies, data.session);
 		return { ok: true };
 	}
+	if (demoInterdit()) return { erreur: 'Le site en ligne n’est pas encore relié à Supabase : la connexion est désactivée.' };
 	const a = Buffer.from(email + '|' + mdp), b = Buffer.from(DEMO.email().toLowerCase() + '|' + DEMO.mdp());
 	const okDemo = a.length === b.length && timingSafeEqual(a, b);
 	if (!okDemo && !(await (await import('./comptes.js')).connexionDemo(email, mdp))) return { erreur: 'E-mail ou mot de passe incorrect.' };
@@ -51,6 +54,7 @@ export async function utilisateur(cookies) {
 		poserSession(cookies, data.session);
 		return { email: data.user.email, id: data.user.id };
 	}
+	if (demoInterdit()) return null;
 	const c = cookies.get('neo_demo')?.value || '';
 	const [v, s] = c.split('.');
 	if (!v || !s || signe(v) !== s) return null;

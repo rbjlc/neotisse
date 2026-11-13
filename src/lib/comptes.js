@@ -52,7 +52,13 @@ export async function roleDe(u) {
 		return f ? roleValide(f) : null;
 	}
 	const f = await ficheSupabase(u.id, email);
-	return f ? roleValide(f) : 'fondatrice';
+	if (f) return roleValide(f);
+	// Compte sans fiche (créé directement dans Supabase) : Fondatrice seulement s'il n'y a encore aucune fondatrice
+	// (premier compte de l'association). Sinon il arrive en Équipe, et une fondatrice peut le passer Fondatrice.
+	const premiere = !(await fiches()).some((c) => c.role === 'fondatrice');
+	const role = premiere ? 'fondatrice' : 'equipe';
+	await ecrire('comptes', u.id, { email, role });
+	return role;
 }
 
 /* Mots de passe du mode démo (avec Supabase, c'est Supabase qui les gère). */
@@ -80,7 +86,8 @@ export async function listeComptes() {
 		// La liste part des comptes Supabase : une fiche sans compte (supprimé ailleurs) n'apparaît pas.
 		return data.users.map((u) => {
 			const e = norm(u.email);
-			const f = liste.find((c) => c.id === u.id) || liste.find((c) => c.email === e) || { role: 'fondatrice' };
+			const sansFondatrice = !liste.some((c) => c.role === 'fondatrice');
+			const f = liste.find((c) => c.id === u.id) || liste.find((c) => c.email === e) || { role: sansFondatrice ? 'fondatrice' : 'equipe' };
 			return { ...f, id: u.id, email: e, role: roleValide(f), auth_id: u.id, invitation: !u.last_sign_in_at };
 		}).sort((a, b) => (a.role === b.role ? a.email.localeCompare(b.email) : a.role === 'fondatrice' ? -1 : 1));
 	}

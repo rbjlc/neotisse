@@ -5,7 +5,7 @@ import Image from '../components/Image.astro';
 import CtaFinal from '../components/CtaFinal.astro';
 import EnteteInterieur from '../components/EnteteInterieur.astro';
 import { page, typo, insecables } from '../lib/site.js';
-import { affiche } from '../lib/html.js';
+import { affiche, esc } from '../lib/html.js';
 
 const p = await page('qui-sommes-nous');
 const para = (h) => affiche(h, { savoirFaire: true }).replace(/<p>/g, '<p class="wp-block-paragraph">');
@@ -13,7 +13,7 @@ const num = (i) => String(i + 1).padStart(2, '0');
 ---
 <Base titre={p.seo_titre} description={p.seo_description} image={p.patrimoine.photo1}>
 	<div class="contenu-page">
-		<EnteteInterieur entete={p.entete} titreHtml={insecables(typo(p.entete.titre))} />
+		<EnteteInterieur entete={p.entete} titreHtml={insecables(esc(typo(p.entete.titre)))} />
 
 		<Groupe classe="sec">
 			<Groupe classe="wrap duo">

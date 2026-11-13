@@ -5,7 +5,24 @@ import { contexteAdmin } from './lib/donnees.js';
 
 const LIBRES = ['/admin/connexion', '/admin/mot-de-passe-oublie', '/admin/nouveau-mot-de-passe'];
 
+/** En-têtes de sécurité, sur toutes les pages (y compris celles générées à la demande). */
+function securiser(rep, https) {
+	const h = rep.headers;
+	h.set('X-Content-Type-Options', 'nosniff');
+	h.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+	h.set('X-Frame-Options', 'SAMEORIGIN');
+	h.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
+	if (https) h.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	return rep;
+}
+
 export async function onRequest(ctx, next) {
+	const https = ctx.url.protocol === 'https:';
+	const rep = await gerer(ctx, next);
+	try { return securiser(rep, https); } catch { return rep; } // réponses figées (redirections) : on les laisse telles quelles
+}
+
+async function gerer(ctx, next) {
 	const chemin = ctx.url.pathname;
 	if (!chemin.startsWith('/admin')) return next();
 	if (LIBRES.some((l) => chemin.startsWith(l))) return next();
