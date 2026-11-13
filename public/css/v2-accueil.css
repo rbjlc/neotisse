@@ -95,7 +95,7 @@ body.accueil{margin:0;background:var(--lin);color:var(--encre);font:400 17px/1.6
 .agenda .entete{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:30px}
 .agenda h2{font-size:clamp(36px,4.6vw,64px)}
 .dates{list-style:none;margin:0;padding:0;border-top:1px solid var(--encre)}
-.dates li{position:relative;display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:20px;align-items:center;padding-block:26px;border-bottom:1px solid var(--trait);overflow:hidden}
+.dates li{position:relative;display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:20px;align-items:center;padding-block:26px;padding-inline:clamp(16px,2.4vw,32px);border-bottom:1px solid var(--trait);overflow:hidden}
 .dates li::before{content:"";position:absolute;inset:0;background:var(--c);transform:scaleY(0);transform-origin:bottom;transition:transform .55s var(--doux);z-index:0}
 .dates li:hover::before{transform:scaleY(1)}
 .dates li > *{position:relative;z-index:1;transition:color .4s}
