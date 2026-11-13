@@ -100,7 +100,7 @@ p{margin:0}
 .liste .sous{color:var(--fusain);font-size:15px;margin-top:2px}
 .liste .nonlu .principal a::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--garance);margin-right:8px;vertical-align:middle}
 .liste-vignette{width:64px;height:48px;border-radius:6px;object-fit:cover;background:var(--laine);flex:none}
-.etiquette{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;background:var(--laine)}
+.etiquette{display:inline-block;padding:5px 10px;line-height:1.1;border-radius:999px;font-size:13px;font-weight:700;background:var(--laine)}
 .etiquette.cachee{background:#EEE;color:#666}
 .etiquette.attente{background:#FBEFC8}
 .etiquette.publie{background:var(--ok)}
