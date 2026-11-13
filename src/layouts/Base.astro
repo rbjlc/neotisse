@@ -165,7 +165,7 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 		</div>
 	</footer>
 
-	{!surContact && <div class="flottant" id="flottant"><a class="bouton" href="/contact/" data-page="Contact">Demander un devis <span class="f" aria-hidden="true">→</span></a></div>}
+	{!surContact && <aside class="flottant" id="flottant" aria-label="Demande de devis"><a class="bouton" href="/contact/" data-page="Contact">Demander un devis <span class="f" aria-hidden="true">→</span></a></aside>}
 	<div class="rideau" id="rideau" aria-hidden="true"><span style="background:#4F5233"></span><span style="background:#A8321F"></span><span style="background:#E8B42F"></span><span style="background:#2E5A8A"></span><div class="nom" id="rideau-nom"></div></div>
 
 	<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
