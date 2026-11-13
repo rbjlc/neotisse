@@ -47,6 +47,10 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 <html lang="fr">
 <head>
 	<meta charset="UTF-8" />
+	<script is:inline>
+		// Lien d'invitation ou de mot de passe oublié arrivé sur une page du site : on l'envoie vers la page qui choisit le mot de passe.
+		if (/access_token=.*type=(invite|recovery)|type=(invite|recovery).*access_token=/.test(location.hash)) location.replace('/admin/nouveau-mot-de-passe/' + location.hash);
+	</script>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>{titreComplet}</title>
 	{description && <meta name="description" content={description} />}
