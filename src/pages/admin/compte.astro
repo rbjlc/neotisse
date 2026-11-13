@@ -1,0 +1,38 @@
+---
+// Mon compte : chaque personne connectée peut changer son propre mot de passe.
+import Admin from '../../layouts/Admin.astro';
+import { changerMonMotDePasse } from '../../lib/auth.js';
+import { ROLES } from '../../lib/comptes.js';
+
+const u = Astro.locals.utilisateur;
+let erreur = '';
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	if (f.get('nouveau') !== f.get('nouveau2')) erreur = 'Les deux nouveaux mots de passe ne sont pas identiques.';
+	else {
+		const r = await changerMonMotDePasse(Astro.cookies, u.email, String(f.get('ancien') || ''), String(f.get('nouveau') || ''));
+		if (r.ok) return Astro.redirect('/admin/compte/?ok=' + encodeURIComponent('Mot de passe changé.'), 303);
+		erreur = r.erreur;
+	}
+}
+---
+<Admin titre="Mon compte" actif="compte">
+	<div class="adm-titre">
+		<div>
+			<h1>Mon compte</h1>
+			<p>{u.email} · niveau d’accès : {ROLES[u.role]?.nom || u.role}</p>
+		</div>
+	</div>
+	{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+	<form method="post" class="edition carte">
+		<h2>Changer mon mot de passe</h2>
+		<p class="carte-aide" style="margin-top:0">Au moins 10 caractères. Une petite phrase facile à retenir fonctionne très bien (ex. : « laine teinte en rouge garance »). Ne le donnez à personne : chacune et chacun a son propre compte.</p>
+		<div class="champ"><label for="a">Mot de passe actuel</label><input id="a" name="ancien" type="password" autocomplete="current-password" required /></div>
+		<div class="duo">
+			<div class="champ"><label for="n1">Nouveau mot de passe</label><input id="n1" name="nouveau" type="password" autocomplete="new-password" minlength="10" required /></div>
+			<div class="champ"><label for="n2">Le même, encore une fois</label><input id="n2" name="nouveau2" type="password" autocomplete="new-password" minlength="10" required /></div>
+		</div>
+		<div class="b-groupe"><button class="b b-principal" type="submit">Changer le mot de passe</button></div>
+		<p class="carte-aide" style="margin:0">Mot de passe oublié ? Déconnectez-vous puis cliquez sur « Mot de passe oublié ? » sur la page de connexion : vous recevrez un lien par e-mail.</p>
+	</form>
+</Admin>

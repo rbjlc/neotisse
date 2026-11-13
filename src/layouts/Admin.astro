@@ -29,6 +29,7 @@ const menu = [
 	['reglages', 'Réglages', '/admin/reglages/', '⚙️'],
 	['comptes', 'Comptes et accès', '/admin/comptes/', '👥'],
 	['journal', 'Journal des modifications', '/admin/journal/', '🕓'],
+	['compte', 'Mon compte', '/admin/compte/', '🔑'],
 	['aide', 'Aide', '/admin/aide/', '❓'],
 ].filter((m) => fondatrice || !m[2] || !estReserve(m[2].replace(/\/$/, '')));
 ---

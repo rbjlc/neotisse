@@ -76,3 +76,26 @@ export async function changerMotDePasse(cookies, jeton, mdp) {
 	if (error) return { erreur: 'Impossible d’enregistrer ce mot de passe : ' + error.message };
 	return connecter(cookies, data.user.email, mdp);
 }
+
+/** Changer son propre mot de passe depuis « Mon compte » (l'ancien est demandé). */
+export async function changerMonMotDePasse(cookies, email, ancien, nouveau) {
+	email = String(email || '').trim().toLowerCase();
+	if (String(nouveau).length < 10) return { erreur: 'Choisissez un mot de passe d’au moins 10 caractères.' };
+	if (nouveau === ancien) return { erreur: 'Le nouveau mot de passe doit être différent de l’ancien.' };
+	if (modeSupabase()) {
+		const { data, error } = await clientNeuf().auth.signInWithPassword({ email, password: ancien });
+		if (error || !data.user) return { erreur: 'Le mot de passe actuel n’est pas le bon.' };
+		const { error: e2 } = await supabase().auth.admin.updateUserById(data.user.id, { password: nouveau });
+		if (e2) return { erreur: 'Impossible d’enregistrer ce mot de passe : ' + e2.message };
+		const { data: d3 } = await clientNeuf().auth.signInWithPassword({ email, password: nouveau });
+		if (d3?.session) poserSession(cookies, d3.session);
+		return { ok: true };
+	}
+	if (email === DEMO.email().toLowerCase()) return { erreur: 'Le compte de démonstration ne peut pas changer de mot de passe (il est fixé dans le fichier .env).' };
+	const { fiches, verifier, hacher } = await import('./comptes.js');
+	const f = (await fiches()).find((c) => c.email === email);
+	if (!f || !verifier(ancien, f.mdp_hache)) return { erreur: 'Le mot de passe actuel n’est pas le bon.' };
+	const { ecrire } = await import('./donnees.js');
+	await ecrire('comptes', f.id, { ...f, mdp_hache: hacher(nouveau) });
+	return { ok: true };
+}
