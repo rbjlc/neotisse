@@ -14,7 +14,7 @@ export async function onRequest(ctx, next) {
 		if (chemin.startsWith('/admin/api/')) return new Response(JSON.stringify({ erreur: 'Session expirée : reconnectez-vous.' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
 		return ctx.redirect('/admin/connexion/?retour=' + encodeURIComponent(chemin + ctx.url.search));
 	}
-	u.role = await roleDe(u.email, u.demo);
+	u.role = await roleDe(u);
 	if (!u.role) {
 		deconnecter(ctx.cookies);
 		return ctx.redirect('/admin/connexion/?erreur=' + encodeURIComponent('Ce compte n’a plus accès à l’espace Neotisse.'));

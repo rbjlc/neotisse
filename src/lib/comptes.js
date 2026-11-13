@@ -4,10 +4,12 @@
 // - « Fondatrice » : accès complet (messages, réglages, comptes…).
 // - « Équipe » : gère les contenus du site, mais n'accède pas aux parties réservées ci-dessous.
 //
-// Les comptes créés directement dans Supabase par l'agence (sans fiche dans « comptes ») sont des fondatrices.
+// Avec Supabase, la fiche d'un compte porte l'identifiant du compte (qui ne change jamais) : changer d'adresse
+// e-mail ne change donc jamais le niveau d'accès. Les comptes créés directement dans Supabase par l'agence
+// (sans fiche) sont des fondatrices.
 // Pour changer ce qu'une personne de l'équipe peut voir, modifier la liste RESERVE_FONDATRICES.
 import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto';
-import { lister, ecrire, supprimer, modeSupabase, supabase } from './donnees.js';
+import { lister, lire, ecrire, supprimer, modeSupabase, supabase } from './donnees.js';
 import { DEMO } from './auth.js';
 import { urlSite } from './site.js';
 
@@ -27,13 +29,30 @@ export async function fiches() {
 	return (await lister('comptes')).map((c) => ({ ...c, email: norm(c.email) }));
 }
 
-/** Rôle d'une personne connectée. null = compte inconnu (accès refusé). */
-export async function roleDe(email, demo) {
-	email = norm(email);
-	if (demo && email === norm(DEMO.email())) return 'fondatrice';
-	const f = (await fiches()).find((c) => c.email === email);
-	if (f) return ROLES[f.role] ? f.role : 'equipe';
-	return demo ? null : 'fondatrice';
+const roleValide = (f) => (ROLES[f.role] ? f.role : 'equipe');
+
+/** Fiche d'un compte Supabase : par identifiant ; une ancienne fiche rangée par adresse est rattachée à l'identifiant. */
+async function ficheSupabase(id, email) {
+	const parId = await lire('comptes', id);
+	if (parId) return parId;
+	const ancienne = (await fiches()).find((c) => c.email === norm(email) && c.id !== id);
+	if (!ancienne) return null;
+	const { id: _ancien, ...reste } = ancienne;
+	await ecrire('comptes', id, { ...reste, email: norm(email) });
+	await supprimer('comptes', ancienne.id);
+	return { ...reste, id };
+}
+
+/** Rôle d'une personne connectée ({ email, id, demo }). null = compte inconnu (accès refusé). */
+export async function roleDe(u) {
+	const email = norm(u?.email);
+	if (u?.demo) {
+		if (email === norm(DEMO.email())) return 'fondatrice';
+		const f = (await fiches()).find((c) => c.email === email);
+		return f ? roleValide(f) : null;
+	}
+	const f = await ficheSupabase(u.id, email);
+	return f ? roleValide(f) : 'fondatrice';
 }
 
 /* Mots de passe du mode démo (avec Supabase, c'est Supabase qui les gère). */
@@ -55,18 +74,18 @@ export async function connexionDemo(email, mdp) {
 /** Tous les comptes, pour la page « Comptes ». */
 export async function listeComptes() {
 	const liste = await fiches();
-	const parEmail = new Map(liste.map((c) => [c.email, { ...c }]));
 	if (modeSupabase()) {
 		const { data, error } = await supabase().auth.admin.listUsers({ perPage: 200 });
 		if (error) throw new Error('Lecture des comptes : ' + error.message);
-		for (const u of data.users) {
+		// La liste part des comptes Supabase : une fiche sans compte (supprimé ailleurs) n'apparaît pas.
+		return data.users.map((u) => {
 			const e = norm(u.email);
-			const f = parEmail.get(e) || { email: e, role: 'fondatrice' };
-			parEmail.set(e, { ...f, auth_id: u.id, invitation: !u.last_sign_in_at });
-		}
-		// Fiches sans compte Supabase (compte supprimé ailleurs) : on ne les montre pas.
-		for (const [e, c] of parEmail) if (!c.auth_id) parEmail.delete(e);
-	} else {
+			const f = liste.find((c) => c.id === u.id) || liste.find((c) => c.email === e) || { role: 'fondatrice' };
+			return { ...f, id: u.id, email: e, role: roleValide(f), auth_id: u.id, invitation: !u.last_sign_in_at };
+		}).sort((a, b) => (a.role === b.role ? a.email.localeCompare(b.email) : a.role === 'fondatrice' ? -1 : 1));
+	}
+	const parEmail = new Map(liste.map((c) => [c.email, { ...c }]));
+	{
 		const e = norm(DEMO.email());
 		if (!parEmail.has(e)) parEmail.set(e, { email: e, nom: 'Compte de démonstration', role: 'fondatrice', fixe: true });
 	}
@@ -79,9 +98,9 @@ export async function ajouterCompte({ nom, email, role, mdp }) {
 	if (!ROLES[role]) return { erreur: 'Choisissez un niveau d’accès.' };
 	if ((await listeComptes()).some((c) => c.email === email)) return { erreur: 'Ce compte existe déjà.' };
 	if (modeSupabase()) {
-		const { error } = await supabase().auth.admin.inviteUserByEmail(email, { redirectTo: urlSite() + '/admin/nouveau-mot-de-passe/' });
+		const { data, error } = await supabase().auth.admin.inviteUserByEmail(email, { redirectTo: urlSite() + '/admin/nouveau-mot-de-passe/' });
 		if (error) return { erreur: 'L’invitation n’a pas pu partir : ' + error.message };
-		await ecrire('comptes', null, { nom: String(nom || '').trim(), email, role });
+		await ecrire('comptes', data.user.id, { nom: String(nom || '').trim(), email, role });
 		return { ok: 'Invitation envoyée à ' + email + ' : la personne choisit son mot de passe depuis l’e-mail reçu.' };
 	}
 	if (String(mdp || '').length < 10) return { erreur: 'Mode démo : choisissez un mot de passe d’au moins 10 caractères pour ce compte.' };
@@ -100,7 +119,7 @@ export async function changerRole(email, role, moi) {
 	if (!c || c.fixe) return { erreur: 'Ce compte ne peut pas être modifié.' };
 	if (c.role === 'fondatrice' && role !== 'fondatrice' && fondatrices(liste) <= 1) return { erreur: 'Il faut garder au moins une fondatrice.' };
 	const { auth_id, invitation, ...fiche } = c;
-	await ecrire('comptes', c.id || null, { ...fiche, role });
+	await ecrire('comptes', modeSupabase() ? auth_id : c.id || null, { ...fiche, role });
 	return { ok: `${c.nom || email} : ${ROLES[role].nom.toLowerCase()}.` };
 }
 
@@ -115,6 +134,6 @@ export async function retirerCompte(email, moi) {
 		const { error } = await supabase().auth.admin.deleteUser(c.auth_id);
 		if (error) return { erreur: 'Impossible de retirer ce compte : ' + error.message };
 	}
-	if (c.id) await supprimer('comptes', c.id);
+	for (const f of await fiches()) if (f.id === c.id || f.email === email) await supprimer('comptes', f.id);
 	return { ok: `Accès retiré pour ${c.nom || email}.` };
 }

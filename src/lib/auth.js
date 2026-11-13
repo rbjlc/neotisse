@@ -109,19 +109,22 @@ export async function changerMonEmail(cookies, email, mdp, nouvel) {
 	const { fiches, listeComptes } = await import('./comptes.js');
 	const { ecrire } = await import('./donnees.js');
 	if ((await listeComptes()).some((c) => c.email === nouvel)) return { erreur: 'Un compte utilise déjà cette adresse.' };
-	const fiche = (await fiches()).find((c) => c.email === email);
 	if (modeSupabase()) {
 		const { data, error } = await clientNeuf().auth.signInWithPassword({ email, password: mdp });
 		if (error || !data.user) return { erreur: 'Le mot de passe n’est pas le bon.' };
 		const { error: e2 } = await supabase().auth.admin.updateUserById(data.user.id, { email: nouvel, email_confirm: true });
 		if (e2) return { erreur: 'Impossible de changer l’adresse : ' + e2.message };
-		if (fiche) await ecrire('comptes', fiche.id, { ...fiche, email: nouvel });
+		// Le niveau d'accès est rattaché à l'identifiant du compte : seule l'adresse affichée est mise à jour.
+		const { lire } = await import('./donnees.js');
+		const fiche = await lire('comptes', data.user.id);
+		if (fiche) await ecrire('comptes', data.user.id, { ...fiche, email: nouvel });
 		const { data: d3 } = await clientNeuf().auth.signInWithPassword({ email: nouvel, password: mdp });
 		if (d3?.session) poserSession(cookies, d3.session);
 		return { ok: true };
 	}
 	if (email === DEMO.email().toLowerCase()) return { erreur: 'Le compte de démonstration ne peut pas changer d’adresse (elle est fixée dans le fichier .env).' };
 	const { verifier } = await import('./comptes.js');
+	const fiche = (await fiches()).find((c) => c.email === email);
 	if (!fiche || !verifier(mdp, fiche.mdp_hache)) return { erreur: 'Le mot de passe n’est pas le bon.' };
 	await ecrire('comptes', fiche.id, { ...fiche, email: nouvel });
 	const v = Buffer.from(nouvel).toString('base64url');
