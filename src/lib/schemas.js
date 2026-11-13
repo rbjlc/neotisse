@@ -294,10 +294,6 @@ export const REGLAGES = [
 		], { ajout: 'Ajouter un type', resume: 'nom' })],
 	},
 	{
-		titre: 'Repères d’accessibilité', aide: 'Proposés pour chaque date du calendrier, et expliqués sous le calendrier.',
-		champs: [liste('reperes', 'Repères', [t('nom', 'Nom'), t('texte', 'Explication'), { cle: 'cle', type: 'cache' }], { ajout: 'Ajouter un repère', resume: 'nom' })],
-	},
-	{
 		titre: 'Formulaire de devis (page Contact)', aide: 'Une proposition par ligne. Laissez vide pour retirer la question du formulaire.',
 		champs: [
 			{ cle: 'choix_projets', type: 'lignes', label: 'Types de projet (cases à cocher)' },
@@ -314,3 +310,9 @@ export const REGLAGES = [
 	},
 	{ titre: 'Partage sur les réseaux', champs: [image('image_partage', 'Image par défaut', 'Affichée quand on partage une page du site sur Facebook, WhatsApp… (format horizontal).')] },
 ];
+
+// Repères d'accessibilité : page à part dans le back-office (/admin/reperes/), enregistrés avec les réglages du site.
+export const REPERES = {
+	titre: 'Repères d’accessibilité', aide: 'Proposés pour chaque date du calendrier, et expliqués sous le calendrier.',
+	champs: [liste('reperes', 'Repères', [t('nom', 'Nom'), t('texte', 'Explication'), { cle: 'cle', type: 'cache' }], { ajout: 'Ajouter un repère', resume: 'nom' })],
+};

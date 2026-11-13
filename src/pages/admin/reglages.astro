@@ -24,7 +24,7 @@ if (Astro.request.method === 'POST') {
 	}
 }
 const [r, sources] = await Promise.all([reglages(), sourcesAdmin()]);
-const ancres = ['coordonnees', 'reseaux', 'objectif', 'messages', 'types', 'reperes', 'formulaire', 'statistiques', 'partage'];
+const ancres = ['coordonnees', 'reseaux', 'objectif', 'messages', 'types', 'formulaire', 'statistiques', 'partage'];
 ---
 <Admin titre="Réglages" actif="reglages">
 	<div class="adm-titre"><div><h1>Réglages</h1><p>Les informations communes à tout le site.</p></div></div>

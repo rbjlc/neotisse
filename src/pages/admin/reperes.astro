@@ -1,0 +1,42 @@
+---
+// Repères d'accessibilité : leur propre page dans le back-office (ils restent enregistrés avec les réglages du site).
+import Admin from '../../layouts/Admin.astro';
+import Champ from '../../components/admin/Champ.astro';
+import { REPERES } from '../../lib/schemas.js';
+import { reglages } from '../../lib/site.js';
+import { lire, ecrire } from '../../lib/donnees.js';
+import { formulaireEnObjet, convertir, sourcesAdmin, valeurDe } from '../../lib/admin.js';
+
+let erreur = '';
+if (Astro.request.method === 'POST') {
+	const brut = formulaireEnObjet(await Astro.request.formData());
+	const avant = (await lire('reglages', 'site')) || {};
+	const { reperes = [] } = convertir(REPERES.champs, brut);
+	if (reperes.some((x) => !x.nom?.trim())) erreur = 'Chaque repère a besoin d’un nom.';
+	else {
+		await ecrire('reglages', 'site', { ...avant, reperes });
+		return Astro.redirect('/admin/reperes/?ok=' + encodeURIComponent('Repères enregistrés.'), 303);
+	}
+}
+const [r, sources] = await Promise.all([reglages(), sourcesAdmin()]);
+---
+<Admin titre="Repères d’accessibilité" actif="accessibilite">
+	<div class="adm-titre">
+		<div>
+			<h1>Repères d’accessibilité</h1>
+			<p>Les repères que vous pouvez cocher sur chaque date du calendrier. Ils sont expliqués sous le calendrier du site.</p>
+		</div>
+		<a class="b b-second" href="/admin/evenements/">Aller au calendrier</a>
+	</div>
+	{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+	<form method="post" class="edition">
+		<div class="section-corps">
+			<p class="section-aide">Donnez à chaque repère un nom court (ex. : « Boucle magnétique ») et une phrase qui explique ce qu’il garantit. N’ajoutez que ce qui est vraiment proposé.</p>
+			{REPERES.champs.map((c) => <Champ c={c} nom={c.cle} valeur={valeurDe(r, c.cle)} sources={sources} />)}
+		</div>
+		<div class="barre-enregistrer">
+			<button class="b b-principal" type="submit">Enregistrer</button>
+			<span class="modifie" data-etat-modif></span>
+		</div>
+	</form>
+</Admin>
