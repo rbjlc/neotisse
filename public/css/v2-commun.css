@@ -248,3 +248,37 @@ html.cookies-ouvert{overflow:hidden}
 /* Anti-robots ALTCHA, aux couleurs du site */
 .captcha{margin:4px 0 8px}
 .captcha altcha-widget{--altcha-max-width:100%;--altcha-border-radius:2px;--altcha-color-base:var(--creme,#FAF6EE);--altcha-color-border:var(--trait,#d9d2c3);--altcha-color-text:var(--encre,#2b2a26);--altcha-color-border-focus:var(--olive,#4F5233);font-family:inherit;font-size:16px}
+
+/* Retouches du 13/11/2026 */
+
+/* Petites étiquettes : plus de MAJUSCULES espacées (elles faisaient « machine à écrire ») */
+.libelle,.carte .pastille,.dates .tag,.dates .jour small,.defiler,.ch-petit,.menu-btn,.menu-plein .fermer,.menu-plein nav ul a small{
+	text-transform:none !important;letter-spacing:.01em !important;
+}
+.libelle{font-size:15px}
+.carte .pastille,.dates .tag,.dates .jour small,.defiler,.menu-btn,.menu-plein .fermer{font-size:13px}
+.ch-petit,.menu-plein nav ul a small{font-size:14px}
+
+/* Étiquettes colorées : même espace au-dessus et au-dessous du texte */
+.tag,.new,.carte .pastille,.dates .tag{line-height:1;vertical-align:middle}
+.tag,.new{padding:6px 10px}
+.carte .pastille,.dates .tag{padding:8px 12px}
+@supports (text-box: trim-both cap alphabetic){
+	.tag,.new,.carte .pastille,.dates .tag{text-box:trim-both cap alphabetic}
+	.tag,.new{padding:7px 10px}
+	.carte .pastille,.dates .tag{padding:9px 13px}
+}
+
+/* Menu : les lettres qui descendent (g de « Témoignages ») ne sont plus coupées ; les longs mots passent à la ligne sur petit écran */
+.menu-plein nav ul a{padding-block:.04em .16em;margin-block:-.04em -.16em;line-height:1.1}
+.menu-plein nav ul a{font-size:clamp(34px,5vw,76px)}
+@media (max-width:800px){.menu-plein nav ul a .mot{min-width:0;padding-right:20px}}
+
+/* Questions fréquentes : ouverture tout en douceur */
+@media (prefers-reduced-motion: no-preference){
+	.faq-q{interpolate-size:allow-keywords}
+	.faq-q::details-content{block-size:0;overflow:hidden;opacity:0;transition:block-size .5s var(--doux,ease),opacity .5s ease,content-visibility .5s allow-discrete}
+	.faq-q[open]::details-content{block-size:auto;opacity:1}
+	.faq-q summary::after{transition:transform .5s var(--doux,ease),background-color .5s ease}
+	.faq-q[open] summary::after{transform:rotate(180deg)}
+}
