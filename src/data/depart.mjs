@@ -139,7 +139,7 @@ export const pages = {
 					role: 'Co-créatrice',
 					nom: 'Émilie Roma Sert',
 					photo: img('', ''),
-					parcours: '<p><strong>Doctorante en archéologie, laboratoire ASM, <a href="https://www.univ-montp3.fr/">Université Paul-Valéry Montpellier 3</a></strong></p>',
+					parcours: '<p><strong>Doctorante en archéologie, laboratoire ASM, Université Paul-Valéry Montpellier 3</strong></p>',
 					texte: 'Spécialiste des systèmes de tissage, elle s’est formée au tissage sur métiers verticaux, au filage et à la teinture végétale auprès de l’association La Couenne. Son expérience de médiation sur un site archéologique nourrit les ateliers de Neotisse.',
 				},
 				{
