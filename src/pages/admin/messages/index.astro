@@ -17,12 +17,13 @@ const r = await reglages();
 const filtre = Astro.url.searchParams.get('voir') || 'tous';
 const tous = (await lister('messages')).sort((a, b) => (b.cree_le || '').localeCompare(a.cree_le || ''));
 const liste = tous.filter((m) => filtre === 'tous' || (filtre === 'nonlus' ? !m.lu : (m.categorie || 'devis') === filtre));
+const compte = (m) => (r.objectif?.categories || []).includes(m.categorie || 'devis');
 const nomCat = (c) => r.categories_messages.find((x) => x.cle === (c || 'devis'))?.nom || c;
 const heure = (iso) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' });
 ---
 <Admin titre="Messages reçus" actif="messages">
 	<div class="adm-titre">
-		<div><h1>Messages reçus</h1><p>Les demandes envoyées depuis la page Contact arrivent ici. Classez-les par catégorie : le tableau de bord compte celles qui correspondent à votre objectif.</p></div>
+		<div><h1>Messages reçus</h1><p>Les demandes envoyées depuis la page Contact arrivent ici. Chaque personne choisit sur le site s’il s’agit d’une demande de devis ou d’information. Vous pouvez corriger la catégorie à tout moment : le tableau de bord compte celles qui correspondent à votre objectif.</p></div>
 		<a class="b b-principal" href="/admin/messages/nouveau/">+ Ajouter une demande reçue autrement</a>
 	</div>
 	<nav class="filtres" aria-label="Filtrer les messages">
@@ -36,7 +37,7 @@ const heure = (iso) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digi
 				<li class:list={{ nonlu: !m.lu }}>
 					<div class="principal">
 						<a href={`/admin/messages/${m.id}/`}>{m.nom || 'Sans nom'}{m.institution ? ` · ${m.institution}` : ''}</a>
-						<p class="sous">{dateLongue(m.cree_le)} à {heure(m.cree_le)} · <span class="etiquette">{nomCat(m.categorie)}</span> {!m.lu && <strong style="color:var(--garance)">Non lu</strong>}</p>
+						<p class="sous">{dateLongue(m.cree_le)} à {heure(m.cree_le)} · <span class="etiquette">{nomCat(m.categorie)}</span>{compte(m) && ' · compte dans l’objectif'} {!m.lu && <strong style="color:var(--garance)">Non lu</strong>}</p>
 						<p class="sous">{String(m.message || '').slice(0, 140)}{String(m.message || '').length > 140 ? '…' : ''}</p>
 					</div>
 					<a class="b b-principal b-petit" href={`/admin/messages/${m.id}/`}>Lire</a>

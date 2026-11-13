@@ -56,7 +56,7 @@ const bonjour = heure < 18 ? 'Bonjour' : 'Bonsoir';
 			<p class="carte-aide" style="margin-top:0">
 				{n >= vise && vise > 0 ? 'Objectif atteint, bravo !' : `Il en manque ${Math.max(0, vise - n)}.`} On compte : {nomsCats.join(', ') || 'aucune catégorie choisie'}.
 			</p>
-			<a href="/admin/reglages/#objectif">Changer l’objectif</a>
+			<p style="margin:0;display:flex;gap:16px;flex-wrap:wrap"><a href={`/admin/messages/?voir=${(o.categories || [])[0] || 'devis'}`}>Vérifier les demandes comptées</a><a href="/admin/reglages/#objectif">Changer l’objectif</a></p>
 		</section>
 
 		<section class="carte" aria-labelledby="t-msg">

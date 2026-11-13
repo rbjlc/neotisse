@@ -25,6 +25,7 @@ if (Astro.request.method === 'POST') {
 if (!nouveau && !m.lu && Astro.request.method === 'GET') { await ecrire('messages', id, { ...m, lu: true }); }
 
 const champs = [['Reçu le', m.cree_le && dateLongue(m.cree_le)], ['Nom', m.nom], ['Institution', m.institution], ['E-mail', m.email], ['Reçu par', m.source], ['Type de projet', (m.projets || []).join(', ')], ['Public', m.public], ['Dates souhaitées', m.dates], ['Budget', m.budget], ['Message', m.message]].filter(([, v]) => v);
+const compte = (r.objectif?.categories || []).includes(m.categorie || 'devis');
 const sujet = encodeURIComponent(`Votre demande d’atelier – ${r.nom}`);
 const corps = encodeURIComponent(`Bonjour ${m.nom || ''},\n\nMerci pour votre message.\n\n\n\nBien cordialement,\nL’équipe ${r.nom}\n\n---\nVotre message :\n${m.message || ''}`);
 ---
@@ -45,6 +46,9 @@ const corps = encodeURIComponent(`Bonjour ${m.nom || ''},\n\nMerci pour votre me
 		</form>
 	) : (
 		<Fragment>
+			<p class:list={['adm-info', { 'compte-oui': compte }]}>{compte
+				? '✓ Cette demande compte dans l’objectif du tableau de bord. Si c’est une fausse demande, changez sa catégorie (par exemple « Autre ») ou supprimez-la.'
+				: 'Cette demande ne compte pas dans l’objectif. Si c’est en fait une demande de devis, choisissez « Demande de devis » ci-dessous puis « Changer la catégorie ».'}</p>
 			<div class="carte fiche-message">
 				<dl>{champs.map(([k, v]) => <Fragment><dt>{k}</dt><dd>{v}</dd></Fragment>)}</dl>
 			</div>
