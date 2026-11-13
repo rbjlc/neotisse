@@ -5,7 +5,7 @@
 do $$
 declare t text;
 begin
-  foreach t in array array['reglages','pages','ateliers','evenements','actualites','partenaires','temoignages','messages','medias','comptes'] loop
+  foreach t in array array['reglages','pages','ateliers','evenements','actualites','partenaires','temoignages','messages','medias','comptes','journal'] loop
     execute format('create table if not exists public.%I (
       id text primary key default gen_random_uuid()::text,
       data jsonb not null default ''{}''::jsonb,

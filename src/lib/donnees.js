@@ -8,11 +8,12 @@
 // Chaque « table » contient des fiches { id, ...champs, cree_le }.
 
 import { createClient } from '@supabase/supabase-js';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import depart from '../data/depart.mjs';
 
 const env = (k) => (typeof process !== 'undefined' && process.env[k]) || import.meta.env[k] || '';
 
-export const TABLES = ['reglages', 'pages', 'ateliers', 'evenements', 'actualites', 'partenaires', 'temoignages', 'messages', 'medias', 'comptes'];
+export const TABLES = ['reglages', 'pages', 'ateliers', 'evenements', 'actualites', 'partenaires', 'temoignages', 'messages', 'medias', 'comptes', 'journal'];
 
 export const modeSupabase = () => !!(env('SUPABASE_URL') && env('SUPABASE_SERVICE_ROLE_KEY'));
 
@@ -160,16 +161,58 @@ const pilote = () => (modeSupabase() ? sb : demo);
 
 export const lister = (t) => { verifier(t); return pilote().lister(t); };
 export const lire = (t, id) => { verifier(t); return pilote().lire(t, id); };
-export const ecrire = (t, id, champs) => { verifier(t); return pilote().ecrire(t, id, champs); };
-export const supprimer = (t, id) => { verifier(t); return pilote().supprimer(t, id); };
+
+/* ------------------------------------------------------------------ */
+/* Journal : qui a créé, modifié ou supprimé quoi dans le back-office   */
+/* ------------------------------------------------------------------ */
+// Le middleware range ici la personne connectée pendant le traitement de sa page.
+// Les formulaires publics (contact, témoignage) n'ont pas de personne connectée : rien n'est noté.
+export const contexteAdmin = new AsyncLocalStorage();
+const IGNORES = ['id', 'cree_le', 'mdp_hache'];
+const titreDe = (t, f = {}) => (t === 'comptes' ? f.email : f.titre || f.nom || f.question || f.alt || f.email || '') || '';
+
+async function noter(action, t, id, champs, avant) {
+	const qui = contexteAdmin.getStore()?.utilisateur;
+	if (!qui || t === 'journal') return;
+	const apres = champs || {};
+	let modifies = [];
+	if (action === 'modification') {
+		modifies = [...new Set([...Object.keys(apres), ...Object.keys(avant || {})])]
+			.filter((k) => !IGNORES.includes(k) && k in apres && JSON.stringify(apres[k]) !== JSON.stringify(avant?.[k]));
+		if (!modifies.length || modifies.every((k) => k === 'lu')) return; // ouvrir un message n'est pas une modification
+	}
+	const ligne = { qui: qui.email, action, table: t, cible: id, titre: String(titreDe(t, action === 'suppression' ? avant : { ...avant, ...apres })).slice(0, 140), champs: modifies.slice(0, 12) };
+	if (modifies.includes('statut')) ligne.statut = apres.statut;
+	if (modifies.includes('role')) ligne.role = apres.role;
+	await pilote().ecrire('journal', null, ligne);
+}
+
+export async function ecrire(t, id, champs) {
+	verifier(t);
+	const suivi = contexteAdmin.getStore() && t !== 'journal';
+	const avant = suivi && id ? await pilote().lire(t, id) : null;
+	const nid = await pilote().ecrire(t, id, champs);
+	if (suivi) await noter(avant ? 'modification' : 'creation', t, nid, champs, avant).catch((e) => console.error('Journal :', e.message));
+	return nid;
+}
+export async function supprimer(t, id) {
+	verifier(t);
+	const suivi = contexteAdmin.getStore() && t !== 'journal';
+	const avant = suivi ? await pilote().lire(t, id) : null;
+	await pilote().supprimer(t, id);
+	if (suivi && avant) await noter('suppression', t, id, null, avant).catch((e) => console.error('Journal :', e.message));
+}
 export const envoyerFichier = (nom, contenu, type) => pilote().envoyerFichier(nom, contenu, type);
 export const supprimerFichier = (url) => pilote().supprimerFichier(url || '');
 
-/** Supprime les messages et témoignages de plus de 3 ans (RGPD). */
+/** Supprime les messages et témoignages de plus de 3 ans, et le journal de plus d'un an (RGPD). */
 export async function purgerVieillesDonnees() {
 	const avant = new Date();
 	avant.setFullYear(avant.getFullYear() - 3);
 	const iso = avant.toISOString();
 	await pilote().purger('messages', iso);
 	await pilote().purger('temoignages', iso);
+	const unAn = new Date();
+	unAn.setFullYear(unAn.getFullYear() - 1);
+	await pilote().purger('journal', unAn.toISOString());
 }

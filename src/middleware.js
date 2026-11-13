@@ -1,6 +1,7 @@
 // Protège le back-office : toute adresse /admin demande d'être connectée.
 import { utilisateur, deconnecter } from './lib/auth.js';
 import { roleDe, estReserve } from './lib/comptes.js';
+import { contexteAdmin } from './lib/donnees.js';
 
 const LIBRES = ['/admin/connexion', '/admin/mot-de-passe-oublie', '/admin/nouveau-mot-de-passe'];
 
@@ -23,7 +24,7 @@ export async function onRequest(ctx, next) {
 		return ctx.redirect('/admin/?erreur=' + encodeURIComponent('Cette partie est réservée aux fondatrices.'));
 	}
 	ctx.locals.utilisateur = u;
-	const rep = await next();
+	const rep = await contexteAdmin.run({ utilisateur: u }, () => next());
 	rep.headers.set('Cache-Control', 'no-store');
 	rep.headers.set('X-Robots-Tag', 'noindex');
 	return rep;

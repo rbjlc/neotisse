@@ -17,7 +17,7 @@ export const ROLES = {
 };
 
 /** Parties du back-office réservées aux fondatrices (début d'adresse). */
-export const RESERVE_FONDATRICES = ['/admin/messages', '/admin/reglages', '/admin/comptes'];
+export const RESERVE_FONDATRICES = ['/admin/messages', '/admin/reglages', '/admin/comptes', '/admin/journal'];
 
 export const estReserve = (chemin) => RESERVE_FONDATRICES.some((r) => chemin === r || chemin.startsWith(r + '/'));
 

@@ -1,0 +1,90 @@
+---
+// Journal des modifications : qui a ajouté, modifié ou supprimé quoi, et quand. Réservé aux fondatrices.
+import Admin from '../../layouts/Admin.astro';
+import { lister } from '../../lib/donnees.js';
+import { fiches, ROLES } from '../../lib/comptes.js';
+import { PAGES } from '../../lib/schemas.js';
+
+const TYPES = {
+	actualites: ['Actualité', '/admin/actualites/'], evenements: ['Date du calendrier', '/admin/evenements/'],
+	ateliers: ['Atelier', '/admin/ateliers/'], partenaires: ['Partenaire', '/admin/partenaires/'],
+	pages: ['Texte de page', '/admin/pages/'], temoignages: ['Témoignage', null], messages: ['Message', '/admin/messages/'],
+	medias: ['Photo', null], reglages: ['Réglages et repères', null], comptes: ['Compte', null],
+};
+const ACTIONS = { creation: 'a ajouté', modification: 'a modifié', suppression: 'a supprimé' };
+const ARTICLES = {
+	actualites: 'l’actualité', evenements: 'la date', ateliers: 'l’atelier', partenaires: 'le partenaire', pages: 'le texte de la page',
+	temoignages: 'le témoignage de', messages: 'le message de', medias: 'la photo', reglages: 'les réglages', comptes: 'le compte',
+};
+const STATUTS = { publie: 'publié', refuse: 'refusé', attente: 'remis en attente' };
+const CHAMPS = {
+	titre: 'titre', texte: 'texte', contenu: 'contenu', date: 'date', date_fin: 'date de fin', lieu: 'lieu', photo: 'photo',
+	categorie: 'catégorie', reperes: 'repères', statut: 'statut', message: 'message', nom: 'nom', role: 'niveau d’accès',
+	questions: 'questions', alt: 'description', lien: 'lien', publie: 'publication',
+};
+
+const [toutes, comptes] = await Promise.all([lister('journal'), fiches()]);
+const noms = new Map(comptes.map((c) => [c.email, c.nom || c.email]));
+const qui = Astro.url.searchParams.get('qui') || '';
+const type = Astro.url.searchParams.get('type') || '';
+const personnes = [...new Set(toutes.map((l) => l.qui))].sort();
+const lignes = toutes
+	.filter((l) => (!qui || l.qui === qui) && (!type || l.table === type))
+	.sort((a, b) => (b.cree_le || '').localeCompare(a.cree_le || ''))
+	.slice(0, 400);
+
+const majuscule = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+const jour = (iso) => majuscule(new Date(iso).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }));
+const heure = (iso) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' });
+const groupes = [];
+for (const l of lignes) {
+	const j = jour(l.cree_le);
+	if (groupes.at(-1)?.jour !== j) groupes.push({ jour: j, lignes: [] });
+	groupes.at(-1).lignes.push(l);
+}
+const titre = (l) => (l.table === 'pages' ? PAGES[l.cible]?.nom || l.titre : l.titre) || 'sans titre';
+const lien = (l) => {
+	const base = TYPES[l.table]?.[1];
+	if (!base || l.action === 'suppression') return null;
+	return l.table === 'pages' ? `${base}${l.cible}/` : `${base}${l.cible}/`;
+};
+const detail = (l) => {
+	if (l.statut) return STATUTS[l.statut] || l.statut;
+	if (l.role) return 'niveau : ' + (ROLES[l.role]?.nom || l.role);
+	if (l.action === 'modification' && l.champs?.length) return l.champs.map((c) => CHAMPS[c] || c.replace(/_/g, ' ')).join(', ');
+	return '';
+};
+---
+<Admin titre="Journal des modifications" actif="journal">
+	<div class="adm-titre">
+		<div>
+			<h1>Journal des modifications</h1>
+			<p>Qui a ajouté, modifié ou supprimé quoi dans l’espace Neotisse, et quand. Chaque personne ayant son propre compte, on sait toujours qui a fait quoi.</p>
+		</div>
+	</div>
+
+	<form method="get" class="b-groupe" aria-label="Filtrer le journal">
+		<div class="champ" style="margin:0"><label for="f-qui">Personne</label>
+			<select id="f-qui" name="qui" style="width:auto"><option value="">Tout le monde</option>{personnes.map((p) => <option value={p} selected={p === qui}>{noms.get(p) || p}</option>)}</select></div>
+		<div class="champ" style="margin:0"><label for="f-type">Contenu</label>
+			<select id="f-type" name="type" style="width:auto"><option value="">Tout</option>{Object.entries(TYPES).map(([k, [n]]) => <option value={k} selected={k === type}>{n}</option>)}</select></div>
+		<button class="b b-second" type="submit" style="align-self:end">Filtrer</button>
+	</form>
+
+	{groupes.length === 0 ? <p class="adm-info">Rien pour l’instant : les prochaines modifications apparaîtront ici.</p> : groupes.map((g) => (
+		<section aria-label={g.jour}>
+			<h2 style="font-size:18px;margin:8px 0">{g.jour}</h2>
+			<ul class="liste">
+				{g.lignes.map((l) => (
+					<li>
+						<div class="principal">
+							<p style="margin:0"><strong>{heure(l.cree_le)}</strong> · {noms.get(l.qui) || l.qui} {ACTIONS[l.action] || l.action} {ARTICLES[l.table] || l.table} {l.table === 'reglages' ? (l.champs?.length === 1 && l.champs[0] === 'reperes' ? '(repères d’accessibilité)' : '') : lien(l) ? <a href={lien(l)} style="font-size:inherit">« {titre(l)} »</a> : <span>« {titre(l)} »</span>}</p>
+							{detail(l) && <p class="sous">{l.action === 'modification' && !l.statut && !l.role ? 'Modifié : ' : ''}{detail(l)}</p>}
+						</div>
+					</li>
+				))}
+			</ul>
+		</section>
+	))}
+	<p class="carte-aide" style="margin:0">Le journal garde un an d’historique, puis s’efface automatiquement.</p>
+</Admin>
