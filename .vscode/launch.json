@@ -8,6 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Ouvrir le site (npm run dev) dans Chrome",
+            "preLaunchTask": "Lancer le site (npm run dev)",
             "url": "http://localhost:4321",
             "webRoot": "${workspaceFolder}"
         }

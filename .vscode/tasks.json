@@ -1,0 +1,20 @@
+{
+	// Démarre le serveur local du site (npm run dev). Utilisé par le bouton « Exécuter » (F5).
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Lancer le site (npm run dev)",
+			"type": "npm",
+			"script": "dev",
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "astro",
+				"pattern": { "regexp": "^x\\b" },
+				"background": {
+					"beginsPattern": "astro",
+					"endsPattern": "(Local|ready in)"
+				}
+			}
+		}
+	]
+}
