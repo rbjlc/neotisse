@@ -37,8 +37,8 @@ async function gerer(ctx, next) {
 		return ctx.redirect('/admin/connexion/?erreur=' + encodeURIComponent('Ce compte n’a plus accès à l’espace Neotisse.'));
 	}
 	if (u.role !== 'fondatrice' && estReserve(chemin)) {
-		if (chemin.startsWith('/admin/api/')) return new Response(JSON.stringify({ erreur: 'Réservé aux fondatrices.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-		return ctx.redirect('/admin/?erreur=' + encodeURIComponent('Cette partie est réservée aux fondatrices.'));
+		if (chemin.startsWith('/admin/api/')) return new Response(JSON.stringify({ erreur: 'Réservé aux responsables.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+		return ctx.redirect('/admin/?erreur=' + encodeURIComponent('Cette partie est réservée aux responsables.'));
 	}
 	ctx.locals.utilisateur = u;
 	const rep = await contexteAdmin.run({ utilisateur: u }, () => next());

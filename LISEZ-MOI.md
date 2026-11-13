@@ -44,7 +44,7 @@ En mode démo, tout ce que tu modifies est enregistré dans le dossier `.donnees
 7. **Authentication → URL Configuration** :
    - Site URL : l'adresse du site (ex. `https://neotisse.netlify.app`)
    - Redirect URLs : ajoute `https://neotisse.netlify.app/admin/nouveau-mot-de-passe/`
-8. **Authentication → Users → Invite user** : invite chaque fondatrice. Elle reçoit un e-mail, clique sur le lien et choisit son mot de passe. Le **premier** compte qui se connecte devient **Fondatrice** (accès complet). Les comptes invités ensuite depuis Supabase arrivent avec le niveau **Équipe** : une fondatrice peut les passer en Fondatrice dans **Comptes et accès** (par sécurité, aucun compte inconnu ne reçoit tous les droits). Ensuite, les fondatrices ajoutent elles-mêmes les autres personnes depuis le back-office (**Comptes et accès**), avec le niveau **Fondatrice** ou **Équipe** (contenus seulement, sans les messages, les réglages ni les comptes).
+8. **Authentication → Users → Invite user** : invite chaque responsable. La personne reçoit un e-mail, clique sur le lien et choisit son mot de passe. Le **premier** compte qui se connecte devient **Responsable** (accès complet). Les comptes invités ensuite depuis Supabase arrivent avec le niveau **Équipe** : une responsable peut les passer en Responsable dans **Comptes et accès** (par sécurité, aucun compte inconnu ne reçoit tous les droits). Ensuite, les fondatrices ajoutent elles-mêmes les autres personnes depuis le back-office (**Comptes et accès**), avec le niveau **Fondatrice** ou **Équipe** (contenus seulement, sans les messages, les réglages ni les comptes).
 
 > ⚠️ La clé `service_role` donne accès à toute la base : ne la mets jamais sur GitHub (le fichier `.env` est déjà exclu par `.gitignore`).
 
@@ -59,7 +59,7 @@ En mode démo, tout ce que tu modifies est enregistré dans le dossier `.donnees
 
 ### Recevoir les demandes de devis dans la boîte mail de Neotisse
 
-Chaque demande arrive dans le back-office et, si c'est configuré, dans la boîte Gmail de l'association (la fondatrice n'a qu'à cliquer sur « Répondre »). Les nouveaux témoignages à relire sont signalés de la même façon.
+Chaque demande arrive dans le back-office et, si c'est configuré, dans la boîte Gmail de l'association (il suffit de cliquer sur « Répondre »). Les nouveaux témoignages à relire sont signalés de la même façon.
 
 1. Sur le compte Google de l'association : **Gérer votre compte → Sécurité → Validation en deux étapes** (à activer si ce n'est pas fait).
 2. Toujours dans **Sécurité**, ouvre **Mots de passe des applications**, crée « Site Neotisse » et copie le code de 16 lettres.
@@ -76,7 +76,7 @@ Si tu préfères ne pas toucher au compte Google, tu peux utiliser https://resen
 
 ---
 
-## 4. Ce que les fondatrices peuvent modifier (`/admin`)
+## 4. Ce que les responsables et l’équipe peuvent modifier (`/admin`)
 
 | Menu | Ce qu'on y fait |
 |---|---|

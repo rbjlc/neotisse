@@ -1,7 +1,7 @@
 // Comptes du back-office et niveaux d'accès.
 //
 // Deux rôles :
-// - « Fondatrice » : accès complet (messages, réglages, comptes…).
+// - « Responsable » (clé interne « fondatrice ») : accès complet (messages, réglages, comptes…).
 // - « Équipe » : gère les contenus du site, mais n'accède pas aux parties réservées ci-dessous.
 //
 // Avec Supabase, la fiche d'un compte porte l'identifiant du compte (qui ne change jamais) : changer d'adresse
@@ -14,7 +14,8 @@ import { DEMO } from './auth.js';
 import { urlSite } from './site.js';
 
 export const ROLES = {
-	fondatrice: { nom: 'Fondatrice', resume: 'Accès complet : messages et demandes de devis, réglages, comptes.' },
+	// Seul le nom affiché change si l'organisation évolue : la clé « fondatrice » reste la même dans la base.
+	fondatrice: { nom: 'Responsable', resume: 'Accès complet : messages et demandes de devis, réglages, comptes, journal.' },
 	equipe: { nom: 'Équipe', resume: 'Gère les contenus (calendrier, actualités, ateliers, photos, textes…). Pas d’accès aux messages, aux réglages ni aux comptes.' },
 };
 
@@ -124,7 +125,7 @@ export async function changerRole(email, role, moi) {
 	const liste = await listeComptes();
 	const c = liste.find((x) => x.email === email);
 	if (!c || c.fixe) return { erreur: 'Ce compte ne peut pas être modifié.' };
-	if (c.role === 'fondatrice' && role !== 'fondatrice' && fondatrices(liste) <= 1) return { erreur: 'Il faut garder au moins une fondatrice.' };
+	if (c.role === 'fondatrice' && role !== 'fondatrice' && fondatrices(liste) <= 1) return { erreur: 'Il faut garder au moins une personne au niveau Responsable.' };
 	const { auth_id, invitation, ...fiche } = c;
 	await ecrire('comptes', modeSupabase() ? auth_id : c.id || null, { ...fiche, role });
 	return { ok: `${c.nom || email} : ${ROLES[role].nom.toLowerCase()}.` };
@@ -136,7 +137,7 @@ export async function retirerCompte(email, moi) {
 	const liste = await listeComptes();
 	const c = liste.find((x) => x.email === email);
 	if (!c || c.fixe) return { erreur: 'Ce compte ne peut pas être retiré.' };
-	if (c.role === 'fondatrice' && fondatrices(liste) <= 1) return { erreur: 'Il faut garder au moins une fondatrice.' };
+	if (c.role === 'fondatrice' && fondatrices(liste) <= 1) return { erreur: 'Il faut garder au moins une personne au niveau Responsable.' };
 	if (modeSupabase() && c.auth_id) {
 		const { error } = await supabase().auth.admin.deleteUser(c.auth_id);
 		if (error) return { erreur: 'Impossible de retirer ce compte : ' + error.message };
