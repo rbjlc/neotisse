@@ -1,10 +1,12 @@
 ---
 // Gabarit du back-office : menu à gauche, contenu à droite.
 import { lister, modeSupabase } from '../lib/donnees.js';
+import { ROLES, estReserve } from '../lib/comptes.js';
 
 const { titre, actif = '', large = false } = Astro.props;
 const u = Astro.locals.utilisateur;
-const [messages, temoignages] = await Promise.all([lister('messages'), lister('temoignages')]);
+const fondatrice = u?.role === 'fondatrice';
+const [messages, temoignages] = await Promise.all([fondatrice ? lister('messages') : [], lister('temoignages')]);
 const nonLus = messages.filter((m) => !m.lu).length;
 const enAttente = temoignages.filter((t) => t.statut === 'attente').length;
 const ok = Astro.url.searchParams.get('ok');
@@ -25,8 +27,9 @@ const menu = [
 	['photos', 'Photos', '/admin/photos/', '🖼️'],
 	['-', 'Paramètres'],
 	['reglages', 'Réglages', '/admin/reglages/', '⚙️'],
+	['comptes', 'Comptes et accès', '/admin/comptes/', '👥'],
 	['aide', 'Aide', '/admin/aide/', '❓'],
-];
+].filter((m) => fondatrice || !m[2] || !estReserve(m[2].replace(/\/$/, '')));
 ---
 <!doctype html>
 <html lang="fr">
@@ -48,7 +51,7 @@ const menu = [
 		<a class="adm-marque" href="/admin/" aria-label="Espace Neotisse : tableau de bord"><img src="/images/logo-neotisse.png" alt="" width="34" height="29" /> <span>Espace Neotisse</span></a>
 		<div class="adm-haut-droite">
 			<a class="adm-voir" href="/" target="_blank" rel="noopener">Voir le site ↗</a>
-			<span class="adm-qui">{u?.email}</span>
+			<span class="adm-qui">{u?.email}{u?.role && ` · ${ROLES[u.role].nom}`}</span>
 			<form method="post" action="/admin/deconnexion/"><button type="submit" class="adm-lien">Se déconnecter</button></form>
 		</div>
 	</header>

@@ -37,6 +37,7 @@ for (const a of parts) fouille(a, { nom: 'Partenaire : ' + a.nom, url: `/admin/p
 const medSansAlt = medias.filter((m) => !String(m.alt || '').trim()).length;
 const uniques = [...new Map(sansAlt.map((x) => [x.url, x])).values()];
 
+const fondatrice = Astro.locals.utilisateur?.role === 'fondatrice';
 const heure = new Date().getHours();
 const bonjour = heure < 18 ? 'Bonjour' : 'Bonsoir';
 ---
@@ -49,7 +50,7 @@ const bonjour = heure < 18 ? 'Bonjour' : 'Bonsoir';
 	</div>
 
 	<div class="grille">
-		<section class="carte" aria-labelledby="t-obj">
+		{fondatrice && <Fragment><section class="carte" aria-labelledby="t-obj">
 			<h2 id="t-obj">Objectif {NOM_PERIODE[o.periode] || ''}</h2>
 			<p><span class="chiffre">{n}</span> <span style="font-size:20px">/ {vise}</span></p>
 			<div class:list={['jauge', { atteint: n >= vise && vise > 0 }]} role="img" aria-label={`${n} sur ${vise}`}><span style={`width:${pct}%`}></span></div>
@@ -64,7 +65,7 @@ const bonjour = heure < 18 ? 'Bonjour' : 'Bonsoir';
 			<p><span class="chiffre">{nonLus.length}</span> <span style="font-size:20px">non lu{nonLus.length > 1 ? 's' : ''}</span></p>
 			{nonLus.slice(0, 3).map((m) => <p><a href={`/admin/messages/${m.id}/`}><strong>{m.nom}</strong>{m.institution ? ` · ${m.institution}` : ''}</a></p>)}
 			<a href="/admin/messages/">Voir tous les messages</a>
-		</section>
+		</section></Fragment>}
 
 		<section class="carte" aria-labelledby="t-tem">
 			<h2 id="t-tem">Témoignages</h2>
@@ -81,7 +82,7 @@ const bonjour = heure < 18 ? 'Bonjour' : 'Bonsoir';
 			<a class="b b-second" href="/admin/actualites/nouveau/">+ Une actualité</a>
 			<a class="b b-second" href="/admin/photos/">+ Des photos</a>
 			<a class="b b-second" href="/admin/partenaires/nouveau/">+ Un partenaire</a>
-			<a class="b b-second" href="/admin/messages/nouveau/">+ Une demande reçue par téléphone</a>
+			{fondatrice && <a class="b b-second" href="/admin/messages/nouveau/">+ Une demande reçue par téléphone</a>}
 		</div>
 	</section>
 
@@ -109,8 +110,8 @@ const bonjour = heure < 18 ? 'Bonjour' : 'Bonsoir';
 		</section>
 	</div>
 
-	<p class="carte-aide" style="margin-top:0">{modeEnvoi()
+	{fondatrice && <p class="carte-aide" style="margin-top:0">{modeEnvoi()
 		? `✓ Chaque demande de devis et chaque témoignage sont aussi envoyés par e-mail à ${process.env.NOTIFICATION_EMAIL || r.email}.`
-		: '⚠ Les demandes de devis ne sont pas encore envoyées par e-mail : elles arrivent seulement ici, dans « Messages reçus ». (Réglage technique à faire par l’agence, voir LISEZ-MOI.)'}</p>
+		: '⚠ Les demandes de devis ne sont pas encore envoyées par e-mail : elles arrivent seulement ici, dans « Messages reçus ». (Réglage technique à faire par l’agence, voir LISEZ-MOI.)'}</p>}
 	<p class="carte-aide" style="margin-top:0">Les messages et témoignages de plus de 3 ans sont supprimés automatiquement (RGPD). Dernière actualité publiée : {dateLongue(actus.map((a) => a.date).sort().pop() || '') || 'aucune'}.</p>
 </Admin>

@@ -12,7 +12,7 @@ import depart from '../data/depart.mjs';
 
 const env = (k) => (typeof process !== 'undefined' && process.env[k]) || import.meta.env[k] || '';
 
-export const TABLES = ['reglages', 'pages', 'ateliers', 'evenements', 'actualites', 'partenaires', 'temoignages', 'messages', 'medias'];
+export const TABLES = ['reglages', 'pages', 'ateliers', 'evenements', 'actualites', 'partenaires', 'temoignages', 'messages', 'medias', 'comptes'];
 
 export const modeSupabase = () => !!(env('SUPABASE_URL') && env('SUPABASE_SERVICE_ROLE_KEY'));
 

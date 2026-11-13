@@ -29,7 +29,8 @@ export async function connecter(cookies, email, mdp) {
 		return { ok: true };
 	}
 	const a = Buffer.from(email + '|' + mdp), b = Buffer.from(DEMO.email().toLowerCase() + '|' + DEMO.mdp());
-	if (a.length !== b.length || !timingSafeEqual(a, b)) return { erreur: 'E-mail ou mot de passe incorrect.' };
+	const okDemo = a.length === b.length && timingSafeEqual(a, b);
+	if (!okDemo && !(await (await import('./comptes.js')).connexionDemo(email, mdp))) return { erreur: 'E-mail ou mot de passe incorrect.' };
 	const v = Buffer.from(email).toString('base64url');
 	cookies.set('neo_demo', `${v}.${signe(v)}`, opts(60 * 60 * 24 * 7));
 	return { ok: true };

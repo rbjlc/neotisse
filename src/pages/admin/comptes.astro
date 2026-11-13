@@ -1,0 +1,83 @@
+---
+// Comptes et accès : réservé aux fondatrices (voir src/lib/comptes.js).
+import Admin from '../../layouts/Admin.astro';
+import { ROLES, listeComptes, ajouterCompte, changerRole, retirerCompte } from '../../lib/comptes.js';
+import { modeSupabase } from '../../lib/donnees.js';
+
+const moi = Astro.locals.utilisateur.email;
+let erreur = '';
+let saisie = { nom: '', email: '', role: 'equipe' };
+if (Astro.request.method === 'POST') {
+	const f = await Astro.request.formData();
+	const action = f.get('action');
+	let r = {};
+	if (action === 'ajouter') {
+		saisie = { nom: String(f.get('nom') || ''), email: String(f.get('email') || ''), role: String(f.get('role') || 'equipe') };
+		r = await ajouterCompte({ ...saisie, mdp: f.get('mdp') });
+	} else if (action === 'role') r = await changerRole(f.get('email'), String(f.get('role')), moi);
+	else if (action === 'retirer') r = await retirerCompte(f.get('email'), moi);
+	if (r.ok) return Astro.redirect('/admin/comptes/?ok=' + encodeURIComponent(r.ok), 303);
+	erreur = r.erreur || 'Action inconnue.';
+}
+const comptes = await listeComptes();
+const supa = modeSupabase();
+---
+<Admin titre="Comptes et accès" actif="comptes">
+	<div class="adm-titre">
+		<div>
+			<h1>Comptes et accès</h1>
+			<p>Les personnes qui peuvent se connecter à l’espace Neotisse, et ce qu’elles peuvent y faire.</p>
+		</div>
+	</div>
+	{erreur && <p class="adm-erreur" role="alert">{erreur}</p>}
+
+	<div class="grille">
+		{Object.entries(ROLES).map(([cle, r]) => (
+			<section class="carte" aria-labelledby={`role-${cle}`}>
+				<h2 id={`role-${cle}`}>{r.nom}</h2>
+				<p class="carte-aide" style="margin-top:0">{r.resume}</p>
+			</section>
+		))}
+	</div>
+
+	<ul class="liste" aria-label="Comptes">
+		{comptes.map((c) => {
+			const soi = c.email === moi.toLowerCase();
+			return (
+				<li>
+					<div class="principal">
+						<strong>{c.nom || c.email}</strong>{soi && ' (vous)'}
+						<p class="sous">{c.nom ? c.email + ' · ' : ''}<span class="etiquette">{ROLES[c.role]?.nom}</span>{c.invitation && ' · invitation envoyée, pas encore connectée'}</p>
+					</div>
+					{!soi && !c.fixe && (
+						<form method="post" class="b-groupe">
+							<input type="hidden" name="email" value={c.email} />
+							<label class="sr" for={`r-${c.email}`}>Niveau d’accès de {c.nom || c.email}</label>
+							<select id={`r-${c.email}`} name="role" style="width:auto">
+								{Object.entries(ROLES).map(([k, r]) => <option value={k} selected={c.role === k}>{r.nom}</option>)}
+							</select>
+							<button class="b b-second b-petit" name="action" value="role">Changer</button>
+							<button class="b b-danger b-petit" name="action" value="retirer" data-confirmer={`Retirer l’accès de ${c.nom || c.email} ? La personne ne pourra plus se connecter.`}>Retirer l’accès</button>
+						</form>
+					)}
+				</li>
+			);
+		})}
+	</ul>
+
+	<form method="post" class="edition carte">
+		<h2>Ajouter une personne</h2>
+		<p class="carte-aide" style="margin-top:0">{supa
+			? 'La personne reçoit un e-mail pour choisir son mot de passe.'
+			: 'Mode démo : choisissez un mot de passe pour ce compte (au moins 10 caractères) et transmettez-le à la personne.'}</p>
+		<div class="duo">
+			<div class="champ"><label for="n">Prénom et nom</label><input id="n" name="nom" type="text" maxlength="80" value={saisie.nom} /></div>
+			<div class="champ"><label for="e">E-mail *</label><input id="e" name="email" type="email" required maxlength="160" value={saisie.email} /></div>
+			<div class="champ"><label for="ro">Niveau d’accès *</label>
+				<select id="ro" name="role">{Object.entries(ROLES).map(([k, r]) => <option value={k} selected={saisie.role === k}>{r.nom}</option>)}</select></div>
+			{!supa && <div class="champ"><label for="m">Mot de passe *</label><input id="m" name="mdp" type="text" minlength="10" required autocomplete="off" /></div>}
+		</div>
+		<div class="b-groupe"><button class="b b-principal" name="action" value="ajouter">Ajouter</button></div>
+	</form>
+	<p class="carte-aide" style="margin:0">Il reste toujours au moins une fondatrice. Personne ne peut changer ni retirer son propre accès.</p>
+</Admin>

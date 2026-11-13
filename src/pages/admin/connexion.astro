@@ -5,7 +5,7 @@ import { modeSupabase } from '../../lib/donnees.js';
 
 const retourBrut = Astro.url.searchParams.get('retour') || '/admin/';
 const retour = retourBrut.startsWith('/admin') ? retourBrut : '/admin/';
-let erreur = '';
+let erreur = Astro.url.searchParams.get('erreur') || '';
 if (Astro.request.method === 'POST') {
 	const f = await Astro.request.formData();
 	const r = await connecter(Astro.cookies, f.get('email'), f.get('mdp'));
