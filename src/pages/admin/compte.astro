@@ -1,14 +1,21 @@
 ---
-// Mon compte : chaque personne connectée peut changer son propre mot de passe.
+// Mon compte : chaque personne connectée peut changer son propre mot de passe et son adresse e-mail.
 import Admin from '../../layouts/Admin.astro';
-import { changerMonMotDePasse } from '../../lib/auth.js';
+import { changerMonMotDePasse, changerMonEmail } from '../../lib/auth.js';
 import { ROLES } from '../../lib/comptes.js';
 
 const u = Astro.locals.utilisateur;
 let erreur = '';
 if (Astro.request.method === 'POST') {
 	const f = await Astro.request.formData();
-	if (f.get('nouveau') !== f.get('nouveau2')) erreur = 'Les deux nouveaux mots de passe ne sont pas identiques.';
+	if (f.get('action') === 'email') {
+		if (String(f.get('email') || '').trim().toLowerCase() !== String(f.get('email2') || '').trim().toLowerCase()) erreur = 'Les deux adresses ne sont pas identiques.';
+		else {
+			const r = await changerMonEmail(Astro.cookies, u.email, String(f.get('mdp') || ''), f.get('email'));
+			if (r.ok) return Astro.redirect('/admin/compte/?ok=' + encodeURIComponent('Adresse e-mail changée. Utilisez-la désormais pour vous connecter.'), 303);
+			erreur = r.erreur;
+		}
+	} else if (f.get('nouveau') !== f.get('nouveau2')) erreur = 'Les deux nouveaux mots de passe ne sont pas identiques.';
 	else {
 		const r = await changerMonMotDePasse(Astro.cookies, u.email, String(f.get('ancien') || ''), String(f.get('nouveau') || ''));
 		if (r.ok) return Astro.redirect('/admin/compte/?ok=' + encodeURIComponent('Mot de passe changé.'), 303);
@@ -32,7 +39,18 @@ if (Astro.request.method === 'POST') {
 			<div class="champ"><label for="n1">Nouveau mot de passe</label><input id="n1" name="nouveau" type="password" autocomplete="new-password" minlength="10" required /></div>
 			<div class="champ"><label for="n2">Le même, encore une fois</label><input id="n2" name="nouveau2" type="password" autocomplete="new-password" minlength="10" required /></div>
 		</div>
-		<div class="b-groupe"><button class="b b-principal" type="submit">Changer le mot de passe</button></div>
+		<div class="b-groupe"><button class="b b-principal" type="submit" name="action" value="mdp">Changer le mot de passe</button></div>
 		<p class="carte-aide" style="margin:0">Mot de passe oublié ? Déconnectez-vous puis cliquez sur « Mot de passe oublié ? » sur la page de connexion : vous recevrez un lien par e-mail.</p>
+	</form>
+
+	<form method="post" class="edition carte">
+		<h2>Changer mon adresse e-mail</h2>
+		<p class="carte-aide" style="margin-top:0">C’est l’adresse qui sert à vous connecter et à recevoir les liens « mot de passe oublié ». Votre niveau d’accès ne change pas.</p>
+		<div class="duo">
+			<div class="champ"><label for="e1">Nouvelle adresse</label><input id="e1" name="email" type="email" autocomplete="email" required /></div>
+			<div class="champ"><label for="e2">La même, encore une fois</label><input id="e2" name="email2" type="email" autocomplete="off" required /></div>
+		</div>
+		<div class="champ"><label for="p">Mot de passe actuel (pour confirmer que c’est bien vous)</label><input id="p" name="mdp" type="password" autocomplete="current-password" required /></div>
+		<div class="b-groupe"><button class="b b-principal" type="submit" name="action" value="email">Changer l’adresse</button></div>
 	</form>
 </Admin>
