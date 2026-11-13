@@ -16,8 +16,9 @@ const dejaVus = new CappedMap({ maxSize: 5000 });
 export async function creerDefi() {
 	return createChallenge({
 		algorithm: 'PBKDF2/SHA-256',
-		cost: 5000,
-		counter: randomInt(5000, 10000),
+		// Réglé pour environ une seconde sur un ordinateur ou un téléphone ordinaire (5 s ou plus semblait bloqué).
+		cost: 1000,
+		counter: randomInt(1000, 3000),
 		deriveKey,
 		hmacSignatureSecret: secret('signature'),
 		hmacKeySignatureSecret: secret('cle'),
