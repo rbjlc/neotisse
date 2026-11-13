@@ -235,3 +235,8 @@ html.cookies-ouvert{overflow:hidden}
 .trait-anime .mois.trace::after{transform:scaleX(1)}
 /* le fond du menu des ateliers couvre toute la largeur de l'écran */
 .onglets-ateliers{box-shadow:0 0 0 100vmax var(--lin);clip-path:inset(0 -100vmax)}
+
+/* Qui sommes-nous : au survol de la présentation d'une fondatrice, son portrait se rapproche doucement */
+.interieur .fondatrice .portrait-photo img{transition:transform 1.2s var(--doux)}
+.interieur .fondatrice:hover .portrait-photo img,.interieur .fondatrice:focus-within .portrait-photo img{transform:scale(1.05)}
+@media (prefers-reduced-motion:reduce){.interieur .fondatrice .portrait-photo img{transition:none}.interieur .fondatrice:hover .portrait-photo img,.interieur .fondatrice:focus-within .portrait-photo img{transform:none}}
