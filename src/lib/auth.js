@@ -8,7 +8,7 @@ import { modeSupabase, supabase } from './donnees.js';
 const env = (k, d = '') => process.env[k] || import.meta.env[k] || d;
 const SECURE = () => env('NODE_ENV') === 'production' || !!env('NETLIFY');
 /** Le mode démo (identifiants du fichier .env) ne fonctionne jamais sur le site en ligne. */
-const demoInterdit = () => !!(env('NETLIFY') || env('CONTEXT') || env('URL')) && !modeSupabase();
+export const demoInterdit = () => !!(env('NETLIFY') || env('CONTEXT') || env('URL')) && !modeSupabase();
 const opts = (maxAge) => ({ path: '/', httpOnly: true, sameSite: 'lax', secure: SECURE(), maxAge });
 
 export const DEMO = { email: () => env('ADMIN_EMAIL', 'demo@neotisse.fr'), mdp: () => env('ADMIN_MOT_DE_PASSE', 'neotisse-demo') };
