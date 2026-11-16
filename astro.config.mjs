@@ -14,4 +14,7 @@ export default defineConfig({
 	trailingSlash: 'ignore',
 	security: { checkOrigin: true },
 	devToolbar: { enabled: false },
+	// sanitize-html est un ancien module (CommonJS) qui charge htmlparser2, devenu un module moderne (ESM).
+	// On l'intègre au code du site au lieu de le charger à part : sinon la fonction Netlify plante.
+	vite: { ssr: { noExternal: ['sanitize-html', 'htmlparser2', 'domhandler', 'domutils', 'dom-serializer', 'domelementtype', 'entities', 'escape-string-regexp', 'is-plain-object', 'launder', 'parse-srcset', 'postcss', 'nanoid', 'picocolors', 'source-map-js', 'dayjs'] } },
 });
