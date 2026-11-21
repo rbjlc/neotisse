@@ -3,6 +3,7 @@
 // et au « mode démo » quand aucune base Supabase n'est branchée.
 // Après la mise en ligne, tout se modifie dans le back-office : ce fichier ne sert plus.
 
+import { CHANGEMENTS, NOUVEAUX_MEDIAS } from './photos-novembre.mjs';
 const img = (src, alt) => ({ src, alt });
 const btn = (texte, lien) => ({ texte, lien });
 const cta = {
@@ -416,6 +417,14 @@ export const medias = [
 	['metier-a-tisser-vertical.webp', 'Métier à tisser vertical à poids', 964, 1286],
 	['atelier-groupe.webp', 'Atelier en salle avec un groupe de participants', 1050, 1400],
 	['conference.webp', 'Conférence sur l’archéologie des textiles', 1400, 933],
-].map(([f, alt, largeur, hauteur], i) => ({ id: 'm' + (i + 1), url: '/images/' + f, alt, largeur, hauteur, date: '2026-11-03T10:00:00Z' }));
+].map(([f, alt, largeur, hauteur], i) => ({ id: 'm' + (i + 1), url: '/images/' + f, alt, largeur, hauteur, date: '2026-11-03T10:00:00Z' })).concat(NOUVEAUX_MEDIAS);
+
+// Photos de novembre : placées dans les pages (voir photos-novembre.mjs).
+for (const c of CHANGEMENTS) {
+	const cles = c.chemin.split('.');
+	let o = pages[c.page];
+	for (const k of cles.slice(0, -1)) o = o[k];
+	o[cles.at(-1)] = c.image;
+}
 
 export default { reglages, pages, ateliers, evenements, actualites, partenaires, temoignages, messages, medias };
