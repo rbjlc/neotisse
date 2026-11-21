@@ -3,6 +3,7 @@
 const img = (src, alt) => ({ src, alt });
 
 export const CHANGEMENTS = [
+	{ page: 'accueil', chemin: 'citation.image', avant: '/images/atelier-plein-air.webp', image: img('/images/bandeau-teinture.webp', 'Main tenant un écheveau de laine teint en orange, sorti d’un bain de teinture végétale') },
 	{ page: 'qui-sommes-nous', chemin: 'equipe.membres.0.photo', avant: '', image: img('/images/portrait-emilie.webp', 'Portrait d’Émilie Roma Sert, co-créatrice de Neotisse') },
 	{ page: 'qui-sommes-nous', chemin: 'equipe.membres.1.photo', avant: '', image: img('/images/portrait-marie-salome.webp', 'Portrait de Marie-Salomé Perrichon, co-créatrice de Neotisse') },
 	{ page: 'qui-sommes-nous', chemin: 'patrimoine.photo1', avant: '/images/bain-teinture-vegetale.webp', image: img('/images/bain-oignon.webp', 'Écheveau de laine sorti d’un bain de teinture à la pelure d’oignon') },
@@ -28,5 +29,6 @@ export const NOUVEAUX_MEDIAS = [
 	media('m21', 'bain-teinture-rouge.webp', 'Fils de laine dans un bain de teinture rouge', 1050, 1400),
 	media('m22', 'atelier-tissage-enfants.webp', 'Petits métiers en carton préparés pour un atelier de tissage jeune public', 1050, 1400),
 	media('m23', 'stand-musee.webp', 'Stand Neotisse accueillant le public dans un musée', 1200, 900),
+	media('m25', 'bandeau-teinture.webp', 'Main tenant un écheveau de laine teint en orange, sorti d’un bain de teinture végétale', 1536, 960),
 	media('m24', 'table-atelier-teinture.webp', 'Table préparée pour un atelier de teinture végétale', 1050, 1400),
 ];
