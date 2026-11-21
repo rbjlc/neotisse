@@ -1,26 +1,27 @@
 {
-  "name": "neotisse",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "remplir": "node scripts/remplir.mjs"
-  },
-  "dependencies": {
-    "@astrojs/netlify": "^8.2.12",
-    "@supabase/supabase-js": "^2.119.0",
-    "altcha": "3.5.0",
-    "altcha-lib": "2.7.0",
-    "astro": "^7.4.7",
-    "gsap": "^3.13.0",
-    "nodemailer": "^10.5.0",
-    "sanitize-html": "^2.18.1"
-  },
-  "description": "Site de l’association Neotisse (Astro + Supabase), avec back-office.",
-  "engines": {
-    "node": ">=22.23"
-  }
+	"name": "neotisse",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"remplir": "node scripts/remplir.mjs",
+		"photos": "node scripts/photos-novembre.mjs"
+	},
+	"dependencies": {
+		"@astrojs/netlify": "^8.2.12",
+		"@supabase/supabase-js": "^2.119.0",
+		"altcha": "3.5.0",
+		"altcha-lib": "2.7.0",
+		"astro": "^7.4.7",
+		"gsap": "^3.13.0",
+		"nodemailer": "^10.5.0",
+		"sanitize-html": "^2.18.1"
+	},
+	"description": "Site de l’association Neotisse (Astro + Supabase), avec back-office.",
+	"engines": {
+		"node": ">=22.23"
+	}
 }

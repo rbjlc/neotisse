@@ -86,5 +86,109 @@
  "/images/logo-neotisse.png": [
   279,
   238
+ ],
+ "/images/portrait-emilie.webp": [
+  1100,
+  825,
+  [
+   800,
+   600
+  ]
+ ],
+ "/images/portrait-marie-salome.webp": [
+  1365,
+  1024,
+  [
+   800,
+   600
+  ]
+ ],
+ "/images/bain-oignon.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
+ ],
+ "/images/echeveaux-garance.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
+ ],
+ "/images/atelier-teinture-enfants.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
+ ],
+ "/images/metier-plein-air.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
+ ],
+ "/images/tissage-serge.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
+ ],
+ "/images/realisation-teinture.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
+ ],
+ "/images/pots-betteraves.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
+ ],
+ "/images/bain-teinture-rouge.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
+ ],
+ "/images/atelier-tissage-enfants.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
+ ],
+ "/images/stand-musee.webp": [
+  1200,
+  900,
+  [
+   800,
+   600
+  ]
+ ],
+ "/images/table-atelier-teinture.webp": [
+  1050,
+  1400,
+  [
+   800,
+   1067
+  ]
  ]
 }
