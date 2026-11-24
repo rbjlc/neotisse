@@ -208,6 +208,7 @@ const ga = (r.ga_id || '').trim().match(/^G-[A-Z0-9]+$/i) ? r.ga_id.trim() : '';
 	<script is:inline src="/js/cookies.js" defer></script>
 	<script is:inline src="/js/site.js" defer></script>
 	<script>import '../scripts/commun.js';</script>
+	{ga && <script>import '../scripts/mesure.js';</script>}
 	{!accueil && <script>import '../scripts/defilement.js';</script>}
 </body>
 </html>
