@@ -20,7 +20,7 @@ if (chemin.startsWith('/contact') && ['erreur', 'robot', 'probleme'].includes(q.
 }
 // Témoignage envoyé
 if (chemin.startsWith('/livre-or') && q.get('temoignage') === 'merci' && q.get('envoye')) {
-	envoyer('temoignage_envoye');
+	envoyer('envoi_temoignage');
 }
 
 const ou = (el) => {
@@ -54,6 +54,6 @@ document.querySelectorAll('details.faq-q').forEach((d) => {
 	d.addEventListener('toggle', () => {
 		if (!d.open) return;
 		const question = (d.querySelector('summary')?.textContent || '').trim().slice(0, 100);
-		envoyer('faq_ouverte', { question, page: chemin });
+		envoyer('ouverture_faq', { question, page: chemin });
 	});
 });
