@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../neotisse-code"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "neotisse"
+	}
+}
