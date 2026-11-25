@@ -13,7 +13,7 @@ const ld = {
 	provider: { '@type': 'Organization', name: 'Neotisse' }, areaServed: 'FR',
 };
 ---
-<Base titre={`${a.titre} : atelier textile`} description={a.seo_description || a.resume} image={a.image} ld={ld}>
+<Base titre={a.seo_titre || `${a.titre} : atelier textile`} description={a.seo_description || a.resume} image={a.image} ld={ld}>
 	<article class="wrap">
 		<div class="single-wrap">
 			<a class="retour-lien" href="/ateliers/">← Tous les ateliers</a>

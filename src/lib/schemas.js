@@ -205,6 +205,7 @@ export const COLLECTIONS = {
 			{ groupe: 'Réglages' },
 			{ cle: 'ordre', type: 'nombre', label: 'Ordre', aide: '1 = en premier.' },
 			t('slug', 'Adresse de la page', 'Se remplit toute seule à partir du nom. À ne changer que si nécessaire.'),
+			t('seo_titre', 'Titre dans Google', '60 caractères maximum. « | Neotisse » est ajouté automatiquement. Vide : nom de l’atelier.', { max: 60 }),
 			long('seo_description', 'Description dans Google', '155 caractères maximum.', { max: 155 }),
 			PUBLIE,
 		],

@@ -4,6 +4,7 @@
 // Après la mise en ligne, tout se modifie dans le back-office : ce fichier ne sert plus.
 
 import { CHANGEMENTS, NOUVEAUX_MEDIAS } from './photos-novembre.mjs';
+import { SEO_PAGES, SEO_ATELIERS } from './seo-mots-cles.mjs';
 const img = (src, alt) => ({ src, alt });
 const btn = (texte, lien) => ({ texte, lien });
 const cta = {
@@ -426,5 +427,9 @@ for (const c of CHANGEMENTS) {
 	for (const k of cles.slice(0, -1)) o = o[k];
 	o[cles.at(-1)] = c.image;
 }
+
+// Titres et descriptions Google alignés sur les mots-clés (voir seo-mots-cles.mjs).
+for (const [id, v] of Object.entries(SEO_PAGES)) Object.assign(pages[id], { seo_titre: v.seo_titre, seo_description: v.seo_description });
+for (const a of ateliers) if (SEO_ATELIERS[a.slug]) Object.assign(a, { seo_titre: SEO_ATELIERS[a.slug].seo_titre, seo_description: SEO_ATELIERS[a.slug].seo_description });
 
 export default { reglages, pages, ateliers, evenements, actualites, partenaires, temoignages, messages, medias };
