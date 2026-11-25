@@ -6,7 +6,7 @@
 //   GA_PROPERTY_ID   numéro de la propriété GA4 (Administration > Paramètres de la propriété), ex. 512345678
 //   GA_CLIENT_EMAIL  adresse du compte de service, ex. neotisse-stats@mon-projet.iam.gserviceaccount.com
 //   GA_PRIVATE_KEY   la clé privée du fichier JSON (champ private_key), collée telle quelle
-import { createSign } from 'node:crypto';
+import { createSign, createPrivateKey } from 'node:crypto';
 import { modeSupabase } from './donnees.js';
 
 const env = (k) => (typeof process !== 'undefined' && process.env[k]) || import.meta.env[k] || '';
@@ -64,6 +64,25 @@ export function bornes(periode, maintenant = new Date()) {
 export const estRelie = () => !!(env('GA_PROPERTY_ID') && env('GA_CLIENT_EMAIL') && env('GA_PRIVATE_KEY'));
 
 // ---------- Jeton d'accès Google (compte de service, lecture seule) ----------
+/**
+ * Remet la clé privée en forme, quelle que soit la façon dont elle a été collée dans Netlify :
+ * avec ou sans guillemets, avec des « \n » écrits en toutes lettres, sur une seule ligne,
+ * ou même le fichier JSON entier du compte de service.
+ */
+function clePrivee() {
+	let brut = String(env('GA_PRIVATE_KEY')).trim();
+	if (brut.startsWith('{')) {
+		try { brut = JSON.parse(brut).private_key || brut; } catch { /* pas du JSON complet : on continue */ }
+	}
+	brut = brut.replace(/^["']+|["',]+$/g, '').replace(/\\n/g, '\n').replace(/\r/g, '');
+	const corps = brut.replace(/-----(BEGIN|END) [A-Z ]*PRIVATE KEY-----/g, '').replace(/[^A-Za-z0-9+/=]/g, '');
+	if (!corps) throw new Error('la clé GA_PRIVATE_KEY est vide dans Netlify');
+	const pem = '-----BEGIN PRIVATE KEY-----\n' + corps.match(/.{1,64}/g).join('\n') + '\n-----END PRIVATE KEY-----\n';
+	try { return createPrivateKey(pem); } catch {
+		throw new Error('la clé GA_PRIVATE_KEY collée dans Netlify est incomplète (il faut tout le texte de private_key, du début à la fin)');
+	}
+}
+
 let jeton = null;
 const b64 = (x) => Buffer.from(typeof x === 'string' ? x : JSON.stringify(x)).toString('base64url');
 
@@ -74,8 +93,7 @@ async function acces() {
 		iss: env('GA_CLIENT_EMAIL'), scope: 'https://www.googleapis.com/auth/analytics.readonly',
 		aud: 'https://oauth2.googleapis.com/token', iat: maintenant, exp: maintenant + 3600,
 	});
-	const cle = env('GA_PRIVATE_KEY').replace(/\\n/g, '\n');
-	const signature = createSign('RSA-SHA256').update(corps).sign(cle).toString('base64url');
+	const signature = createSign('RSA-SHA256').update(corps).sign(clePrivee()).toString('base64url');
 	const r = await fetch('https://oauth2.googleapis.com/token', {
 		method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 		body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: corps + '.' + signature }),
