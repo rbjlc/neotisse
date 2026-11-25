@@ -8,7 +8,7 @@ export async function POST({ request, redirect }) {
 	try {
 		const r = await enregistrerTemoignage(f);
 		if (r.manque) return redirect(`/livre-or/?temoignage=erreur&manque=${r.manque.join(',')}#temoigner`, 303);
-		return redirect('/livre-or/?temoignage=merci#temoigner', 303);
+		return redirect('/livre-or/?temoignage=merci&envoye=1#temoigner', 303);
 	} catch (e) {
 		console.error(e);
 		return redirect('/livre-or/?temoignage=erreur#temoigner', 303);

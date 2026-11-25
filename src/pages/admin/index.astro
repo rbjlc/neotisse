@@ -38,6 +38,32 @@ const medSansAlt = medias.filter((m) => !String(m.alt || '').trim()).length;
 const uniques = [...new Map(sansAlt.map((x) => [x.url, x])).values()];
 
 const fondatrice = Astro.locals.utilisateur?.role === 'fondatrice';
+
+// Indicateurs du mois (voir le Livrable 6 : tableau de bord de suivi)
+const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const auj = new Date();
+const bornes = (decalage) => {
+	const d = new Date(auj.getFullYear(), auj.getMonth() - decalage, 1);
+	const f = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+	return { de: d.toISOString(), a: f.toISOString(), jourDe: d.toISOString().slice(0, 10), jourA: f.toISOString().slice(0, 10), nom: MOIS[d.getMonth()] };
+};
+const dans = (iso, b) => (iso || '') >= b.de && (iso || '') < b.a;
+const ceMois = bornes(0), moisDernier = bornes(1);
+const estDevis = (m) => (m.categorie || 'devis') === 'devis';
+const compte = (b) => ({
+	devis: messages.filter((m) => estDevis(m) && dans(m.cree_le, b)).length,
+	autres: messages.filter((m) => !estDevis(m) && dans(m.cree_le, b)).length,
+	temoignages: temoignages.filter((t) => dans(t.cree_le, b)).length,
+	actus: actus.filter((x) => (x.date || '') >= b.jourDe && (x.date || '') < b.jourA).length,
+});
+const kpi = compte(ceMois), avant = compte(moisDernier);
+const ecart = (k) => {
+	const d = kpi[k] - avant[k];
+	return d === 0 ? `autant qu’en ${moisDernier.nom}` : `${d > 0 ? '+' : '−'}${Math.abs(d)} par rapport à ${moisDernier.nom}`;
+};
+const historique = [5, 4, 3, 2, 1, 0].map((i) => { const b = bornes(i); return { nom: b.nom, n: compte(b).devis }; });
+const maxH = Math.max(1, ...historique.map((h) => h.n));
+const gaId = String(r.ga_id || '').trim();
 const heure = new Date().getHours();
 const bonjour = heure < 18 ? 'Bonjour' : 'Bonsoir';
 ---
@@ -74,6 +100,46 @@ const bonjour = heure < 18 ? 'Bonjour' : 'Bonsoir';
 			<a href="/admin/temoignages/">Relire les témoignages</a>
 		</section>
 	</div>
+
+	<section class="carte" aria-labelledby="t-kpi">
+		<h2 id="t-kpi">Les chiffres de {ceMois.nom}</h2>
+		<p class="carte-aide" style="margin-top:0">Comparés au mois dernier. Le bilan mensuel se remplit avec ces chiffres.</p>
+		<div class="kpis">
+			{fondatrice && <div class="kpi">
+				<p class="kpi-nom">Demandes de devis</p>
+				<p><span class="chiffre">{kpi.devis}</span></p>
+				<p class="kpi-ecart">{ecart('devis')}</p>
+			</div>}
+			{fondatrice && <div class="kpi">
+				<p class="kpi-nom">Autres demandes</p>
+				<p><span class="chiffre">{kpi.autres}</span></p>
+				<p class="kpi-ecart">{ecart('autres')}</p>
+			</div>}
+			<div class="kpi">
+				<p class="kpi-nom">Témoignages reçus</p>
+				<p><span class="chiffre">{kpi.temoignages}</span></p>
+				<p class="kpi-ecart">{ecart('temoignages')}</p>
+			</div>
+			<div class="kpi">
+				<p class="kpi-nom">Actualités publiées</p>
+				<p><span class="chiffre">{kpi.actus}</span></p>
+				<p class="kpi-ecart">{kpi.actus >= 1 ? 'Objectif d’une par mois atteint' : 'Objectif : au moins une par mois'}</p>
+			</div>
+		</div>
+		{fondatrice && <Fragment>
+			<h3 class="kpi-sous-titre" id="t-histo">Demandes de devis, 6 derniers mois</h3>
+			<ul class="histo" aria-labelledby="t-histo">
+				{historique.map((h) => <li>
+					<span class="histo-barre" style={`height:${Math.round((h.n / maxH) * 110)}px`} aria-hidden="true"></span>
+					<span class="histo-n">{h.n}</span>
+					<span class="histo-mois">{h.nom}</span>
+				</li>)}
+			</ul>
+		</Fragment>}
+		<p class="carte-aide" style="margin-bottom:0">{gaId
+			? <Fragment>Visites, provenance et pages les plus vues : <a href="https://analytics.google.com/" target="_blank" rel="noopener">ouvrir Google Analytics</a> (seuls les visiteurs qui acceptent les cookies sont comptés).</Fragment>
+			: <Fragment>Pour suivre les visites et leur provenance, ajoutez votre identifiant Google Analytics dans les <a href="/admin/reglages/">Réglages</a>{fondatrice ? '' : ' (demandez à une responsable)'}.</Fragment>}</p>
+	</section>
 
 	<section class="carte" aria-labelledby="t-faire">
 		<h2 id="t-faire">Ajouter rapidement</h2>

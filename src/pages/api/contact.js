@@ -8,7 +8,7 @@ export async function POST({ request, redirect }) {
 	try {
 		const r = await enregistrerDemande(f);
 		if (r.manque) return redirect(`/contact/?devis=erreur&manque=${r.manque.join(',')}#formulaire`, 303);
-		return redirect('/contact/?devis=merci#formulaire', 303);
+		return redirect(`/contact/?devis=merci&type=${encodeURIComponent(String(f.get('categorie') || 'devis').slice(0, 30))}#formulaire`, 303);
 	} catch (e) {
 		console.error(e);
 		return redirect('/contact/?devis=probleme#formulaire', 303);
