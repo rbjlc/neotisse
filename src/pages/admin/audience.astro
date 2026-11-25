@@ -1,0 +1,128 @@
+---
+// Audience du site : les chiffres de Google Analytics, lus par le serveur, sans que les fondatrices aient à se connecter à Google.
+import Admin from '../../layouts/Admin.astro';
+import { audience, PERIODES } from '../../lib/analytics.js';
+
+const periode = PERIODES[Astro.url.searchParams.get('periode')] ? Astro.url.searchParams.get('periode') : 'mois';
+const a = await audience(periode);
+const fondatrice = Astro.locals.utilisateur?.role === 'fondatrice';
+
+const fr = (n) => Number(n || 0).toLocaleString('fr-FR');
+const ecart = ([n, avant]) => {
+	if (!avant && !n) return 'Comme sur la période précédente';
+	if (!avant) return 'Nouveau sur cette période';
+	const p = Math.round(((n - avant) / avant) * 100);
+	if (p === 0) return 'Stable par rapport à la période précédente';
+	return (p > 0 ? '+' : '') + p + ' % par rapport à la période précédente (' + fr(avant) + ')';
+};
+const sens = ([n, avant]) => (n > avant ? 'hausse' : n < avant ? 'baisse' : '');
+const totalSources = (a.sources || []).reduce((s, x) => s + x.n, 0) || 1;
+const maxJour = Math.max(1, ...(a.jours || []).map((j) => j.n));
+const jourFr = (d) => new Date(`${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}T12:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'Europe/Paris' });
+const meilleur = (a.jours || []).reduce((m, j) => (j.n > (m?.n ?? -1) ? j : m), null);
+const dateFr = (iso) => new Date(iso + 'T12:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' });
+const heureLu = a.lu ? new Date(a.lu).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }) : '';
+---
+<Admin titre="Audience du site" actif="audience">
+	<div class="adm-titre">
+		<div>
+			<h1>Audience du site</h1>
+			<p>Combien de personnes viennent sur le site, d’où elles viennent et ce qu’elles y font. Seuls les visiteurs qui acceptent les cookies de mesure sont comptés : regardez surtout l’évolution d’un mois à l’autre.</p>
+		</div>
+	</div>
+
+	<nav class="filtres" aria-label="Période">
+		{Object.entries(PERIODES).map(([k, nom]) => <a href={`/admin/audience/?periode=${k}`} aria-current={k === periode ? 'page' : undefined}>{nom}</a>)}
+	</nav>
+	<p class="carte-aide" style="margin-top:0">Du {dateFr(a.b.debut)} au {dateFr(a.b.fin)}, comparé à la même durée juste avant (du {dateFr(a.b.avantDebut)} au {dateFr(a.b.avantFin)}).</p>
+
+	{a.etat === 'non-relie' && (
+		<section class="carte" aria-labelledby="t-relier">
+			<h2 id="t-relier">Les chiffres ne sont pas encore reliés</h2>
+			<p>Le site enregistre déjà les visites dans Google Analytics, mais le back-office n’a pas encore la clé de lecture pour les afficher ici.</p>
+			<p>{fondatrice ? 'C’est un réglage à faire une seule fois dans Google Cloud et Netlify, par la personne chargée de la maintenance (voir le dossier de passation).' : 'Demandez à une responsable de faire ce réglage.'} En attendant, les chiffres sont visibles sur <a href="https://analytics.google.com/" target="_blank" rel="noopener">Google Analytics ↗</a>.</p>
+		</section>
+	)}
+
+	{a.etat === 'erreur' && (
+		<p class="adm-erreur" role="alert">Google Analytics ne répond pas pour l’instant : {a.message}. Les chiffres réapparaîtront dès que la connexion reviendra. Réessayez dans quelques minutes.</p>
+	)}
+
+	{a.etat === 'exemple' && (
+		<p class="adm-info"><strong>Chiffres d’exemple.</strong> Cette copie locale n’est pas reliée à Google Analytics : les nombres ci-dessous sont fictifs, pour montrer la page.</p>
+	)}
+
+	{(a.etat === 'ok' || a.etat === 'exemple') && (
+		<Fragment>
+			<section class="carte" aria-labelledby="t-visites">
+				<h2 id="t-visites">Les visites, {a.b.nom}</h2>
+				<div class="kpis">
+					{[['newUsers', 'Nouveaux visiteurs', 'personnes venues pour la première fois'], ['activeUsers', 'Visiteurs', 'personnes différentes'], ['sessions', 'Visites', 'une personne peut venir plusieurs fois'], ['screenPageViews', 'Pages vues', 'toutes pages confondues']].map(([k, nom, aide]) => (
+						<div class="kpi">
+							<p class="kpi-nom">{nom}</p>
+							<p><span class="chiffre">{fr(a.totaux[k][0])}</span></p>
+							<p class={`kpi-ecart ${sens(a.totaux[k])}`}>{ecart(a.totaux[k])}</p>
+							<p class="kpi-aide">{aide}</p>
+						</div>
+					))}
+				</div>
+
+				<h3 class="kpi-sous-titre" id="t-jours">Visiteurs par jour</h3>
+				{a.jours.length === 0 || a.jours.every((j) => j.n === 0)
+					? <p class="vide">Aucune visite comptée sur cette période.</p>
+					: <Fragment>
+						<div class="jours" aria-hidden="true" style={`--n:${a.jours.length}`}>
+							{a.jours.map((j) => <span class="jour" title={`${jourFr(j.date)} : ${j.n}`}><i style={`height:${Math.max(2, Math.round((j.n / maxJour) * 100))}%`}></i></span>)}
+						</div>
+						<p class="carte-aide jours-legende"><span>{jourFr(a.jours[0].date)}</span>{meilleur && meilleur.n > 0 && <span>Jour le plus suivi : {jourFr(meilleur.date)} ({fr(meilleur.n)})</span>}<span>{jourFr(a.jours.at(-1).date)}</span></p>
+						<details class="jours-detail"><summary>Voir les chiffres jour par jour</summary>
+							<table class="tableau"><thead><tr><th scope="col">Jour</th><th scope="col">Visiteurs</th></tr></thead>
+								<tbody>{a.jours.map((j) => <tr><td>{jourFr(j.date)}</td><td>{fr(j.n)}</td></tr>)}</tbody></table>
+						</details>
+					</Fragment>}
+			</section>
+
+			<section class="carte" aria-labelledby="t-actions">
+				<h2 id="t-actions">Ce que les visiteurs font</h2>
+				<p class="carte-aide">Chaque ligne compte une action sur le site. Les demandes exactes restent dans <a href="/admin/messages/">Messages reçus</a>{fondatrice ? '' : ' (réservé aux responsables)'} : elles comptent aussi les visiteurs qui refusent les cookies.</p>
+				<table class="tableau">
+					<thead><tr><th scope="col">Action</th><th scope="col">Nombre</th><th scope="col">Période précédente</th></tr></thead>
+					<tbody>
+						{a.evenements.map((e) => (
+							<tr>
+								<td><strong>{e.nom}</strong><br /><span class="kpi-aide">{e.aide}</span></td>
+								<td class="nb">{fr(e.n)}</td>
+								<td class="nb">{fr(e.avant)}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</section>
+
+			<div class="deux-colonnes">
+				<section class="carte" aria-labelledby="t-sources">
+					<h2 id="t-sources">D’où viennent les visiteurs</h2>
+					{a.sources.length === 0 ? <p class="vide">Pas encore de visite sur cette période.</p> : (
+						<ul class="barres">
+							{a.sources.map((s) => {
+								const p = Math.round((s.n / totalSources) * 100);
+								return <li><span class="barres-nom">{s.nom}</span><span class="barres-fond" aria-hidden="true"><i style={`width:${p}%`}></i></span><span class="barres-n">{p} %<span class="sr"> des visites</span></span></li>;
+							})}
+						</ul>
+					)}
+					<p class="carte-aide" style="margin-bottom:0">Pour savoir quelle publication a amené du monde, utilisez des liens UTM (voir le plan de taggage).</p>
+				</section>
+				<section class="carte" aria-labelledby="t-pages">
+					<h2 id="t-pages">Les pages les plus vues</h2>
+					{a.pages.length === 0 ? <p class="vide">Pas encore de page vue sur cette période.</p> : (
+						<ol class="pages-vues">
+							{a.pages.map((p) => <li><span>{p.nom}</span><span class="nb">{fr(p.n)}</span></li>)}
+						</ol>
+					)}
+				</section>
+			</div>
+
+			<p class="carte-aide">{a.etat === 'ok' ? `Chiffres lus dans Google Analytics à ${heureLu}, mis à jour toutes les 15 minutes. Les visites du jour peuvent mettre quelques heures à apparaître.` : 'Chiffres fictifs.'} Pour aller plus loin : <a href="https://analytics.google.com/" target="_blank" rel="noopener">ouvrir Google Analytics ↗</a></p>
+		</Fragment>
+	)}
+</Admin>

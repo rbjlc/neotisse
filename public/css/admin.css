@@ -223,3 +223,27 @@ select{max-width:100%;text-overflow:ellipsis}
 .histo-barre{display:block;width:100%;max-width:56px;min-height:3px;background:var(--olive);border-radius:6px 6px 0 0}
 .histo-n{font:400 20px/1 var(--f-titre)}
 .histo-mois{font-size:14px;color:var(--fusain)}
+
+/* Audience du site (chiffres Google Analytics) */
+.kpi-aide{font-size:14px;color:var(--fusain)}
+.kpi-ecart.hausse{color:var(--olive);font-weight:600}
+.kpi-ecart.baisse{color:var(--garance-fonce);font-weight:600}
+.jours{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;align-items:end;height:130px;margin-top:4px}
+.jour{height:100%;display:flex;align-items:flex-end}
+.jour i{display:block;width:100%;background:var(--olive);border-radius:3px 3px 0 0;min-height:2px}
+.jours-legende{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-top:6px}
+.jours-detail summary{cursor:pointer;font-weight:600;padding:6px 0}
+.tableau{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:tabular-nums}
+.tableau th{text-align:left;font-size:14px;color:var(--fusain);font-weight:700;padding:8px 10px;border-bottom:2px solid var(--trait)}
+.tableau td{padding:10px;border-bottom:1px solid var(--trait);vertical-align:top}
+.tableau .nb,.tableau th:not(:first-child){text-align:right}
+.deux-colonnes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px}
+.deux-colonnes > *{min-width:0}
+.barres{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.barres li{display:grid;grid-template-columns:minmax(0,9em) 1fr 3.5em;gap:10px;align-items:center}
+.barres-fond{height:12px;background:var(--laine);border-radius:6px;overflow:hidden}
+.barres-fond i{display:block;height:100%;background:var(--olive)}
+.barres-n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.pages-vues{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px;font-variant-numeric:tabular-nums}
+.pages-vues li span:first-child{overflow-wrap:anywhere}
+.pages-vues li .nb{float:right;font-weight:600;margin-left:12px}
