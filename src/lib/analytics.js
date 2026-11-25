@@ -145,8 +145,8 @@ export async function audience(periode = 'mois') {
 			{ dateRanges: deux, metrics: [{ name: 'activeUsers' }, { name: 'newUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }] },
 			{ dateRanges: deux, dimensions: [{ name: 'eventName' }], metrics: [{ name: 'eventCount' }],
 				dimensionFilter: { filter: { fieldName: 'eventName', inListFilter: { values: EVENEMENTS.map((e) => e[0]) } } } },
-			{ dateRanges: un, dimensions: [{ name: 'sessionDefaultChannelGroup' }], metrics: [{ name: 'sessions' }],
-				orderBys: [{ metric: { metricName: 'sessions' }, desc: true }], limit: 6 },
+			{ dateRanges: deux, dimensions: [{ name: 'sessionDefaultChannelGroup' }], metrics: [{ name: 'sessions' }],
+				orderBys: [{ metric: { metricName: 'sessions' }, desc: true }], limit: 20 },
 			{ dateRanges: un, dimensions: [{ name: 'pageTitle' }], metrics: [{ name: 'screenPageViews' }],
 				orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }], limit: 6 },
 			{ dateRanges: un, dimensions: [{ name: 'date' }], metrics: [{ name: 'activeUsers' }],
@@ -166,12 +166,13 @@ export async function audience(periode = 'mois') {
 			}
 			return out;
 		};
-		const t = parPeriode(tot), e = parPeriode(evts);
+		const t = parPeriode(tot), e = parPeriode(evts), src = parPeriode(sources);
 		const v = {
 			etat: 'ok', b,
 			totaux: ['activeUsers', 'newUsers', 'sessions', 'screenPageViews'].reduce((o, k, i) => ({ ...o, [k]: [t.p._?.[i] || 0, t.a._?.[i] || 0] }), {}),
 			evenements: EVENEMENTS.map(([cle, nom, aide]) => ({ cle, nom, aide, n: e.p[cle]?.[0] || 0, avant: e.a[cle]?.[0] || 0 })),
-			sources: (sources?.rows || []).map((r) => ({ nom: CANAUX[r.dimensionValues[0].value] || r.dimensionValues[0].value, n: nombre(r) })),
+			sources: Object.entries(src.p).map(([k, v]) => ({ nom: CANAUX[k] || k, n: v[0] })).sort((x, y) => y.n - x.n).slice(0, 6),
+			google: [src.p['Organic Search']?.[0] || 0, src.a['Organic Search']?.[0] || 0],
 			pages: (pages?.rows || []).map((r) => ({ nom: r.dimensionValues[0].value.replace(/\s*\|\s*Neotisse$/, ''), n: nombre(r) })),
 			jours: (jours?.rows || []).map((r) => ({ date: r.dimensionValues[0].value, n: nombre(r) })),
 			lu: new Date().toISOString(),
@@ -193,6 +194,7 @@ function exemple(b) {
 	return {
 		totaux: { activeUsers: [184, 148], newUsers: [151, 122], sessions: [236, 190], screenPageViews: [702, 611] },
 		evenements: EVENEMENTS.map(([cle, nom, aide], i) => ({ cle, nom, aide, n: [2, 14, 3, 0, 6, 21][i], avant: [1, 9, 1, 2, 4, 17][i] })),
+		google: [112, 87],
 		sources: [{ nom: 'Recherche Google', n: 112 }, { nom: 'Réseaux sociaux', n: 61 }, { nom: 'Accès direct', n: 38 }, { nom: 'Sites partenaires', n: 25 }],
 		pages: [{ nom: 'Ateliers textiles anciens à Montpellier', n: 241 }, { nom: 'Ateliers textiles : filage, tissage, teinture', n: 133 }, { nom: 'Démonstrations textiles : calendrier des ateliers', n: 98 }, { nom: 'Demande de devis pour un atelier textile', n: 71 }],
 		jours, lu: new Date().toISOString(),

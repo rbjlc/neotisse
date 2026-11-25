@@ -57,11 +57,11 @@ const heureLu = a.lu ? new Date(a.lu).toLocaleTimeString('fr-FR', { hour: '2-dig
 			<section class="carte" aria-labelledby="t-visites">
 				<h2 id="t-visites">Les visites, {a.b.nom}</h2>
 				<div class="kpis">
-					{[['newUsers', 'Nouveaux visiteurs', 'personnes venues pour la première fois'], ['activeUsers', 'Visiteurs', 'personnes différentes'], ['sessions', 'Visites', 'une personne peut venir plusieurs fois'], ['screenPageViews', 'Pages vues', 'toutes pages confondues']].map(([k, nom, aide]) => (
+					{[['google', 'Visites depuis Google', 'arrivées par la recherche Google (hors annonces)'], ['newUsers', 'Nouveaux visiteurs', 'personnes venues pour la première fois'], ['activeUsers', 'Visiteurs', 'personnes différentes'], ['sessions', 'Visites', 'une personne peut venir plusieurs fois'], ['screenPageViews', 'Pages vues', 'toutes pages confondues']].map(([k, nom, aide]) => (
 						<div class="kpi">
 							<p class="kpi-nom">{nom}</p>
-							<p><span class="chiffre">{fr(a.totaux[k][0])}</span></p>
-							<p class={`kpi-ecart ${sens(a.totaux[k])}`}>{ecart(a.totaux[k])}</p>
+							<p><span class="chiffre">{fr((a[k] || a.totaux[k])[0])}</span></p>
+							<p class={`kpi-ecart ${sens(a[k] || a.totaux[k])}`}>{ecart(a[k] || a.totaux[k])}</p>
 							<p class="kpi-aide">{aide}</p>
 						</div>
 					))}
@@ -110,7 +110,7 @@ const heureLu = a.lu ? new Date(a.lu).toLocaleTimeString('fr-FR', { hour: '2-dig
 							})}
 						</ul>
 					)}
-					<p class="carte-aide" style="margin-bottom:0">Pour savoir quelle publication a amené du monde, utilisez des liens UTM (voir le plan de taggage).</p>
+					<p class="carte-aide" style="margin-bottom:0">Pour savoir quelle publication a amené du monde, utilisez des liens UTM (voir le plan de taggage). Pour les mots tapés dans Google et la position du site : <a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console ↗</a>.</p>
 				</section>
 				<section class="carte" aria-labelledby="t-pages">
 					<h2 id="t-pages">Les pages les plus vues</h2>
