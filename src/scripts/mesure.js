@@ -1,18 +1,26 @@
 // Mesure d'audience : événements envoyés à Google Analytics (voir le plan de taggage dans Notion).
 // Rien n'est envoyé tant que le visiteur n'a pas accepté la mesure d'audience : gtag n'existe qu'après son accord.
 
-function envoyer(nom, params = {}, essais = 10) {
-	if (typeof window.gtag === 'function') return window.gtag('event', nom, params);
+function envoyer(nom, params = {}, essais = 10, ensuite) {
+	if (typeof window.gtag === 'function') {
+		window.gtag('event', nom, params);
+		if (ensuite) ensuite();
+		return;
+	}
 	// Juste après le chargement, gtag peut arriver avec un léger retard : on réessaie quelques fois.
-	if (essais > 0) setTimeout(() => envoyer(nom, params, essais - 1), 500);
+	if (essais > 0) setTimeout(() => envoyer(nom, params, essais - 1, ensuite), 500);
 }
+
+// Une réussite ne se compte qu'une fois : après l'envoi, on retire « ?devis=merci… » de l'adresse,
+// pour qu'un rechargement de la page ne crée pas de doublon.
+const nettoyerAdresse = () => history.replaceState(history.state, '', location.pathname + location.hash);
 
 const chemin = location.pathname;
 const q = new URLSearchParams(location.search);
 
 // Formulaire de contact envoyé (conversion principale)
 if (chemin.startsWith('/contact') && q.get('devis') === 'merci' && q.get('type')) {
-	envoyer('generate_lead', { type_demande: q.get('type') });
+	envoyer('generate_lead', { type_demande: q.get('type') }, 10, nettoyerAdresse);
 }
 // Formulaire de contact refusé ou en erreur
 if (chemin.startsWith('/contact') && ['erreur', 'robot', 'probleme'].includes(q.get('devis'))) {
@@ -20,7 +28,7 @@ if (chemin.startsWith('/contact') && ['erreur', 'robot', 'probleme'].includes(q.
 }
 // Témoignage envoyé
 if (chemin.startsWith('/livre-or') && q.get('temoignage') === 'merci' && q.get('envoye')) {
-	envoyer('envoi_temoignage');
+	envoyer('envoi_temoignage', {}, 10, nettoyerAdresse);
 }
 
 const ou = (el) => {
