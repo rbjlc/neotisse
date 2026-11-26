@@ -8,7 +8,6 @@
 		"build": "astro build",
 		"preview": "astro preview",
 		"remplir": "node scripts/remplir.mjs",
-		"photos": "node scripts/photos-novembre.mjs",
 		"seo": "node scripts/seo-mots-cles.mjs"
 	},
 	"dependencies": {
