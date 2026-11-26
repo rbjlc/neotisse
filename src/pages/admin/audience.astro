@@ -15,14 +15,14 @@ const ecart = ([n, avant]) => {
 	if (!avant) return 'Nouveau sur cette période';
 	const p = Math.round(((n - avant) / avant) * 100);
 	if (p === 0) return 'Stable par rapport à la période précédente';
-	return (p > 0 ? '+' : '') + p + ' % par rapport à la période précédente';
+	return (p > 0 ? '+' : '') + p + ' % par rapport à la période précédente (' + fr(avant) + ')';
 };
 const sens = ([n, avant]) => (n > avant ? 'hausse' : n < avant ? 'baisse' : '');
 const jourFr = (d) => new Date(`${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}T12:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'Europe/Paris' });
 const dateFr = (iso) => new Date(iso + 'T12:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' });
 const heureLu = a.lu ? new Date(a.lu).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }) : '';
 
-// Les 4 chiffres clés, chacun avec une petite comparaison visuelle « cette période / avant ».
+// Les 4 chiffres clés, comparés à la période précédente.
 const KPIS = [
 	['google', 'Visites depuis Google', 'arrivées par la recherche Google'],
 	['newUsers', 'Nouveaux visiteurs', 'personnes venues pour la première fois'],
@@ -97,16 +97,11 @@ const CIRC = 2 * Math.PI * 40;
 				<div class="kpis">
 					{KPIS.map(([k, nom, aide]) => {
 						const [n, avant] = valeur(k);
-						const max = Math.max(1, n, avant);
 						return (
 							<div class="kpi">
 								<p class="kpi-nom">{nom}</p>
 								<p><span class="chiffre">{fr(n)}</span></p>
 								<p class={`kpi-ecart ${sens([n, avant])}`}>{ecart([n, avant])}</p>
-								<div class="compare" aria-hidden="true">
-									<span class="compare-ligne"><span class="compare-nom">Cette période</span><span class="compare-fond"><i style={`width:${Math.round((n / max) * 100)}%`}></i></span></span>
-									<span class="compare-ligne avant"><span class="compare-nom">Avant ({fr(avant)})</span><span class="compare-fond"><i style={`width:${Math.round((avant / max) * 100)}%`}></i></span></span>
-								</div>
 								<p class="kpi-aide">{aide}</p>
 							</div>
 						);
@@ -120,7 +115,7 @@ const CIRC = 2 * Math.PI * 40;
 					? <p class="vide">Aucune visite comptée sur cette période.</p>
 					: <Fragment>
 						{meilleur && meilleur.n > 0 && <p class="carte-aide">Le jour le plus suivi : <strong>{jourFr(meilleur.date)}</strong>, avec {fr(meilleur.n)} visiteur{meilleur.n > 1 ? 's' : ''}. Passez la souris sur la courbe pour voir chaque jour.</p>}
-						<figure class="courbe" aria-hidden="true">
+						<figure class="courbe" role="img" aria-label={`Courbe des visiteurs par jour, du ${jourFr(jours[0].date)} au ${jourFr(jours.at(-1).date)}${meilleur ? `, au plus haut le ${jourFr(meilleur.date)} avec ${meilleur.n}` : ''}`}>
 							<div class="courbe-axe">{graduations.slice().reverse().map((g) => <span>{fr(g)}</span>)}</div>
 							<div class="courbe-zone">
 								<div class="courbe-grille">{graduations.map(() => <i></i>)}</div>
@@ -132,10 +127,6 @@ const CIRC = 2 * Math.PI * 40;
 								<div class="courbe-dates"><span>{jourFr(jours[0].date)}</span>{jours.length > 2 && <span>{jourFr(milieu.date)}</span>}<span>{jourFr(jours.at(-1).date)}</span></div>
 							</div>
 						</figure>
-						<details class="jours-detail"><summary>Voir les chiffres jour par jour</summary>
-							<table class="tableau"><thead><tr><th scope="col">Jour</th><th scope="col">Visiteurs</th></tr></thead>
-								<tbody>{jours.map((j) => <tr><td>{jourFr(j.date)}</td><td>{fr(j.n)}</td></tr>)}</tbody></table>
-						</details>
 					</Fragment>}
 			</section>
 

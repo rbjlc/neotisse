@@ -249,11 +249,6 @@ select{max-width:100%;text-overflow:ellipsis}
 .pages-vues li .nb{float:right;font-weight:600;margin-left:12px}
 
 /* Audience : comparaison visuelle, courbe par jour, anneau des provenances, liens à partager */
-.compare{display:flex;flex-direction:column;gap:5px;margin:4px 0 2px}
-.compare-ligne{display:grid;grid-template-columns:7.5em 1fr;gap:8px;align-items:center;font-size:13px;color:var(--fusain)}
-.compare-fond{height:10px;background:var(--laine);border-radius:5px;overflow:hidden}
-.compare-fond i{display:block;height:100%;background:var(--olive);border-radius:5px}
-.compare-ligne.avant .compare-fond i{background:var(--trait-fort)}
 .courbe{display:grid;grid-template-columns:auto 1fr;gap:10px;margin:8px 0 0}
 .courbe-axe{display:flex;flex-direction:column;justify-content:space-between;height:220px;font-size:13px;color:var(--fusain);text-align:right;font-variant-numeric:tabular-nums;transform:translateY(-.6em)}
 .courbe-zone{position:relative;min-width:0}
