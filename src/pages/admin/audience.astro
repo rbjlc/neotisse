@@ -120,7 +120,7 @@ const CIRC = 2 * Math.PI * 40;
 					? <p class="vide">Aucune visite comptée sur cette période.</p>
 					: <Fragment>
 						{meilleur && meilleur.n > 0 && <p class="carte-aide">Le jour le plus suivi : <strong>{jourFr(meilleur.date)}</strong>, avec {fr(meilleur.n)} visiteur{meilleur.n > 1 ? 's' : ''}. Passez la souris sur la courbe pour voir chaque jour.</p>}
-						<figure class="courbe" aria-hidden="true">
+						<figure class="courbe" role="img" aria-label={`Courbe des visiteurs par jour, du ${jourFr(jours[0].date)} au ${jourFr(jours.at(-1).date)}${meilleur ? `, au plus haut le ${jourFr(meilleur.date)} avec ${meilleur.n}` : ''}`}>
 							<div class="courbe-axe">{graduations.slice().reverse().map((g) => <span>{fr(g)}</span>)}</div>
 							<div class="courbe-zone">
 								<div class="courbe-grille">{graduations.map(() => <i></i>)}</div>
@@ -132,10 +132,6 @@ const CIRC = 2 * Math.PI * 40;
 								<div class="courbe-dates"><span>{jourFr(jours[0].date)}</span>{jours.length > 2 && <span>{jourFr(milieu.date)}</span>}<span>{jourFr(jours.at(-1).date)}</span></div>
 							</div>
 						</figure>
-						<details class="jours-detail"><summary>Voir les chiffres jour par jour</summary>
-							<table class="tableau"><thead><tr><th scope="col">Jour</th><th scope="col">Visiteurs</th></tr></thead>
-								<tbody>{jours.map((j) => <tr><td>{jourFr(j.date)}</td><td>{fr(j.n)}</td></tr>)}</tbody></table>
-						</details>
 					</Fragment>}
 			</section>
 
