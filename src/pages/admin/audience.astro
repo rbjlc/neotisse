@@ -1,11 +1,13 @@
 ---
 // Audience du site : les chiffres de Google Analytics, lus par le serveur, sans que les fondatrices aient à se connecter à Google.
 import Admin from '../../layouts/Admin.astro';
-import { audience, PERIODES } from '../../lib/analytics.js';
+import { audience, PERIODES, LIENS_RESEAUX } from '../../lib/analytics.js';
+import { urlSite } from '../../lib/site.js';
 
 const periode = PERIODES[Astro.url.searchParams.get('periode')] ? Astro.url.searchParams.get('periode') : 'mois';
 const a = await audience(periode);
 const fondatrice = Astro.locals.utilisateur?.role === 'fondatrice';
+const site = urlSite();
 
 const fr = (n) => Number(n || 0).toLocaleString('fr-FR');
 const ecart = ([n, avant]) => {
@@ -13,15 +15,51 @@ const ecart = ([n, avant]) => {
 	if (!avant) return 'Nouveau sur cette période';
 	const p = Math.round(((n - avant) / avant) * 100);
 	if (p === 0) return 'Stable par rapport à la période précédente';
-	return (p > 0 ? '+' : '') + p + ' % par rapport à la période précédente (' + fr(avant) + ')';
+	return (p > 0 ? '+' : '') + p + ' % par rapport à la période précédente';
 };
 const sens = ([n, avant]) => (n > avant ? 'hausse' : n < avant ? 'baisse' : '');
-const totalSources = (a.sources || []).reduce((s, x) => s + x.n, 0) || 1;
-const maxJour = Math.max(1, ...(a.jours || []).map((j) => j.n));
 const jourFr = (d) => new Date(`${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}T12:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'Europe/Paris' });
-const meilleur = (a.jours || []).reduce((m, j) => (j.n > (m?.n ?? -1) ? j : m), null);
 const dateFr = (iso) => new Date(iso + 'T12:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' });
 const heureLu = a.lu ? new Date(a.lu).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }) : '';
+
+// Les 4 chiffres clés, chacun avec une petite comparaison visuelle « cette période / avant ».
+const KPIS = [
+	['google', 'Visites depuis Google', 'arrivées par la recherche Google'],
+	['newUsers', 'Nouveaux visiteurs', 'personnes venues pour la première fois'],
+	['activeUsers', 'Visiteurs', 'personnes différentes venues sur le site'],
+	['screenPageViews', 'Pages vues', 'toutes pages confondues'],
+];
+const valeur = (k) => a[k] || a.totaux?.[k] || [0, 0];
+
+// Graphique des visiteurs par jour (courbe), dessiné côté serveur.
+const jours = a.jours || [];
+const maxJour = Math.max(1, ...jours.map((j) => j.n));
+const pas = maxJour <= 4 ? 1 : Math.ceil(maxJour / 4);
+const haut = pas * Math.ceil(maxJour / pas);
+const graduations = Array.from({ length: Math.round(haut / pas) + 1 }, (_, i) => i * pas);
+const W = 1000, H = 300;
+const x = (i) => (jours.length <= 1 ? W / 2 : (i / (jours.length - 1)) * W);
+const y = (n) => H - (n / haut) * H;
+const ligne = jours.map((j, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(j.n).toFixed(1)}`).join(' ');
+const aire = jours.length ? `${ligne} L${x(jours.length - 1).toFixed(1)},${H} L${x(0).toFixed(1)},${H} Z` : '';
+const meilleur = jours.reduce((m, j) => (j.n > (m?.n ?? -1) ? j : m), null);
+const milieu = jours[Math.floor((jours.length - 1) / 2)];
+const total = jours.reduce((s, j) => s + j.n, 0);
+
+// Anneau « d'où viennent les visiteurs ».
+const sources = a.sources || [];
+const totalSources = sources.reduce((s, x) => s + x.n, 0) || 1;
+const COULEURS = { 'Recherche Google': '#4F5233', 'Facebook': '#2E5A8A', 'Instagram': '#A8321F', 'Accès direct': '#E8B42F', 'Sites partenaires': '#7A8F5A', 'Autres réseaux sociaux': '#C9739B', 'E-mail et newsletter': '#5E5965' };
+const RESERVE = ['#B9B1A3', '#8C6E4E', '#3F7F86'];
+let r = 0;
+const parts = sources.map((s) => {
+	const p = s.n / totalSources;
+	const part = { ...s, p, pct: Math.round(p * 100), couleur: COULEURS[s.nom] || RESERVE[r++ % RESERVE.length], debut: 0 };
+	return part;
+});
+let cumul = 0;
+for (const pt of parts) { pt.debut = cumul; cumul += pt.p; }
+const CIRC = 2 * Math.PI * 40;
 ---
 <Admin titre="Audience du site" actif="audience">
 	<div class="adm-titre">
@@ -55,32 +93,79 @@ const heureLu = a.lu ? new Date(a.lu).toLocaleTimeString('fr-FR', { hour: '2-dig
 	{(a.etat === 'ok' || a.etat === 'exemple') && (
 		<Fragment>
 			<section class="carte" aria-labelledby="t-visites">
-				<h2 id="t-visites">Les visites, {a.b.nom}</h2>
+				<h2 id="t-visites">L’essentiel, {a.b.nom}</h2>
 				<div class="kpis">
-					{[['google', 'Visites depuis Google', 'arrivées par la recherche Google (hors annonces)'], ['newUsers', 'Nouveaux visiteurs', 'personnes venues pour la première fois'], ['activeUsers', 'Visiteurs', 'personnes différentes'], ['sessions', 'Visites', 'une personne peut venir plusieurs fois'], ['screenPageViews', 'Pages vues', 'toutes pages confondues']].map(([k, nom, aide]) => (
-						<div class="kpi">
-							<p class="kpi-nom">{nom}</p>
-							<p><span class="chiffre">{fr((a[k] || a.totaux[k])[0])}</span></p>
-							<p class={`kpi-ecart ${sens(a[k] || a.totaux[k])}`}>{ecart(a[k] || a.totaux[k])}</p>
-							<p class="kpi-aide">{aide}</p>
-						</div>
-					))}
+					{KPIS.map(([k, nom, aide]) => {
+						const [n, avant] = valeur(k);
+						const max = Math.max(1, n, avant);
+						return (
+							<div class="kpi">
+								<p class="kpi-nom">{nom}</p>
+								<p><span class="chiffre">{fr(n)}</span></p>
+								<p class={`kpi-ecart ${sens([n, avant])}`}>{ecart([n, avant])}</p>
+								<div class="compare" aria-hidden="true">
+									<span class="compare-ligne"><span class="compare-nom">Cette période</span><span class="compare-fond"><i style={`width:${Math.round((n / max) * 100)}%`}></i></span></span>
+									<span class="compare-ligne avant"><span class="compare-nom">Avant ({fr(avant)})</span><span class="compare-fond"><i style={`width:${Math.round((avant / max) * 100)}%`}></i></span></span>
+								</div>
+								<p class="kpi-aide">{aide}</p>
+							</div>
+						);
+					})}
 				</div>
+			</section>
 
-				<h3 class="kpi-sous-titre" id="t-jours">Visiteurs par jour</h3>
-				{a.jours.length === 0 || a.jours.every((j) => j.n === 0)
+			<section class="carte" aria-labelledby="t-jours">
+				<h2 id="t-jours">Visiteurs par jour</h2>
+				{jours.length === 0 || total === 0
 					? <p class="vide">Aucune visite comptée sur cette période.</p>
 					: <Fragment>
-						<div class="jours" aria-hidden="true" style={`--n:${a.jours.length}`}>
-							{a.jours.map((j) => <span class="jour" title={`${jourFr(j.date)} : ${j.n}`}><i style={`height:${Math.max(2, Math.round((j.n / maxJour) * 100))}%`}></i></span>)}
-						</div>
-						<p class="carte-aide jours-legende"><span>{jourFr(a.jours[0].date)}</span>{meilleur && meilleur.n > 0 && <span>Jour le plus suivi : {jourFr(meilleur.date)} ({fr(meilleur.n)})</span>}<span>{jourFr(a.jours.at(-1).date)}</span></p>
+						{meilleur && meilleur.n > 0 && <p class="carte-aide">Le jour le plus suivi : <strong>{jourFr(meilleur.date)}</strong>, avec {fr(meilleur.n)} visiteur{meilleur.n > 1 ? 's' : ''}. Passez la souris sur la courbe pour voir chaque jour.</p>}
+						<figure class="courbe" aria-hidden="true">
+							<div class="courbe-axe">{graduations.slice().reverse().map((g) => <span>{fr(g)}</span>)}</div>
+							<div class="courbe-zone">
+								<div class="courbe-grille">{graduations.map(() => <i></i>)}</div>
+								<svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+									<path d={aire} class="courbe-aire" />
+									<path d={ligne} class="courbe-trait" vector-effect="non-scaling-stroke" />
+									{jours.map((j, i) => <rect x={x(i) - W / jours.length / 2} y="0" width={W / jours.length} height={H} class="courbe-cible"><title>{jourFr(j.date)} : {j.n} visiteur{j.n > 1 ? 's' : ''}</title></rect>)}
+								</svg>
+								<div class="courbe-dates"><span>{jourFr(jours[0].date)}</span>{jours.length > 2 && <span>{jourFr(milieu.date)}</span>}<span>{jourFr(jours.at(-1).date)}</span></div>
+							</div>
+						</figure>
 						<details class="jours-detail"><summary>Voir les chiffres jour par jour</summary>
 							<table class="tableau"><thead><tr><th scope="col">Jour</th><th scope="col">Visiteurs</th></tr></thead>
-								<tbody>{a.jours.map((j) => <tr><td>{jourFr(j.date)}</td><td>{fr(j.n)}</td></tr>)}</tbody></table>
+								<tbody>{jours.map((j) => <tr><td>{jourFr(j.date)}</td><td>{fr(j.n)}</td></tr>)}</tbody></table>
 						</details>
 					</Fragment>}
 			</section>
+
+			<div class="deux-colonnes">
+				<section class="carte" aria-labelledby="t-sources">
+					<h2 id="t-sources">D’où viennent les visiteurs</h2>
+					{parts.length === 0 ? <p class="vide">Pas encore de visite sur cette période.</p> : (
+						<div class="anneau-bloc">
+							<svg class="anneau" viewBox="0 0 100 100" aria-hidden="true">
+								<circle cx="50" cy="50" r="40" class="anneau-fond" />
+								{parts.map((pt) => <circle cx="50" cy="50" r="40" stroke={pt.couleur} stroke-dasharray={`${(pt.p * CIRC).toFixed(2)} ${CIRC.toFixed(2)}`} stroke-dashoffset={(-pt.debut * CIRC).toFixed(2)} transform="rotate(-90 50 50)" />)}
+								<text x="50" y="49" class="anneau-total">{fr(totalSources)}</text>
+								<text x="50" y="61" class="anneau-legende">visites</text>
+							</svg>
+							<ul class="legende">
+								{parts.map((pt) => <li><span class="pastille" style={`background:${pt.couleur}`} aria-hidden="true"></span><span class="legende-nom">{pt.nom}</span><span class="legende-n">{pt.pct} %<span class="sr"> des visites</span></span></li>)}
+							</ul>
+						</div>
+					)}
+					<p class="carte-aide" style="margin-bottom:0">Les mots tapés dans Google et la position du site : <a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console ↗</a>.</p>
+				</section>
+				<section class="carte" aria-labelledby="t-pages">
+					<h2 id="t-pages">Les pages les plus vues</h2>
+					{a.pages.length === 0 ? <p class="vide">Pas encore de page vue sur cette période.</p> : (
+						<ol class="pages-vues">
+							{a.pages.map((p) => <li><span>{p.nom}</span><span class="nb">{fr(p.n)}</span></li>)}
+						</ol>
+					)}
+				</section>
+			</div>
 
 			<section class="carte" aria-labelledby="t-actions">
 				<h2 id="t-actions">Ce que les visiteurs font</h2>
@@ -98,31 +183,27 @@ const heureLu = a.lu ? new Date(a.lu).toLocaleTimeString('fr-FR', { hour: '2-dig
 					</tbody>
 				</table>
 			</section>
-
-			<div class="deux-colonnes">
-				<section class="carte" aria-labelledby="t-sources">
-					<h2 id="t-sources">D’où viennent les visiteurs</h2>
-					{a.sources.length === 0 ? <p class="vide">Pas encore de visite sur cette période.</p> : (
-						<ul class="barres">
-							{a.sources.map((s) => {
-								const p = Math.round((s.n / totalSources) * 100);
-								return <li><span class="barres-nom">{s.nom}</span><span class="barres-fond" aria-hidden="true"><i style={`width:${p}%`}></i></span><span class="barres-n">{p} %<span class="sr"> des visites</span></span></li>;
-							})}
-						</ul>
-					)}
-					<p class="carte-aide" style="margin-bottom:0">Pour savoir quelle publication a amené du monde, utilisez des liens UTM (voir le plan de taggage). Pour les mots tapés dans Google et la position du site : <a href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console ↗</a>.</p>
-				</section>
-				<section class="carte" aria-labelledby="t-pages">
-					<h2 id="t-pages">Les pages les plus vues</h2>
-					{a.pages.length === 0 ? <p class="vide">Pas encore de page vue sur cette période.</p> : (
-						<ol class="pages-vues">
-							{a.pages.map((p) => <li><span>{p.nom}</span><span class="nb">{fr(p.n)}</span></li>)}
-						</ol>
-					)}
-				</section>
-			</div>
-
-			<p class="carte-aide">{a.etat === 'ok' ? `Chiffres lus dans Google Analytics à ${heureLu}, mis à jour toutes les 15 minutes. Les visites du jour peuvent mettre quelques heures à apparaître.` : 'Chiffres fictifs.'} Pour aller plus loin : <a href="https://analytics.google.com/" target="_blank" rel="noopener">ouvrir Google Analytics ↗</a></p>
 		</Fragment>
 	)}
+
+	<section class="carte" aria-labelledby="t-liens">
+		<h2 id="t-liens">Liens à partager sur Facebook et Instagram</h2>
+		<p class="carte-aide">Utilisez ces liens dans vos publications plutôt que l’adresse simple du site : les visites qu’ils amènent apparaîtront sous « Facebook » ou « Instagram » dans « D’où viennent les visiteurs ».</p>
+		<ul class="liens-reseaux">
+			{LIENS_RESEAUX.map(([reseau, usage, chemin, utm], i) => {
+				const lien = `${site}${chemin}?${utm}`;
+				return (
+					<li>
+						<label for={`lien-${i}`}><strong>{reseau}</strong> · {usage}</label>
+						<span class="lien-copie">
+							<input type="text" id={`lien-${i}`} value={lien} readonly />
+							<button type="button" class="b b-second b-petit" data-copier={`lien-${i}`}>Copier</button>
+						</span>
+					</li>
+				);
+			})}
+		</ul>
+	</section>
+
+	{(a.etat === 'ok' || a.etat === 'exemple') && <p class="carte-aide">{a.etat === 'ok' ? `Chiffres lus dans Google Analytics à ${heureLu}, mis à jour toutes les 15 minutes. Les visites du jour peuvent mettre quelques heures à apparaître.` : 'Chiffres fictifs.'} Pour aller plus loin : <a href="https://analytics.google.com/" target="_blank" rel="noopener">ouvrir Google Analytics ↗</a></p>}
 </Admin>

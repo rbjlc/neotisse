@@ -280,3 +280,15 @@
 	ouvrirAncre();
 	window.addEventListener('hashchange', ouvrirAncre);
 })();
+
+// Boutons « Copier » (liens à partager de la page Audience).
+document.addEventListener('click', function (e) {
+	var b = e.target.closest && e.target.closest('[data-copier]');
+	if (!b) return;
+	var champ = document.getElementById(b.getAttribute('data-copier'));
+	if (!champ) return;
+	champ.select();
+	var fait = function () { b.textContent = 'Copié'; setTimeout(function () { b.textContent = 'Copier'; }, 2000); };
+	if (navigator.clipboard) navigator.clipboard.writeText(champ.value).then(fait, function () { document.execCommand('copy'); fait(); });
+	else { document.execCommand('copy'); fait(); }
+});

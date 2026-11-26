@@ -17,7 +17,6 @@ export const EVENEMENTS = [
 	['envoi_temoignage', 'Témoignages envoyés', 'depuis le livre d’or'],
 	['ajout_agenda', 'Ajouts au calendrier', 'bouton « Ajouter à mon agenda »'],
 	['click_contact', 'Clics e-mail ou téléphone', 'adresse ou numéro de l’association'],
-	['ouverture_faq', 'Questions fréquentes ouvertes', 'réponses dépliées'],
 ];
 
 const CANAUX = {
@@ -30,8 +29,15 @@ const CANAUX = {
 export const PERIODES = {
 	mois: 'Ce mois-ci',
 	precedent: 'Le mois dernier',
-	'28j': 'Les 28 derniers jours',
+	'90j': 'Les 90 derniers jours',
 };
+
+/** Liens à coller dans les publications : la visite est ensuite rangée sous Facebook ou Instagram. */
+export const LIENS_RESEAUX = [
+	['Facebook', 'Publication Facebook (une date, un atelier)', '/calendrier/', 'utm_source=facebook&utm_medium=social&utm_campaign=publication'],
+	['Instagram', 'Lien dans la bio Instagram', '/', 'utm_source=instagram&utm_medium=social&utm_campaign=lien_bio'],
+	['Instagram', 'Publication ou story Instagram', '/calendrier/', 'utm_source=instagram&utm_medium=social&utm_campaign=publication'],
+];
 
 const iso = (d) => d.toISOString().slice(0, 10);
 const moisFr = (d) => d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'Europe/Paris' });
@@ -46,11 +52,11 @@ export function bornes(periode, maintenant = new Date()) {
 		avantDebut = new Date(Date.UTC(auj.getUTCFullYear(), auj.getUTCMonth() - 2, 1));
 		avantFin = new Date(Date.UTC(auj.getUTCFullYear(), auj.getUTCMonth() - 1, 0));
 		nom = moisFr(debut);
-	} else if (periode === '28j') {
-		fin = auj; debut = new Date(auj); debut.setUTCDate(auj.getUTCDate() - 27);
+	} else if (periode === '90j') {
+		fin = auj; debut = new Date(auj); debut.setUTCDate(auj.getUTCDate() - 89);
 		avantFin = new Date(debut); avantFin.setUTCDate(debut.getUTCDate() - 1);
-		avantDebut = new Date(avantFin); avantDebut.setUTCDate(avantFin.getUTCDate() - 27);
-		nom = 'les 28 derniers jours';
+		avantDebut = new Date(avantFin); avantDebut.setUTCDate(avantFin.getUTCDate() - 89);
+		nom = 'les 90 derniers jours';
 	} else {
 		debut = new Date(Date.UTC(auj.getUTCFullYear(), auj.getUTCMonth(), 1)); fin = auj;
 		const jours = Math.round((fin - debut) / 864e5);
@@ -123,6 +129,39 @@ async function lots(demandes) {
 
 const nombre = (row, i = 0) => Number(row?.metricValues?.[i]?.value || 0);
 
+/** Nom affiché d'une provenance : Facebook et Instagram à part (liens UTM ou clics depuis l'appli), sinon le canal. */
+function provenance(canal, source) {
+	const s = String(source || '').toLowerCase();
+	if (canal !== 'Paid Search' && /(^|\.)(facebook|fb)(\.|$)|^fb$|facebook/.test(s)) return 'Facebook';
+	if (canal !== 'Paid Search' && /instagram|^ig$/.test(s)) return 'Instagram';
+	if (canal === 'Organic Social' || canal === 'Paid Social') return 'Autres réseaux sociaux';
+	return CANAUX[canal] || canal;
+}
+
+/** Additionne les visites par provenance, pour la période (p) et la précédente (a). */
+function provenances(rapport) {
+	const out = { p: {}, a: {}, google: { p: 0, a: 0 } };
+	const noms = (rapport?.dimensionHeaders || []).map((h) => h.name);
+	const iCanal = Math.max(0, noms.indexOf('sessionDefaultChannelGroup')), iSource = noms.indexOf('sessionSource'), iPer = noms.indexOf('dateRange');
+	for (const row of rapport?.rows || []) {
+		const dims = row.dimensionValues.map((d) => d.value);
+		const per = iPer >= 0 && dims[iPer] === 'a' ? 'a' : 'p';
+		const n = nombre(row);
+		const nom = provenance(dims[iCanal], iSource >= 0 ? dims[iSource] : '');
+		out[per][nom] = (out[per][nom] || 0) + n;
+		if (dims[iCanal] === 'Organic Search') out.google[per] += n;
+	}
+	return out;
+}
+
+/** Les 5 provenances principales, le reste regroupé dans « Autres ». */
+function regrouper(parNom) {
+	const liste = Object.entries(parNom).map(([nom, n]) => ({ nom, n })).filter((x) => x.n > 0).sort((x, y) => y.n - x.n);
+	if (liste.length <= 6) return liste;
+	const reste = liste.slice(5).reduce((s, x) => s + x.n, 0);
+	return [...liste.slice(0, 5), { nom: 'Autres', n: reste }];
+}
+
 // ---------- Lecture des chiffres (gardés 15 minutes en mémoire) ----------
 const cache = new Map();
 
@@ -145,8 +184,8 @@ export async function audience(periode = 'mois') {
 			{ dateRanges: deux, metrics: [{ name: 'activeUsers' }, { name: 'newUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }] },
 			{ dateRanges: deux, dimensions: [{ name: 'eventName' }], metrics: [{ name: 'eventCount' }],
 				dimensionFilter: { filter: { fieldName: 'eventName', inListFilter: { values: EVENEMENTS.map((e) => e[0]) } } } },
-			{ dateRanges: deux, dimensions: [{ name: 'sessionDefaultChannelGroup' }], metrics: [{ name: 'sessions' }],
-				orderBys: [{ metric: { metricName: 'sessions' }, desc: true }], limit: 20 },
+			{ dateRanges: deux, dimensions: [{ name: 'sessionDefaultChannelGroup' }, { name: 'sessionSource' }], metrics: [{ name: 'sessions' }],
+				orderBys: [{ metric: { metricName: 'sessions' }, desc: true }], limit: 100 },
 			{ dateRanges: un, dimensions: [{ name: 'pageTitle' }], metrics: [{ name: 'screenPageViews' }],
 				orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }], limit: 6 },
 			{ dateRanges: un, dimensions: [{ name: 'date' }], metrics: [{ name: 'activeUsers' }],
@@ -166,13 +205,13 @@ export async function audience(periode = 'mois') {
 			}
 			return out;
 		};
-		const t = parPeriode(tot), e = parPeriode(evts), src = parPeriode(sources);
+		const t = parPeriode(tot), e = parPeriode(evts), src = provenances(sources);
 		const v = {
 			etat: 'ok', b,
 			totaux: ['activeUsers', 'newUsers', 'sessions', 'screenPageViews'].reduce((o, k, i) => ({ ...o, [k]: [t.p._?.[i] || 0, t.a._?.[i] || 0] }), {}),
 			evenements: EVENEMENTS.map(([cle, nom, aide]) => ({ cle, nom, aide, n: e.p[cle]?.[0] || 0, avant: e.a[cle]?.[0] || 0 })),
-			sources: Object.entries(src.p).map(([k, v]) => ({ nom: CANAUX[k] || k, n: v[0] })).sort((x, y) => y.n - x.n).slice(0, 6),
-			google: [src.p['Organic Search']?.[0] || 0, src.a['Organic Search']?.[0] || 0],
+			sources: regrouper(src.p),
+			google: [src.google.p, src.google.a],
 			pages: (pages?.rows || []).map((r) => ({ nom: r.dimensionValues[0].value.replace(/\s*\|\s*Neotisse$/, ''), n: nombre(r) })),
 			jours: (jours?.rows || []).map((r) => ({ date: r.dimensionValues[0].value, n: nombre(r) })),
 			lu: new Date().toISOString(),
@@ -193,9 +232,9 @@ function exemple(b) {
 	while (d <= f) { jours.push({ date: iso(d).replace(/-/g, ''), n: [3, 5, 2, 8, 6, 1, 0, 4, 7, 9, 5, 3, 2, 6][k++ % 14] }); d.setUTCDate(d.getUTCDate() + 1); }
 	return {
 		totaux: { activeUsers: [184, 148], newUsers: [151, 122], sessions: [236, 190], screenPageViews: [702, 611] },
-		evenements: EVENEMENTS.map(([cle, nom, aide], i) => ({ cle, nom, aide, n: [2, 14, 3, 0, 6, 21][i], avant: [1, 9, 1, 2, 4, 17][i] })),
+		evenements: EVENEMENTS.map(([cle, nom, aide], i) => ({ cle, nom, aide, n: [2, 14, 3, 0, 6][i], avant: [1, 9, 1, 2, 4][i] })),
 		google: [112, 87],
-		sources: [{ nom: 'Recherche Google', n: 112 }, { nom: 'Réseaux sociaux', n: 61 }, { nom: 'Accès direct', n: 38 }, { nom: 'Sites partenaires', n: 25 }],
+		sources: [{ nom: 'Recherche Google', n: 112 }, { nom: 'Instagram', n: 39 }, { nom: 'Accès direct', n: 38 }, { nom: 'Sites partenaires', n: 25 }, { nom: 'Facebook', n: 22 }],
 		pages: [{ nom: 'Ateliers textiles anciens à Montpellier', n: 241 }, { nom: 'Ateliers textiles : filage, tissage, teinture', n: 133 }, { nom: 'Démonstrations textiles : calendrier des ateliers', n: 98 }, { nom: 'Demande de devis pour un atelier textile', n: 71 }],
 		jours, lu: new Date().toISOString(),
 	};
