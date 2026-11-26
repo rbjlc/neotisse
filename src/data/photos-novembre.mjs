@@ -10,6 +10,7 @@ export const CHANGEMENTS = [
 	{ page: 'ateliers', chemin: 'entete.photo', avant: '/images/echeveaux-teints.webp', image: img('/images/echeveaux-garance.webp', 'Écheveaux de laine teints en rouge et en beige') },
 	{ page: 'ateliers', chemin: 'faq.photo', avant: '/images/atelier-groupe.webp', image: img('/images/atelier-teinture-enfants.webp', 'Atelier jeune public : des enfants peignent des motifs sur du tissu avec une teinture végétale') },
 	{ page: 'calendrier', chemin: 'accueillir.photo', avant: '/images/atelier-plein-air.webp', image: img('/images/metier-plein-air.webp', 'Démonstration de tissage sur un métier vertical en plein air') },
+	{ page: 'livre-or', chemin: 'entete.photo', avant: '/images/panier-echeveaux.webp', image: img('/images/stand-musee.webp', 'Stand Neotisse accueillant le public dans un musée') },
 	{ page: 'contact', chemin: 'aside.photo', avant: '/images/metier-a-tisser-vertical.webp', image: img('/images/tissage-serge.webp', 'Tissage sergé jaune et brun en cours sur un métier') },
 ];
 
